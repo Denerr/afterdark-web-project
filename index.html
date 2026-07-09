@@ -2794,7 +2794,7 @@ class Component extends DCLogic {
     const selChapter=chaptersView[s.chapter]||chaptersView[0];
 
     const oneshotList=Object.values(this.ONESHOTS).map(o=>{ const sd=o.key===s.oneshot; return {...o, selected:sd,
-      onClick:()=>this.pickOneshot(o.key), onCreate:()=>{ this.setState({oneshot:o.key}); this.go('m_lobby'); },
+      onClick:()=>this.pickOneshot(o.key), onCreate:()=>{ this.setState({oneshot:o.key},()=>{ this.saveCurrentTable(); this.go('m_lobby'); }); },
       borderCol:sd?o.acc:'rgba(255,255,255,.1)', shadow:sd?('0 16px 50px rgba(0,0,0,.5), 0 0 40px '+o.glow):'0 12px 30px rgba(0,0,0,.4)',
       btnBg:sd?o.acc:'transparent', btnCol:sd?'#0b0b10':o.acc
     }; });
