@@ -1,0 +1,19 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:400px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:16px;padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
+    <h2 style="font-family:'Cinzel';font-weight:700;font-size:23px;margin:0 0 8px;color:#efe8d8;text-align:center">Recuperar Senha</h2>
+    <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0 0 22px;text-align:center;line-height:1.5">Informe seu email e enviaremos um link para redefinir sua senha.</p>
+    <sc-if value="{{ forgotSent }}">
+      <div style="text-align:center;padding:18px;background:rgba(127,174,143,.08);border:1px solid rgba(127,174,143,.3);border-radius:8px;margin-bottom:18px">
+        <div style="font-size:13px;color:#7fae8f;letter-spacing:.06em">✓ Se {{ forgotEmail }} tiver cadastro, um link foi enviado.</div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ forgotError }}"><div style="font-size:13px;color:#e08a8a;font-family:'Cormorant Garamond';font-style:italic;margin-bottom:12px">{{ forgotError }}</div></sc-if>
+    <input value="{{ forgotEmail }}" onInput="{{ onForgotEmail }}" placeholder="voce@email.com" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none;margin-bottom:16px"/>
+    <button onClick="{{ submitForgot }}" disabled="{{ forgotBusy }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">{{ forgotBtnLabel }}</button>
+    <div style="text-align:center;margin-top:18px;font-size:13px;color:#8d887c"><span onClick="{{ goLogin }}" style="color:#e0c179;cursor:pointer">← Voltar para o login</span></div>
+  </div>
+</div>
+</x-dc>
