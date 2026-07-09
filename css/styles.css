@@ -1,0 +1,26 @@
+/* Afterdark — estilos globais
+ * Reset, cores base, tipografia e animações (@keyframes) usados em toda a página.
+ * O restante do visual é aplicado com estilos inline diretamente no index.html.
+ */
+*{box-sizing:border-box}
+body{margin:0;background:#0a0b10;color:#e9e3d4;font-family:'Archivo',sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-track{background:#0a0b10}
+::-webkit-scrollbar-thumb{background:#2a2c36;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:#3a3d49}
+input,textarea,select{font-family:'Archivo',sans-serif}
+
+@keyframes glowPulse{0%,100%{opacity:.55}50%{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(-40px,-30px)}}
+@keyframes ember{0%{transform:translateY(0);opacity:.15}50%{opacity:.65}100%{transform:translateY(-34px);opacity:.05}}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:.45}50%{transform:scale(1.04);opacity:.7}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes shake{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-3px) rotate(-3deg)}75%{transform:translateY(2px) rotate(3deg)}}
+@keyframes diceWin{0%{box-shadow:0 0 0 0 rgba(127,174,143,0)}50%{box-shadow:0 0 30px 6px rgba(127,174,143,.55)}100%{box-shadow:0 0 18px 2px rgba(127,174,143,.3)}}
+@keyframes dicePartial{0%{box-shadow:0 0 0 0 rgba(210,162,58,0)}50%{box-shadow:0 0 30px 6px rgba(210,162,58,.55)}100%{box-shadow:0 0 18px 2px rgba(210,162,58,.3)}}
+@keyframes diceFail{0%{box-shadow:0 0 0 0 rgba(196,30,58,0)}50%{box-shadow:0 0 30px 6px rgba(196,30,58,.6)}100%{box-shadow:0 0 18px 2px rgba(196,30,58,.35)}}
+@keyframes popIn{0%{opacity:0;transform:scale(.85)}100%{opacity:1;transform:scale(1)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+@keyframes fabSpin{from{transform:rotate(0)}to{transform:rotate(90deg)}}
