@@ -30,6 +30,7 @@
 <script src="src/data/themes.js"></script>
 <script src="src/data/equipment.js"></script>
 <script src="src/data/seed.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </helmet>
 
 <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}">
@@ -135,6 +136,15 @@
   <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
   <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
   <div style="position:relative;width:100%;max-width:420px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:16px;padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
+    <sc-if value="{{ regSent }}">
+      <div style="text-align:center">
+        <div style="width:52px;height:52px;border:1.5px solid rgba(127,174,143,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:#7fae8f">✓</div>
+        <h2 style="font-family:'Cinzel';font-weight:700;font-size:22px;margin:0;color:#efe8d8">Confirme seu email</h2>
+        <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:12px 0 0;line-height:1.5">Enviamos um link de confirmação para {{ reg.email }}. Clique nele para ativar seu cadastro e depois volte para entrar.</p>
+        <div style="text-align:center;margin-top:22px;font-size:13px;color:#8d887c"><span onClick="{{ goLogin }}" style="color:#e0c179;cursor:pointer;text-decoration:underline">← Voltar para o login</span></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ regFormVisible }}">
     <div style="text-align:center;margin-bottom:26px">
       <h2 style="font-family:'Cinzel';font-weight:700;font-size:26px;margin:0;color:#efe8d8">Criar Cadastro</h2>
       <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Sua entrada para Saint Vesper</p>
@@ -163,9 +173,10 @@
         </div>
       </div>
       <sc-if value="{{ regError }}"><div style="font-size:13px;color:#e08a8a;font-family:'Cormorant Garamond';font-style:italic">{{ regErrorMsg }}</div></sc-if>
-      <button onClick="{{ submitRegister }}" disabled="{{ regDisabled }}" style="width:100%;margin-top:6px;padding:14px;background: {{ regBtnBg }};color: {{ regBtnCol }};border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor: {{ regCursor }}">Cadastrar e Entrar →</button>
+      <button onClick="{{ submitRegister }}" disabled="{{ regDisabled }}" style="width:100%;margin-top:6px;padding:14px;background: {{ regBtnBg }};color: {{ regBtnCol }};border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor: {{ regCursor }}">{{ regBtnLabel }}</button>
     </div>
     <div style="text-align:center;margin-top:18px;font-size:13px;color:#8d887c">Já possui cadastro? <span onClick="{{ goLogin }}" style="color:#e0c179;cursor:pointer;text-decoration:underline">Entrar</span></div>
+    </sc-if>
   </div>
 </div>
 </sc-if>
@@ -191,8 +202,8 @@
         <input type="password" value="{{ login.pass }}" onInput="{{ onLoginPass }}" placeholder="••••••" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
       </div>
       <div style="text-align:right"><span onClick="{{ goForgot }}" style="font-size:13px;color:#a39e90;cursor:pointer" style-hover="color:#e0c179">Esqueci minha senha</span></div>
-      <sc-if value="{{ loginError }}"><div style="font-size:13px;color:#e08a8a;font-family:'Cormorant Garamond';font-style:italic">Informe email e senha para entrar.</div></sc-if>
-      <button onClick="{{ submitLogin }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Entrar →</button>
+      <sc-if value="{{ loginError }}"><div style="font-size:13px;color:#e08a8a;font-family:'Cormorant Garamond';font-style:italic">{{ loginError }}</div></sc-if>
+      <button onClick="{{ submitLogin }}" disabled="{{ authBusy }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">{{ loginBtnLabel }}</button>
     </div>
     <div style="text-align:center;margin-top:18px;font-size:13px;color:#8d887c">Não possui cadastro? <span onClick="{{ goRegister }}" style="color:#e0c179;cursor:pointer;text-decoration:underline">Cadastre-se</span></div>
   </div>
@@ -209,11 +220,12 @@
     <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0 0 22px;text-align:center;line-height:1.5">Informe seu email e enviaremos um link para redefinir sua senha.</p>
     <sc-if value="{{ forgotSent }}">
       <div style="text-align:center;padding:18px;background:rgba(127,174,143,.08);border:1px solid rgba(127,174,143,.3);border-radius:8px;margin-bottom:18px">
-        <div style="font-size:13px;color:#7fae8f;letter-spacing:.06em">✓ Link enviado para {{ forgotEmail }}</div>
+        <div style="font-size:13px;color:#7fae8f;letter-spacing:.06em">✓ Se {{ forgotEmail }} tiver cadastro, um link foi enviado.</div>
       </div>
     </sc-if>
+    <sc-if value="{{ forgotError }}"><div style="font-size:13px;color:#e08a8a;font-family:'Cormorant Garamond';font-style:italic;margin-bottom:12px">{{ forgotError }}</div></sc-if>
     <input value="{{ forgotEmail }}" onInput="{{ onForgotEmail }}" placeholder="voce@email.com" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none;margin-bottom:16px"/>
-    <button onClick="{{ submitForgot }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Enviar link</button>
+    <button onClick="{{ submitForgot }}" disabled="{{ forgotBusy }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">{{ forgotBtnLabel }}</button>
     <div style="text-align:center;margin-top:18px;font-size:13px;color:#8d887c"><span onClick="{{ goLogin }}" style="color:#e0c179;cursor:pointer">← Voltar para o login</span></div>
   </div>
 </div>
@@ -2176,6 +2188,15 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;100%&quot;,&quot;height&quot;:&quot;100%&quot;},&quot;homeDirection&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showGrain&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;softGlow&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
 class Component extends DCLogic {
+  static SUPABASE_URL='https://dqkaxxwusdzfsezxiwxl.supabase.co';
+  static SUPABASE_KEY='sb_publishable_qLrc4CLY2Yk0EfM0xJEZQg_6Ddh_kd5';
+  get sb(){
+    if(!this._sb){
+      if(!window.supabase) return null;
+      this._sb=window.supabase.createClient(Component.SUPABASE_URL,Component.SUPABASE_KEY);
+    }
+    return this._sb;
+  }
   get ATTRS(){ return (window.AfterdarkData||{}).attributes || []; }
   get SKILLS(){ return (window.AfterdarkData||{}).skills || []; }
   get SENS(){ return (window.AfterdarkData||{}).natures || {}; }
@@ -2200,10 +2221,10 @@ class Component extends DCLogic {
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil',
     joinCode:'', joinName:'',
-    auth:{loggedIn:false, name:'', email:'', phone:''},
-    reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false,
+    auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
+    reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
-    forgot:{email:'',sent:false},
+    forgot:{email:'',sent:false,busy:false,error:''},
     profileTab:'personagens', tableName:'', wizReturn:'player', selectedChar:null,
     manage:{open:false, view:'menu', saved:false, copied:false}, lobbyCopied:null,
     characters:[],
@@ -2239,7 +2260,7 @@ class Component extends DCLogic {
     scene:{local:'Salão de Leilões — Alta Vesper',clima:'Tensão aristocrática',desc:'Cristais pendem do teto como lâminas. O ar cheira a cera, perfume caro e algo metálico por baixo. Os convidados sorriem demais. No palco, um frasco lacrado aguarda o próximo lance.',npc:'Aurelian Voss',pistas:['Taça com resíduo']}
   };
 
-  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this.loadPhotos(); this._loadSession(); this._ready=true; }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
+  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this.loadPhotos(); this._loadSession(); this._ready=true; }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
     this._pxHandler=(ev)=>{ if(this.state.screen!=='j_wizard'||this.state.wizStep!==2) return; const w=window.innerWidth||1, h=window.innerHeight||1; this._pxN={x:ev.clientX/w-0.5, y:ev.clientY/h-0.5}; if(this._pxRaf) return; this._pxRaf=requestAnimationFrame(()=>{ this._pxRaf=null; const n=this._pxN||{x:0,y:0}; document.querySelectorAll('[data-px]').forEach(el=>{ const d=parseFloat(el.getAttribute('data-px'))||0; el.style.transform=`translate3d(${(-n.x*d*30).toFixed(1)}px, ${(-n.y*d*30).toFixed(1)}px, 0)`; }); }); };
     window.addEventListener('mousemove',this._pxHandler,{passive:true});
   }
@@ -2270,7 +2291,17 @@ class Component extends DCLogic {
     };
     if(!apply()){ let n=0; this._hydrateIv=setInterval(()=>{ if(apply()||++n>200) clearInterval(this._hydrateIv); },20); }
   }
-  componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
+  _initAuth(){
+    const setup=()=>{
+      if(!window.supabase) return false;
+      const sb=this.sb;
+      sb.auth.getSession().then(({data})=>{ if(data&&data.session) this.setState({auth:this._authFromUser(data.session.user)}); });
+      sb.auth.onAuthStateChange((event,session)=>{ this.setState({auth: session? this._authFromUser(session.user) : {loggedIn:false,name:'',email:'',phone:''}}); });
+      return true;
+    };
+    if(!setup()){ let n=0; this._authIv=setInterval(()=>{ if(setup()||++n>200) clearInterval(this._authIv); },50); }
+  }
+  componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
   _switchPxBg(key){
     const url=this._NAT_BG[key]||'assets/images/nat-default.png';
@@ -2303,14 +2334,48 @@ class Component extends DCLogic {
   goMesas(){ if(this.state.auth.loggedIn){ this.setState({screen:'profile',profileTab:'mesas',nav:[]}); } else { this.setState({screen:'connect_gate',gateFrom:'mesas',nav:[]}); } }
   goPersonagens(){ if(this.state.auth.loggedIn){ this.setState({screen:'profile',profileTab:'personagens',nav:[]}); } else { this.setState({screen:'connect_gate',gateFrom:'personagens',nav:[]}); } }
   goRoleSelect(){ this.go('home'); }
-  setReg(k,v){ this.setState(s=>({reg:{...s.reg,[k]:v},regError:false})); }
+  setReg(k,v){ this.setState(s=>({reg:{...s.reg,[k]:v},regError:false,regErrorText:''})); }
   setLogin(k,v){ this.setState(s=>({login:{...s.login,[k]:v},loginError:false})); }
   validEmail(e){ return /.+@.+\..+/.test(e); }
-  regValid(){ const r=this.state.reg; return r.name&&this.validEmail(r.email)&&r.phone&&r.pass.length>=4&&r.pass===r.pass2; }
-  submitRegister(){ const r=this.state.reg; if(!this.regValid()){ this.setState({regError:true}); return; } this.setState({auth:{loggedIn:true,name:r.name,email:r.email,phone:r.phone},screen:'profile',nav:[],profileTab:'personagens'}); }
-  submitLogin(){ const l=this.state.login; if(!l.email||!l.pass){ this.setState({loginError:true}); return; } const nm=this.state.auth.name||'Mestre Vesper'; this.setState({auth:{loggedIn:true,name:nm,email:l.email,phone:this.state.auth.phone},screen:'profile',nav:[],profileTab:'personagens'}); }
-  submitForgot(){ if(!this.state.forgot.email) return; this.setState(s=>({forgot:{...s.forgot,sent:true}})); }
-  logout(){ clearInterval(this._ri); this.setState({auth:{loggedIn:false,name:'',email:'',phone:''},screen:'landing',nav:[],login:{email:'',pass:''},reg:{name:'',email:'',phone:'',pass:'',pass2:''}}); }
+  regValid(){ const r=this.state.reg; return r.name&&this.validEmail(r.email)&&r.phone&&r.pass.length>=6&&r.pass===r.pass2; }
+  _authFromUser(user){ const md=(user&&user.user_metadata)||{}; return {loggedIn:true, name:md.name||(user&&user.email)||'', email:(user&&user.email)||'', phone:md.phone||''}; }
+  _authErrorMsg(err){
+    const msg=(err&&err.message)||'';
+    const map={
+      'Invalid login credentials':'Email ou senha incorretos.',
+      'Email not confirmed':'Confirme seu email antes de entrar (verifique sua caixa de entrada).',
+      'User already registered':'Este email já possui cadastro. Tente entrar.',
+      'Password should be at least 6 characters':'A senha precisa ter pelo menos 6 caracteres.'
+    };
+    return map[msg]||msg||'Não foi possível completar a operação. Tente novamente.';
+  }
+  async submitRegister(){
+    if(!this.regValid()){ this.setState({regError:true,regErrorText:''}); return; }
+    if(!this.sb){ this.setState({regError:true,regErrorText:'Serviço indisponível no momento. Tente recarregar a página.'}); return; }
+    const r=this.state.reg;
+    this.setState({authBusy:true,regError:false});
+    const {data,error}=await this.sb.auth.signUp({email:r.email,password:r.pass,options:{data:{name:r.name,phone:r.phone}}});
+    if(error){ this.setState({authBusy:false,regError:true,regErrorText:this._authErrorMsg(error)}); return; }
+    if(data.session){ this.setState({authBusy:false,auth:this._authFromUser(data.user),screen:'profile',nav:[],profileTab:'personagens',reg:{name:'',email:'',phone:'',pass:'',pass2:''}}); }
+    else { this.setState({authBusy:false,regSent:true}); }
+  }
+  async submitLogin(){
+    const l=this.state.login;
+    if(!l.email||!l.pass){ this.setState({loginError:'Informe email e senha para entrar.'}); return; }
+    if(!this.sb){ this.setState({loginError:'Serviço indisponível no momento. Tente recarregar a página.'}); return; }
+    this.setState({authBusy:true,loginError:false});
+    const {data,error}=await this.sb.auth.signInWithPassword({email:l.email,password:l.pass});
+    if(error){ this.setState({authBusy:false,loginError:this._authErrorMsg(error)}); return; }
+    this.setState({authBusy:false,auth:this._authFromUser(data.user),screen:'profile',nav:[],profileTab:'personagens',login:{email:'',pass:''}});
+  }
+  async submitForgot(){
+    if(!this.state.forgot.email) return;
+    if(!this.sb){ this.setState(s=>({forgot:{...s.forgot,error:'Serviço indisponível no momento. Tente recarregar a página.'}})); return; }
+    this.setState(s=>({forgot:{...s.forgot,busy:true,error:''}}));
+    const {error}=await this.sb.auth.resetPasswordForEmail(this.state.forgot.email,{redirectTo:window.location.origin});
+    this.setState(s=>({forgot:{...s.forgot,busy:false,sent:!error,error:error?this._authErrorMsg(error):''}}));
+  }
+  async logout(){ clearInterval(this._ri); if(this.sb) await this.sb.auth.signOut(); this.setState({auth:{loggedIn:false,name:'',email:'',phone:''},screen:'landing',nav:[],login:{email:'',pass:''},reg:{name:'',email:'',phone:'',pass:'',pass2:''}}); }
   setProfileTab(t){ this.setState({profileTab:t}); }
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
@@ -2973,16 +3038,18 @@ class Component extends DCLogic {
       isMLobby:screen==='m_lobby', isMSession:screen==='m_session',
       isJJoin:screen==='j_join', isJName:screen==='j_name', isJChar:screen==='j_char', isJWizard:screen==='j_wizard', isJIntro:screen==='j_intro', isJPanel:screen==='j_panel',
       // register
-      reg:s.reg, regError:s.regError, regErrorMsg: (s.reg.pass&&s.reg.pass!==s.reg.pass2)?'As senhas não coincidem.':'Preencha todos os campos corretamente (email válido, senha de 4+ dígitos).',
+      reg:s.reg, regError:s.regError, regSent:s.regSent, regFormVisible:!s.regSent,
+      regErrorMsg: s.regErrorText || ((s.reg.pass&&s.reg.pass!==s.reg.pass2)?'As senhas não coincidem.':'Preencha todos os campos corretamente (email válido, senha de 6+ dígitos).'),
       regEmailBorder: emailTouched? (this.validEmail(s.reg.email)?'rgba(127,174,143,.5)':'rgba(196,30,58,.5)') : 'rgba(255,255,255,.1)',
       regPass2Border: pass2Touched? (s.reg.pass===s.reg.pass2?'rgba(127,174,143,.5)':'rgba(196,30,58,.5)') : 'rgba(255,255,255,.1)',
-      regDisabled:!regValid, regBtnBg:regValid?'#c6a35e':'#26242c', regBtnCol:regValid?'#0b0b10':'#6f6b61', regCursor:regValid?'pointer':'not-allowed',
+      regDisabled:!regValid||s.authBusy, regBtnBg:regValid?'#c6a35e':'#26242c', regBtnCol:regValid?'#0b0b10':'#6f6b61', regCursor:(regValid&&!s.authBusy)?'pointer':'not-allowed',
+      regBtnLabel: s.authBusy?'Cadastrando…':'Cadastrar e Entrar →',
       onRegName:(e)=>this.setReg('name',e.target.value), onRegEmail:(e)=>this.setReg('email',e.target.value), onRegPhone:(e)=>this.setReg('phone',e.target.value), onRegPass:(e)=>this.setReg('pass',e.target.value), onRegPass2:(e)=>this.setReg('pass2',e.target.value),
       submitRegister:()=>this.submitRegister(),
       // login
-      login:s.login, loginError:s.loginError, onLoginEmail:(e)=>this.setLogin('email',e.target.value), onLoginPass:(e)=>this.setLogin('pass',e.target.value), submitLogin:()=>this.submitLogin(),
+      login:s.login, loginError:s.loginError, authBusy:s.authBusy, loginBtnLabel: s.authBusy?'Entrando…':'Entrar →', onLoginEmail:(e)=>this.setLogin('email',e.target.value), onLoginPass:(e)=>this.setLogin('pass',e.target.value), submitLogin:()=>this.submitLogin(),
       // forgot
-      forgotEmail:s.forgot.email, forgotSent:s.forgot.sent, onForgotEmail:(e)=>this.setState(st=>({forgot:{...st.forgot,email:e.target.value}})), submitForgot:()=>this.submitForgot(),
+      forgotEmail:s.forgot.email, forgotSent:s.forgot.sent, forgotBusy:s.forgot.busy, forgotError:s.forgot.error, forgotBtnLabel: s.forgot.busy?'Enviando…':'Enviar link', onForgotEmail:(e)=>this.setState(st=>({forgot:{...st.forgot,email:e.target.value,sent:false,error:''}})), submitForgot:()=>this.submitForgot(),
       // profile
       profilePers:pPers, profileMesas:pMesas, charactersView, tablesView, charCount:s.characters.length, tableCount:s.tables.length,
       onProfilePers:()=>this.setProfileTab('personagens'), onProfileMesas:()=>this.setProfileTab('mesas'),
