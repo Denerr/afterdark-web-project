@@ -29,7 +29,6 @@
 <script src="src/data/adventures.js"></script>
 <script src="src/data/themes.js"></script>
 <script src="src/data/equipment.js"></script>
-<script src="src/data/seed.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </helmet>
 
@@ -2260,7 +2259,7 @@ class Component extends DCLogic {
     scene:{local:'Salão de Leilões — Alta Vesper',clima:'Tensão aristocrática',desc:'Cristais pendem do teto como lâminas. O ar cheira a cera, perfume caro e algo metálico por baixo. Os convidados sorriem demais. No palco, um frasco lacrado aguarda o próximo lance.',npc:'Aurelian Voss',pistas:['Taça com resíduo']}
   };
 
-  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this.loadPhotos(); this._loadSession(); this._ready=true; }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
+  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
     this._pxHandler=(ev)=>{ if(this.state.screen!=='j_wizard'||this.state.wizStep!==2) return; const w=window.innerWidth||1, h=window.innerHeight||1; this._pxN={x:ev.clientX/w-0.5, y:ev.clientY/h-0.5}; if(this._pxRaf) return; this._pxRaf=requestAnimationFrame(()=>{ this._pxRaf=null; const n=this._pxN||{x:0,y:0}; document.querySelectorAll('[data-px]').forEach(el=>{ const d=parseFloat(el.getAttribute('data-px'))||0; el.style.transform=`translate3d(${(-n.x*d*30).toFixed(1)}px, ${(-n.y*d*30).toFixed(1)}px, 0)`; }); }); };
     window.addEventListener('mousemove',this._pxHandler,{passive:true});
   }
@@ -2269,7 +2268,7 @@ class Component extends DCLogic {
   // Sem servidor: os dados da mesa vivem no navegador. Abas/janelas do MESMO navegador
   // (ex.: Mestre numa aba, Jogador noutra) ficam sincronizadas em tempo real via
   // BroadcastChannel; entre dispositivos diferentes exigiria um backend.
-  _syncKeys(){ return ['characters','tables','players','clocks','stressBars','npcs','clues','log','scene','inventory','library']; }
+  _syncKeys(){ return ['players','clocks','stressBars','npcs','clues','log','scene','inventory','library']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
   _initSync(){
     try{ this._bc=('BroadcastChannel' in window)? new BroadcastChannel('afterdark:session') : null; }catch(e){ this._bc=null; }
@@ -2283,10 +2282,9 @@ class Component extends DCLogic {
   componentDidUpdate(){ if(!this._ready) return; clearTimeout(this._saveT); this._saveT=setTimeout(()=>this._saveSession(),400); }
   _hydrateData(cb){
     const apply=()=>{
-      const D=window.AfterdarkData; if(!D||!D.seed) return false;
-      const seed=JSON.parse(JSON.stringify(D.seed));
+      const D=window.AfterdarkData; if(!D||!D.catalog) return false;
       const cat=JSON.parse(JSON.stringify(D.catalog||{weapons:[],items:[]}));
-      this.setState({characters:seed.characters,tables:seed.tables,players:seed.players,clocks:seed.clocks,stressBars:seed.stressBars,npcs:seed.npcs,clues:seed.clues,log:seed.log,library:cat},cb);
+      this.setState({library:cat},cb);
       return true;
     };
     if(!apply()){ let n=0; this._hydrateIv=setInterval(()=>{ if(apply()||++n>200) clearInterval(this._hydrateIv); },20); }
@@ -2295,11 +2293,24 @@ class Component extends DCLogic {
     const setup=()=>{
       if(!window.supabase) return false;
       const sb=this.sb;
-      sb.auth.getSession().then(({data})=>{ if(data&&data.session) this.setState({auth:this._authFromUser(data.session.user)}); });
-      sb.auth.onAuthStateChange((event,session)=>{ this.setState({auth: session? this._authFromUser(session.user) : {loggedIn:false,name:'',email:'',phone:''}}); });
+      sb.auth.getSession().then(({data})=>{ if(data&&data.session){ this.setState({auth:this._authFromUser(data.session.user)}); this._loadUserData(); } });
+      sb.auth.onAuthStateChange((event,session)=>{
+        this.setState({auth: session? this._authFromUser(session.user) : {loggedIn:false,name:'',email:'',phone:''}});
+        if(event==='SIGNED_IN') this._loadUserData();
+        if(event==='SIGNED_OUT') this.setState({characters:[],tables:[]});
+      });
       return true;
     };
     if(!setup()){ let n=0; this._authIv=setInterval(()=>{ if(setup()||++n>200) clearInterval(this._authIv); },50); }
+  }
+  async _loadUserData(){
+    if(!this.sb) return;
+    const [chars,tbls]=await Promise.all([
+      this.sb.from('characters').select('*').order('created_at',{ascending:true}),
+      this.sb.from('tables').select('*').order('created_at',{ascending:true})
+    ]);
+    if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
+    if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,role:'mestre',target:'m_session'}))});
   }
   componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
@@ -2380,26 +2391,41 @@ class Component extends DCLogic {
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
   openTable(t){ this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':null, screen:t.target, nav:['profile']})); }
-  saveCurrentTable(){ const s=this.state; const nm=(s.tableName||'').trim(); if(!nm) return; if(s.tables.some(t=>t.name===nm)) return; const sel=s.oneshot?this.ONESHOTS[s.oneshot]:null; const theme=sel? (s.oneshot==='gota'?'vampire':s.oneshot==='misterios'?'demon':'werewolf') : 'human'; this.setState(st=>({tables:[{id:'t'+Date.now(),name:nm,type:s.mode==='capitulos'?'Campanha':'One-shot',faction:sel?sel.faction.split(' · ')[0]:'Misto',role:'mestre',status:'Aguardando jogadores',theme,target:'m_session'},...st.tables]})); }
+  saveCurrentTable(){
+    const s=this.state; const nm=(s.tableName||'').trim();
+    if(!nm || s.tables.some(t=>t.name===nm)) return Promise.resolve();
+    const sel=s.oneshot?this.ONESHOTS[s.oneshot]:null;
+    const theme=sel? (s.oneshot==='gota'?'vampire':s.oneshot==='misterios'?'demon':'werewolf') : 'human';
+    const row={name:nm,type:s.mode==='capitulos'?'Campanha':'One-shot',faction:sel?sel.faction.split(' · ')[0]:'Misto',theme,status:'Aguardando jogadores'};
+    const commit=(entry)=>new Promise(resolve=>this.setState(st=>({tables:[entry,...st.tables]}),resolve));
+    if(this.sb && s.auth.loggedIn){
+      return this.sb.from('tables').insert(row).select().single().then(({data,error})=>{
+        const entry=(!error&&data)? {id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,role:'mestre',target:'m_session'} : {id:'t'+Date.now(),...row,role:'mestre',target:'m_session'};
+        return commit(entry);
+      });
+    }
+    return commit({id:'t'+Date.now(),...row,role:'mestre',target:'m_session'});
+  }
 
   // ---- gerenciar mesa ----
   sessionTitle(){ const s=this.state; const sel=s.oneshot?this.ONESHOTS[s.oneshot]:null; return (s.tableName&&s.tableName.trim())||(sel&&sel.title)||'A Última Gota'; }
   openManage(){ this.setState({manage:{open:true,view:'menu',saved:false,copied:false}}); }
   closeManage(){ this.setState(s=>({manage:{...s.manage,open:false}})); }
   manageSetView(v){ this.setState(s=>({manage:{...s.manage,view:v,copied:false}})); }
-  saveProgress(){ this.saveCurrentTable(); this.setState(s=>({manage:{...s.manage,saved:true},log:[{icon:'💾',t:'Mesa',txt:'Progresso da mesa salvo.'},...s.log]})); }
+  async saveProgress(){ await this.saveCurrentTable(); this.setState(s=>({manage:{...s.manage,saved:true},log:[{icon:'💾',t:'Mesa',txt:'Progresso da mesa salvo.'},...s.log]})); }
   copyInvite(){ this.setState(s=>({manage:{...s.manage,copied:true}})); }
   lobbyCopy(which){ const txt=which==='link'?'afterdark.online/j/SV-7K92':'SV-7K92'; try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){} clearTimeout(this._lcT); this.setState({lobbyCopied:which}); this._lcT=setTimeout(()=>this.setState({lobbyCopied:null}),2000); }
-  updateTableStatus(status,label){
-    this.saveCurrentTable();
+  async updateTableStatus(status,label){
+    await this.saveCurrentTable();
     const nm=this.sessionTitle();
     clearInterval(this._ri);
+    const row=this.state.tables.find(t=>t.name===nm);
     this.setState(st=>{
-      let found=false;
-      const tables=st.tables.map(t=>{ if(t.name===nm){found=true; return {...t,status,target:status.includes('Encerrada')?'m_session':'m_session'};} return t; });
+      const tables=st.tables.map(t=>t.name===nm?{...t,status,target:status.includes('Encerrada')?'m_session':'m_session'}:t);
       return {tables, manage:{...st.manage,open:false}, screen:'profile', nav:[], profileTab:'mesas',
         log:[{icon:'◷',t:'Mesa',txt:label},...st.log]};
     });
+    if(this.sb && row && this.state.auth.loggedIn){ this.sb.from('tables').update({status}).eq('id',row.id).then(()=>{}); }
   }
   pauseTable(){ this.updateTableStatus('Pausada · retomar depois','Mesa pausada para continuar em outro momento.'); }
   endTable(){ this.updateTableStatus('Encerrada','Mesa encerrada pelo Mestre.'); }
@@ -2611,16 +2637,22 @@ class Component extends DCLogic {
   decAttr(k){ this.setState(s=>{ const base={...s.wiz.attrs}; if((base[k]||1)<=1) return s; base[k]=base[k]-1; return {wiz:{...s.wiz,attrs:base}}; }); }
   incSkill(k){ this.setState(s=>{ const sk={...s.wiz.skills}; const v=sk[k]||0; const used=Object.values(sk).reduce((a,b)=>a+b,0); if(v>=3||used>=24) return s; sk[k]=v+1; return {wiz:{...s.wiz,skills:sk}}; }); }
   decSkill(k){ this.setState(s=>{ const sk={...s.wiz.skills}; if(!sk[k]) return s; sk[k]=sk[k]-1; return {wiz:{...s.wiz,skills:sk}}; }); }
-  wizNext(){ this.setState(s=>{
-    if(s.wizStep<7) return {wizStep:s.wizStep+1};
-    if(s.wizReturn==='profile'){
-      const w=s.wiz;
-      const attrs={}; this.ATTRS.forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
-      const ch={id:'ch'+Date.now(),name:w.charName||'Novo Personagem',role:w.personality||(w.sens==='humano'?'Humano Comum':'Sensitivo'),sens:w.sens||'humano',usedIn:null,photo:null,attrs,skills:{...w.skills},weaknesses:[...w.weaknesses],bio:w.history||''};
-      return {characters:[...s.characters,ch],screen:'profile',nav:[],profileTab:'personagens',wizStep:1};
+  wizNext(){
+    if(this.state.wizStep<7){ this.setState(s=>({wizStep:s.wizStep+1})); return; }
+    if(this.state.wizReturn==='profile'){ this._finishCharWizard(); return; }
+    this.setState(s=>({screen:'j_intro',nav:[...s.nav,'j_wizard']}));
+  }
+  async _finishCharWizard(){
+    const w=this.state.wiz;
+    const attrs={}; this.ATTRS.forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
+    const name=w.charName||'Novo Personagem';
+    const chData={name,role:w.personality||(w.sens==='humano'?'Humano Comum':'Sensitivo'),sens:w.sens||'humano',usedIn:null,photo:null,attrs,skills:{...w.skills},weaknesses:[...w.weaknesses],bio:w.history||''};
+    if(this.sb && this.state.auth.loggedIn){
+      const {data,error}=await this.sb.from('characters').insert({name,data:chData}).select().single();
+      if(!error && data){ this.setState(s=>({characters:[...s.characters,{...data.data,id:data.id}],screen:'profile',nav:[],profileTab:'personagens',wizStep:1})); return; }
     }
-    return {screen:'j_intro',nav:[...s.nav,'j_wizard']};
-  }); }
+    this.setState(s=>({characters:[...s.characters,{...chData,id:'ch'+Date.now()}],screen:'profile',nav:[],profileTab:'personagens',wizStep:1}));
+  }
   wizPrev(){ this.setState(s=> s.wizStep<=1? (s.nav.length?{screen:s.nav[s.nav.length-1],nav:s.nav.slice(0,-1)}:s) :{wizStep:s.wizStep-1}); }
   setPlayerTab(t){ this.setState({playerTab:t,playerMenuOpen:false}); }
   setCenterTab(t){ this.setState({centerTab:t,playerFocus:null,playerMenuOpen:false}); }
@@ -2635,10 +2667,14 @@ class Component extends DCLogic {
   openPlayerCard(id){ this.setState({playerCardId:id}); }
   closePlayerCard(){ this.setState({playerCardId:null}); }
   onCharPhoto(e){ const f=e.target&&e.target.files&&e.target.files[0]; if(!f) return; const id=this.state.selectedChar; const rd=new FileReader(); rd.onload=()=>this.setCharPhoto(id,rd.result); rd.readAsDataURL(f); }
-  setCharPhoto(id,dataUrl){ this.setState(s=>({characters:s.characters.map(c=>c.id===id?{...c,photo:dataUrl}:c)}),()=>this.persistPhotos()); }
-  removeCharPhoto(){ const id=this.state.selectedChar; this.setState(s=>({characters:s.characters.map(c=>c.id===id?{...c,photo:null}:c)}),()=>this.persistPhotos()); }
-  persistPhotos(){ try{ const map={}; this.state.characters.forEach(c=>{ if(c.photo) map[c.id]=c.photo; }); localStorage.setItem('afterdark_char_photos',JSON.stringify(map)); }catch(e){} }
-  loadPhotos(){ try{ const raw=localStorage.getItem('afterdark_char_photos'); if(!raw) return; const map=JSON.parse(raw); this.setState(s=>({characters:s.characters.map(c=>map[c.id]?{...c,photo:map[c.id]}:c)})); }catch(e){} }
+  setCharPhoto(id,dataUrl){ this.setState(s=>({characters:s.characters.map(c=>c.id===id?{...c,photo:dataUrl}:c)}),()=>this._syncCharToSupabase(id)); }
+  removeCharPhoto(){ const id=this.state.selectedChar; this.setState(s=>({characters:s.characters.map(c=>c.id===id?{...c,photo:null}:c)}),()=>this._syncCharToSupabase(id)); }
+  _syncCharToSupabase(id){
+    if(!this.sb || !this.state.auth.loggedIn) return;
+    const ch=this.state.characters.find(c=>c.id===id); if(!ch) return;
+    const {id:_id,...data}=ch;
+    this.sb.from('characters').update({data}).eq('id',id).then(()=>{});
+  }
 
   // ---- roteiro (script da missão) ----
   persistRoteiro(){ try{ localStorage.setItem('afterdark_roteiro',JSON.stringify(this.state.roteiro)); }catch(e){} }

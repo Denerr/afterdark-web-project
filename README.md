@@ -18,8 +18,7 @@ export/
 │       ├── natures.js      (sensibilidades)
 │       ├── adventures.js   (one-shots e capítulos)
 │       ├── themes.js
-│       ├── equipment.js
-│       └── seed.js         (personagens/jogadores de exemplo)
+│       └── equipment.js
 └── assets/
     └── images/         → fundo da tela inicial e capas dos one-shots
 ```
