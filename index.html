@@ -3103,7 +3103,7 @@ class Component extends DCLogic {
     const histCol=(g)=>{ if(/Falha|Desastre|Errou/.test(g)) return '#c0473f'; if(/Parcial|Acertou/.test(g)) return '#d2a23a'; return '#7fae8f'; };
     const testHistory=s.log.filter(e=>e.t==='Teste'||e.t==='Combate').slice(0,4).map(e=>{ const m=e.txt.match(/^(.*?) — (.*?) \(/); return {label:m?m[1]:e.txt, grade:m?m[2]:'—', col:histCol(m?m[2]:'')}; });
     const pt=s.pending;
-    const pendingFormula=pt.mode==='combate' ? `Ataque · 1d10 + atributo + perícia · DEF ${pt.difficulty}` : `${this.attrLabel(pt.attrKey)} (${selfV.attrs?selfV.attrs[pt.attrKey]||1:1}d20) + ${this.skillLabel(pt.skillKey)} · DIF ${pt.difficulty}`;
+    const pendingFormula=pt ? (pt.mode==='combate' ? `Ataque · 1d10 + atributo + perícia · DEF ${pt.difficulty}` : `${this.attrLabel(pt.attrKey)} (${selfV.attrs?selfV.attrs[pt.attrKey]||1:1}d20) + ${this.skillLabel(pt.skillKey)} · DIF ${pt.difficulty}`) : '';
     const pendingDot=s.testNotif;
 
     // inventory
