@@ -2361,6 +2361,7 @@ class Component extends DCLogic {
     if(!l.email||!l.pass){ this.setState({loginError:'Informe email e senha para entrar.'}); return; }
     if(!this.sb){ this.setState({loginError:'Serviço indisponível no momento. Tente recarregar a página.'}); return; }
     this.setState({authBusy:true,loginError:false});
+    await this.sb.auth.signOut();
     const {data,error}=await this.sb.auth.signInWithPassword({email:l.email,password:l.pass});
     if(error){ this.setState({authBusy:false,loginError:this._authErrorMsg(error)}); return; }
     this.setState({authBusy:false,auth:this._authFromUser(data.user),screen:'profile',nav:[],profileTab:'personagens',login:{email:'',pass:''}});
