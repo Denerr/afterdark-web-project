@@ -1296,8 +1296,10 @@
       <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Use o código do seu Mestre</p>
     </div>
     <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:7px">Código de convite</label>
-    <input value="{{ joinCode }}" onInput="{{ onJoinCode }}" placeholder="SV-7K92" style="width:100%;background:#0d0c11;border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:14px;font-family:'Space Mono';font-weight:700;font-size:20px;letter-spacing:.16em;color:#e0c179;text-align:center;margin-bottom:18px;outline:none"/>
-    <button onClick="{{ toName }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;margin-bottom:18px" style-hover="background:#e0c179">Entrar →</button>
+    <input value="{{ joinCode }}" onInput="{{ onJoinCode }}" placeholder="SV-7K92" style="width:100%;background:#0d0c11;border:1px solid {{ joinInputBorder }};border-radius:4px;padding:14px;font-family:'Space Mono';font-weight:700;font-size:20px;letter-spacing:.16em;color:#e0c179;text-align:center;margin-bottom:8px;outline:none"/>
+    <sc-if value="{{ hasJoinError }}"><p style="font-size:12px;color:#e08a8a;margin:0 0 12px;text-align:center">{{ joinError }}</p></sc-if>
+    <sc-if value="{{ !hasJoinError }}"><div style="height:20px"></div></sc-if>
+    <button onClick="{{ toName }}" disabled="{{ joinBusy }}" style="width:100%;padding:14px;background:{{ joinBtnBg }};color:{{ joinBtnCol }};border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:{{ joinBtnCursor }};margin-bottom:18px" style-hover="background:#e0c179">{{ joinBtnLabel }}</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div><span style="font-size:11px;color:#6f6b61;letter-spacing:.1em">OU</span><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div></div>
     <div style="display:flex;gap:10px">
       <button onClick="{{ toName }}" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(198,166,100,.25);border-radius:3px;color:#cfc7b4;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.55)">⛓ Por Link</button>
@@ -2203,7 +2205,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil',
-    joinCode:'', joinName:'',
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinTableId:null, joinTableName:'',
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -2294,7 +2296,7 @@ class Component extends DCLogic {
       this.sb.from('tables').select('*').order('created_at',{ascending:true})
     ]);
     if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
-    if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,role:'mestre',target:'m_session'}))});
+    if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,role:'mestre',target:'m_session'}))});
   }
   componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
@@ -2375,16 +2377,18 @@ class Component extends DCLogic {
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
   openTable(t){ this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':null, screen:t.target, nav:['profile']})); }
+  _genInviteCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return 'SV-'+Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join(''); }
   saveCurrentTable(){
     const s=this.state; const nm=(s.tableName||'').trim();
     if(!nm || s.tables.some(t=>t.name===nm)) return Promise.resolve();
     const sel=s.oneshot?this.ONESHOTS[s.oneshot]:null;
     const theme=sel? (s.oneshot==='gota'?'vampire':s.oneshot==='misterios'?'demon':'werewolf') : 'human';
-    const row={name:nm,type:s.mode==='capitulos'?'Campanha':'One-shot',faction:sel?sel.faction.split(' · ')[0]:'Misto',theme,status:'Aguardando jogadores'};
+    const invite_code=this._genInviteCode();
+    const row={name:nm,type:s.mode==='capitulos'?'Campanha':'One-shot',faction:sel?sel.faction.split(' · ')[0]:'Misto',theme,status:'Aguardando jogadores',invite_code};
     const commit=(entry)=>new Promise(resolve=>this.setState(st=>({tables:[entry,...st.tables]}),resolve));
     if(this.sb && s.auth.loggedIn){
       return this.sb.from('tables').insert(row).select().single().then(({data,error})=>{
-        const entry=(!error&&data)? {id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,role:'mestre',target:'m_session'} : {id:'t'+Date.now(),...row,role:'mestre',target:'m_session'};
+        const entry=(!error&&data)? {id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,invite_code:data.invite_code,role:'mestre',target:'m_session'} : {id:'t'+Date.now(),...row,role:'mestre',target:'m_session'};
         return commit(entry);
       });
     }
@@ -2397,8 +2401,36 @@ class Component extends DCLogic {
   closeManage(){ this.setState(s=>({manage:{...s.manage,open:false}})); }
   manageSetView(v){ this.setState(s=>({manage:{...s.manage,view:v,copied:false}})); }
   async saveProgress(){ await this.saveCurrentTable(); this.setState(s=>({manage:{...s.manage,saved:true},log:[{icon:'💾',t:'Mesa',txt:'Progresso da mesa salvo.'},...s.log]})); }
-  copyInvite(){ this.setState(s=>({manage:{...s.manage,copied:true}})); }
-  lobbyCopy(which){ const txt=which==='link'?'afterdark.online/j/SV-7K92':'SV-7K92'; try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){} clearTimeout(this._lcT); this.setState({lobbyCopied:which}); this._lcT=setTimeout(()=>this.setState({lobbyCopied:null}),2000); }
+  copyInvite(){
+    const code=this._currentTableCode();
+    const mg=this.state.manage; const isSpec=mg.view==='invite-spectator';
+    const txt=`https://afterdark-rpg.netlify.app/?code=${code}${isSpec?'&obs=1':''}`;
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){}
+    this.setState(s=>({manage:{...s.manage,copied:true}}));
+  }
+  _currentTableCode(){
+    const s=this.state; const nm=this.sessionTitle();
+    const t=s.tables.find(t=>t.name===nm);
+    return (t&&t.invite_code)||'—';
+  }
+  async joinByCode(){
+    const code=(this.state.joinCode||'').trim().toUpperCase();
+    if(!code){ return; }
+    if(this.sb){
+      this.setState({joinBusy:true,joinError:''});
+      const {data,error}=await this.sb.from('tables').select('id,name,type,theme').eq('invite_code',code).single();
+      this.setState({joinBusy:false});
+      if(error||!data){ this.setState({joinError:'Código não encontrado. Verifique com seu Mestre.'}); return; }
+      this.setState({joinTableId:data.id,joinTableName:data.name});
+    }
+    this.go('j_name');
+  }
+  lobbyCopy(which){
+    const code=this._currentTableCode();
+    const txt=which==='link'?`https://afterdark-rpg.netlify.app/?code=${code}`:code;
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){}
+    clearTimeout(this._lcT); this.setState({lobbyCopied:which}); this._lcT=setTimeout(()=>this.setState({lobbyCopied:null}),2000);
+  }
   async updateTableStatus(status,label){
     await this.saveCurrentTable();
     const nm=this.sessionTitle();
@@ -2935,7 +2967,8 @@ class Component extends DCLogic {
     const mg=s.manage;
     const sessionTitle=this.sessionTitle();
     const inviteIsSpectator=mg.view==='invite-spectator';
-    const inviteCode=inviteIsSpectator?'SV-OBS3':'SV-7K92';
+    const tableCode=this._currentTableCode();
+    const inviteCode=inviteIsSpectator?tableCode+'-OBS':tableCode;
 
     // ---- master center stage ----
     const stageCena=s.sceneView==='cena';
@@ -3088,12 +3121,12 @@ class Component extends DCLogic {
       copyCodeLabel:s.lobbyCopied==='code'?'✓ Copiado':'Copiar código', copyLinkLabel:s.lobbyCopied==='link'?'✓ Copiado':'Copiar link',
       copyCodeBg:s.lobbyCopied==='code'?'rgba(127,174,143,.12)':'transparent', copyCodeCol:s.lobbyCopied==='code'?'#7fae8f':'#cfc7b4',
       copyLinkBg:s.lobbyCopied==='link'?'rgba(127,174,143,.12)':'transparent', copyLinkCol:s.lobbyCopied==='link'?'#7fae8f':'#cfc7b4',
-      lobbyCopiedMsg:s.lobbyCopied==='code'?'Código SV-7K92 copiado.':(s.lobbyCopied==='link'?'Link de convite copiado.':null),
+      lobbyCopiedMsg:s.lobbyCopied==='code'?`Código ${tableCode} copiado.`:(s.lobbyCopied==='link'?'Link de convite copiado.':null),
       saveLabel:mg.saved?'Progresso salvo':'Salvar progresso da mesa', saveSub:mg.saved?'Salvo agora — disponível no seu perfil':'Guarda relógios, cenas e fichas no estado atual', saveIcon:mg.saved?'✓':'💾', saveBorder:mg.saved?'rgba(127,174,143,.5)':'rgba(255,255,255,.08)',
       inviteIcon:inviteIsSpectator?'◉':'＋', inviteAcc:inviteIsSpectator?'#7ea6d4':'#e0c179',
       inviteTitle:inviteIsSpectator?'Convidar espectador':'Convidar novo jogador',
       inviteDesc:inviteIsSpectator?'Compartilhe o código de observador. Ele assiste à mesa sem entrar nas cenas.':'Compartilhe o código abaixo. Ele entra com ficha e participa das rolagens.',
-      inviteCode, inviteLink:'afterdark.online/'+(inviteIsSpectator?'obs':'j')+'/'+inviteCode,
+      inviteCode, inviteLink:`https://afterdark-rpg.netlify.app/?code=${inviteCode}`,
       copyLabel:mg.copied?'Copiado ✓':'Copiar', copyBg:mg.copied?'rgba(127,174,143,.12)':'transparent', copyCol:mg.copied?'#7fae8f':'#cfc7b4',
       // character sheet
       charOpen:!!selChar, charDetail, closeChar:()=>this.closeChar(), onCharPhoto:(e)=>this.onCharPhoto(e), removeCharPhoto:()=>this.removeCharPhoto(),
@@ -3217,8 +3250,12 @@ class Component extends DCLogic {
       onDraftCombatAttr:(e)=>this.setDraft('combatAttr',e.target.value), onDraftCombatSkill:(e)=>this.setDraft('combatSkill',e.target.value),
       rollMaster:()=>this.rollMaster(), rolling:s.rolling, rollTemp:s.rollTemp?s.rollTemp.map(d=>({d})):null, roll:decorate(s.roll), hasRoll:!!s.roll,
       qr,
-      joinCode:s.joinCode, joinName:s.joinName, onJoinCode:(e)=>this.setState({joinCode:e.target.value}), onJoinName:(e)=>this.setState({joinName:e.target.value}),
-      toName:()=>this.go('j_name'), toChar:()=>this.go('j_char'), toWizard:()=>this.startCharWizard(), toIntro:()=>this.go('j_intro'), toPanel:()=>this.go('j_panel'),
+      joinCode:s.joinCode, joinName:s.joinName, onJoinCode:(e)=>this.setState({joinCode:e.target.value,joinError:''}), onJoinName:(e)=>this.setState({joinName:e.target.value}),
+      joinBusy:s.joinBusy, joinError:s.joinError, hasJoinError:!!s.joinError,
+      joinInputBorder:s.joinError?'rgba(196,30,58,.6)':'rgba(198,166,100,.3)',
+      joinBtnBg:s.joinBusy?'#2a2830':'#c6a35e', joinBtnCol:s.joinBusy?'#6f6b61':'#0b0b10',
+      joinBtnCursor:s.joinBusy?'not-allowed':'pointer', joinBtnLabel:s.joinBusy?'Verificando...':'Entrar →',
+      toName:()=>this.joinByCode(), toChar:()=>this.go('j_char'), toWizard:()=>this.startCharWizard(), toIntro:()=>this.go('j_intro'), toPanel:()=>this.go('j_panel'),
       wizStep:s.wizStep, wiz:w, stepDots, stepTitle,
       step1:s.wizStep===1, step2:s.wizStep===2, step3:s.wizStep===3, step4:s.wizStep===4, step5:s.wizStep===5, step6:s.wizStep===6, step7:s.wizStep===7,
       attrView, skillView, skillGroups, weakOpts, sensList, hasSens:!!w.sens,

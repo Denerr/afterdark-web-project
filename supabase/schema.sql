@@ -21,6 +21,7 @@ create table if not exists public.tables (
   faction text,
   theme text,
   status text not null default 'Aguardando jogadores',
+  invite_code text unique,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (owner_id, name)
@@ -38,8 +39,9 @@ create policy "characters_update_own" on public.characters
 create policy "characters_delete_own" on public.characters
   for delete using (auth.uid() = owner_id);
 
+-- Dono vê suas próprias mesas; qualquer um pode buscar pelo invite_code (para entrar)
 create policy "tables_select_own" on public.tables
-  for select using (auth.uid() = owner_id);
+  for select using (auth.uid() = owner_id or invite_code is not null);
 create policy "tables_insert_own" on public.tables
   for insert with check (auth.uid() = owner_id);
 create policy "tables_update_own" on public.tables
