@@ -129,7 +129,85 @@
 
 <!-- ========================= PERFIL ========================= -->
 <sc-if value="{{ isProfile }}" data-screen-label="Perfil">
+<<<<<<< HEAD
 <dc-import name="Perfil" userName="{{ userName }}" goStart="{{ goStart }}" onProfilePers="{{ onProfilePers }}" tabPersUnder="{{ tabPersUnder }}" tabPersCol="{{ tabPersCol }}" charCount="{{ charCount }}" onProfileMesas="{{ onProfileMesas }}" tabMesasUnder="{{ tabMesasUnder }}" tabMesasCol="{{ tabMesasCol }}" tableCount="{{ tableCount }}" profilePers="{{ profilePers }}" createCharProfile="{{ createCharProfile }}" charactersView="{{ charactersView }}" profileMesas="{{ profileMesas }}" tablesView="{{ tablesView }}"/>
+=======
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-mapa.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.50);pointer-events:none"></div>
+<div style="max-width:920px;margin:0 auto;padding:44px 24px 80px;animation:fadeUp .5s ease;position:relative">
+  <!-- welcome -->
+  <div style="position:relative;overflow:hidden;border-radius:12px;border:1px solid rgba(198,166,100,.22);background:radial-gradient(100% 140% at 0% 0%, rgba(60,48,28,.4), #13121a 60%);padding:30px 32px;margin-bottom:28px">
+    <div style="position:absolute;top:-30px;right:-10px;font-family:'Cinzel';font-weight:800;font-size:140px;color:rgba(198,166,100,.06);line-height:1">A</div>
+    <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">Bem-vindo de volta</div>
+    <h1 style="font-family:'Cinzel';font-weight:700;font-size:34px;margin:0;color:#efe8d8">{{ userName }}</h1>
+    <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:19px;color:#b9b2a2;margin:8px 0 20px;max-width:480px">As sombras de Saint Vesper aguardam. Reúna seus sensitivos, conduza suas mesas — ou comece uma nova noite.</p>
+    <button onClick="{{ goStart }}" style="padding:13px 28px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 11px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">▸ Iniciar nova aventura</button>
+  </div>
+
+  <!-- tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)">
+    <button onClick="{{ onProfilePers }}" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid {{ tabPersUnder }};color: {{ tabPersCol }};font:600 13px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:-1px">Personagens <span style="font-family:'Space Mono';opacity:.7">{{ charCount }}</span></button>
+    <button onClick="{{ onProfileMesas }}" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid {{ tabMesasUnder }};color: {{ tabMesasCol }};font:600 13px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:-1px">Mesas <span style="font-family:'Space Mono';opacity:.7">{{ tableCount }}</span></button>
+  </div>
+
+  <!-- PERSONAGENS -->
+  <sc-if value="{{ profilePers }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+      <div onClick="{{ createCharProfile }}" style="cursor:pointer;min-height:172px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:1.5px dashed rgba(198,166,100,.35);border-radius:10px;background:rgba(198,163,94,.03);transition:.25s" style-hover="border-color:rgba(224,193,121,.7);background:rgba(198,163,94,.07)">
+        <div style="width:46px;height:46px;border-radius:50%;border:1.5px solid #c6a35e;display:flex;align-items:center;justify-content:center;font-size:24px;color:#e0c179">+</div>
+        <span style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">Criar personagem</span>
+        <span style="font-size:12px;color:#8d887c">Ficha guiada em 7 etapas</span>
+      </div>
+      <sc-for list="{{ charactersView }}" as="c">
+        <div onClick="{{ c.onOpen }}" style="border-radius:10px;overflow:hidden;border:1px solid {{ c.border }};background:#13121a;display:flex;flex-direction:column;cursor:pointer;transition:.22s" style-hover="border-color:rgba(224,193,121,.55);transform:translateY(-3px);box-shadow:0 14px 36px rgba(0,0,0,.4)">
+          <div style="height:84px;position:relative;background:radial-gradient(120% 120% at 30% 0%, {{ c.surf }}, #0c0a10);display:flex;align-items:flex-end;padding:12px 14px">
+            <div style="position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background: {{ c.avatarBg }};border:1.5px solid {{ c.acc }};display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8">{{ c.avatarInitial }}</div>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color: {{ c.acc }};padding:4px 9px;border:1px solid {{ c.acc }}55;border-radius:12px;background:rgba(8,8,12,.5)">{{ c.sensLabel }}</span>
+          </div>
+          <div style="padding:14px 16px 16px;flex:1;display:flex;flex-direction:column">
+            <div style="font-family:'Cinzel';font-weight:600;font-size:19px;color:#efe8d8">{{ c.name }}</div>
+            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90;margin-bottom:12px">{{ c.role }}</div>
+            <div style="flex:1"></div>
+            <sc-if value="{{ c.inUse }}">
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:rgba(198,163,94,.08);border:1px solid rgba(198,166,100,.25);border-radius:6px">
+                <span style="width:7px;height:7px;border-radius:50%;background:#7fae8f;box-shadow:0 0 8px rgba(127,174,143,.6)"></span>
+                <span style="font-size:12px;color:#cdc6b6">Utilizando em: <span style="color:#e0c179">{{ c.usedIn }}</span></span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ c.free }}">
+              <div style="font-size:12px;color:#7e7a70;font-family:'Cormorant Garamond';font-style:italic;padding:8px 0">Disponível · não está em nenhuma mesa</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- MESAS -->
+  <sc-if value="{{ profileMesas }}">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <sc-for list="{{ tablesView }}" as="t" hint-placeholder-count="3">
+        <div onClick="{{ t.onOpen }}" style="cursor:pointer;display:flex;align-items:center;gap:18px;border-radius:10px;border:1px solid {{ t.border }};border-left:3px solid {{ t.acc }};background:#13121a;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(198,166,100,.5);transform:translateX(2px)">
+          <div style="width:52px;height:52px;border-radius:8px;flex-shrink:0;background:radial-gradient(120% 120% at 30% 0%, {{ t.surf }}, #0c0a10);border:1px solid {{ t.acc }}55;display:flex;align-items:center;justify-content:center;font-size:20px;color: {{ t.acc }}">{{ t.icon }}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">
+              <span style="font-family:'Cinzel';font-weight:600;font-size:20px;color:#efe8d8">{{ t.name }}</span>
+              <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background: {{ t.roleBg }};color: {{ t.roleCol }};border:1px solid {{ t.roleBorder }}">{{ t.roleLabel }}</span>
+            </div>
+            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90">{{ t.type }} · {{ t.faction }} · {{ t.status }}</div>
+          </div>
+          <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#e0c179;flex-shrink:0">{{ t.cta }} →</span>
+        </div>
+      </sc-for>
+      <div onClick="{{ goStart }}" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border:1.5px dashed rgba(198,166,100,.3);border-radius:10px;color:#cfc7b4;transition:.25s" style-hover="border-color:rgba(224,193,121,.6);color:#e9e3d4">
+        <span style="font-size:18px;color:#e0c179">+</span><span style="font-family:'Cinzel';font-weight:600;font-size:15px">Criar ou entrar em uma nova mesa</span>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</div>
+>>>>>>> c0d034c79babe645e39e4d3316546c9dfbd14fa2
 </sc-if>
 
 <!-- ========================= INÍCIO (Hora de começar) ========================= -->
@@ -164,7 +242,78 @@
 
 <!-- ========================= MESTRE · LOBBY ========================= -->
 <sc-if value="{{ isMLobby }}" data-screen-label="Mestre Lobby">
+<<<<<<< HEAD
 <dc-import name="MLobby" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
+=======
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-mapa.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
+<div style="max-width:1120px;margin:0 auto;padding:44px 28px 80px;animation:fadeUp .5s ease;position:relative" style="--acc: {{ sessTheme.acc }}">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+    <div>
+      <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:8px">Lobby da Sessão</div>
+      <h2 style="font-family:'Cinzel';font-weight:700;font-size:32px;margin:0;color:#efe8d8">{{ sessName }}</h2>
+      <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:17px;color:#a39e90;margin-top:4px">Modo One-shot · Aguardando o grupo</div>
+    </div>
+    <button onClick="{{ startSession }}" style="padding:15px 34px;background: {{ sessTheme.acc }};color:#0b0b10;border:none;border-radius:2px;font:700 12px/1 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:.25s;box-shadow:0 0 0 1px {{ sessTheme.acc }}" style-hover="filter:brightness(1.18);box-shadow:0 0 30px {{ sessTheme.glow }}">▸ Iniciar RPG</button>
+  </div>
+
+  <div style="display:flex;gap:24px;flex-wrap:wrap">
+    <!-- invite -->
+    <div style="flex:1;min-width:280px;background:rgba(20,18,24,.65);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:26px">
+      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:18px">Convite</div>
+      <div style="font-size:11px;color:#8d887c;margin-bottom:6px;letter-spacing:.1em;text-transform:uppercase">Código</div>
+      <div style="font-family:'Space Mono';font-weight:700;font-size:30px;letter-spacing:.18em;color:#e0c179;margin-bottom:20px">{{ tableCode }}</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <div style="flex:1;font-family:'Space Mono';font-size:12px;color:#a39e90;background:#0e0d12;border:1px solid rgba(255,255,255,.08);border-radius:3px;padding:11px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ lobbyInviteLink }}</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button onClick="{{ onCopyCode }}" style="flex:1;padding:9px;background: {{ copyCodeBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyCodeCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyCodeLabel }}</button>
+        <button onClick="{{ onCopyLink }}" style="flex:1;padding:9px;background: {{ copyLinkBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyLinkCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyLinkLabel }}</button>
+      </div>
+      <sc-if value="{{ lobbyCopiedMsg }}"><div style="font-size:11px;color:#7fae8f;letter-spacing:.04em;margin-bottom:14px;animation:fadeIn .3s ease">✓ {{ lobbyCopiedMsg }}</div></sc-if>
+      <sc-if value="{{ lobbyNoAuth }}">
+        <div style="background:rgba(196,30,58,.08);border:1px solid rgba(196,30,58,.3);border-radius:5px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:#e08a8a;line-height:1.5">
+          ⚠ Sem conta: o código só funciona neste dispositivo.<br>
+          <span style="color:#a39e90">Crie uma conta para que jogadores de outros dispositivos possam entrar.</span>
+        </div>
+      </sc-if>
+      <div style="display:flex;gap:18px;align-items:center">
+        <div style="width:108px;height:108px;background:#0d0c11;border:1px solid rgba(198,166,100,.2);border-radius:5px;padding:9px;display:grid;grid-template-columns:repeat(21,1fr);gap:0">
+          <sc-for list="{{ qr }}" as="q" hint-placeholder-count="441"><div style="width:100%;padding-bottom:100%;background: {{ q.cell }}"></div></sc-for>
+        </div>
+        <div style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;line-height:1.5">Aponte a câmera<br>para entrar pelo<br>celular.</div>
+      </div>
+    </div>
+    <!-- players -->
+    <div style="flex:2;min-width:340px;background:rgba(20,18,24,.65);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:26px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c">Jogadores conectados</div>
+        <div style="font-family:'Space Mono';font-size:13px;color:#e0c179">{{ readyCount }} prontos · {{ total }}/8</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ players }}" as="p">
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;background:#0f0e13;border:1px solid {{ p.rowBorder }};border-radius:5px">
+            <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8;background: {{ p.avatarBg }};border:1.5px solid {{ p.acc }}">{{ p.avatarInitial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;color:#e9e3d4;font-weight:500">{{ p.char }} <span style="color:#7e7a70;font-style:italic;font-family:'Cormorant Garamond';font-size:15px">· {{ p.player }}</span></div>
+              <div style="font-size:12px;color: {{ p.cColor }};letter-spacing:.04em">{{ p.sLabel }}</div>
+            </div>
+            <sc-if value="{{ p.ready }}"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7fae8f;padding:5px 12px;border:1px solid rgba(127,174,143,.4);border-radius:20px">✓ Pronto</span></sc-if>
+            <sc-if value="{{ p.notReady }}"><button onClick="{{ p.onApprove }}" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfc7b4;padding:6px 13px;border:1px solid rgba(198,166,100,.35);border-radius:20px;background:transparent;cursor:pointer" style-hover="border-color:rgba(198,166,100,.7)">Aprovar</button></sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
+        <span style="font-size:11px;color:#7e7a70;padding:6px 12px;border:1px solid rgba(255,255,255,.07);border-radius:20px">Permitir personagens prontos</span>
+        <span style="font-size:11px;color:#7e7a70;padding:6px 12px;border:1px solid rgba(255,255,255,.07);border-radius:20px">Rolagens públicas</span>
+        <span style="font-size:11px;color:#7e7a70;padding:6px 12px;border:1px solid rgba(255,255,255,.07);border-radius:20px">Tom: Sombrio</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+>>>>>>> c0d034c79babe645e39e4d3316546c9dfbd14fa2
 </sc-if>
 
 <!-- ========================= MESTRE · SESSÃO (PAINEL) ========================= -->
@@ -845,17 +994,136 @@
 
 <!-- ========================= JOGADOR · ENTRAR ========================= -->
 <sc-if value="{{ isJJoin }}" data-screen-label="Jogador Entrar">
+<<<<<<< HEAD
 <dc-import name="JJoin" joinCode="{{ joinCode }}" onJoinCode="{{ onJoinCode }}" toName="{{ toName }}"/>
+=======
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:400px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:18px;padding:34px 28px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
+    <div style="text-align:center;margin-bottom:28px">
+      <div style="width:54px;height:54px;border:1.5px solid rgba(198,166,100,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-family:'Cinzel';font-weight:800;font-size:24px;color:#e0c179">A</div>
+      <h2 style="font-family:'Cinzel';font-weight:700;font-size:24px;margin:0;color:#efe8d8">Entrar na Mesa</h2>
+      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Use o código do seu Mestre</p>
+    </div>
+    <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:7px">Código de convite</label>
+    <input value="{{ joinCode }}" onInput="{{ onJoinCode }}" placeholder="SV-7K92" style="width:100%;background:#0d0c11;border:1px solid {{ joinInputBorder }};border-radius:4px;padding:14px;font-family:'Space Mono';font-weight:700;font-size:20px;letter-spacing:.16em;color:#e0c179;text-align:center;margin-bottom:8px;outline:none"/>
+    <sc-if value="{{ hasJoinError }}"><p style="font-size:12px;color:#e08a8a;margin:0 0 12px;text-align:center">{{ joinError }}</p></sc-if>
+    <sc-if value="{{ !hasJoinError }}"><div style="height:20px"></div></sc-if>
+    <button onClick="{{ toName }}" disabled="{{ joinBusy }}" style="width:100%;padding:14px;background:{{ joinBtnBg }};color:{{ joinBtnCol }};border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:{{ joinBtnCursor }};margin-bottom:18px" style-hover="background:#e0c179">{{ joinBtnLabel }}</button>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div><span style="font-size:11px;color:#6f6b61;letter-spacing:.1em">OU</span><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div></div>
+    <div style="display:flex;gap:10px">
+      <button onClick="{{ toName }}" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(198,166,100,.25);border-radius:3px;color:#cfc7b4;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.55)">⛓ Por Link</button>
+      <button onClick="{{ toName }}" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(198,166,100,.25);border-radius:3px;color:#cfc7b4;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.55)">▦ Ler QR</button>
+    </div>
+  </div>
+</div>
+>>>>>>> c0d034c79babe645e39e4d3316546c9dfbd14fa2
 </sc-if>
 
 <!-- ========================= JOGADOR · NOME ========================= -->
 <sc-if value="{{ isJName }}" data-screen-label="Jogador Nome">
+<<<<<<< HEAD
 <dc-import name="JName" onJoinName="{{ onJoinName }}" joinName="{{ joinName }}" toChar="{{ toChar }}"/>
+=======
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:400px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:18px;padding:34px 28px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
+    <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7fae8f;margin-bottom:16px;text-align:center">✓ Conectado · {{ joinTableName }}</div>
+    <h2 style="font-family:'Cinzel';font-weight:700;font-size:23px;margin:0 0 22px;color:#efe8d8;text-align:center">Como devemos te chamar?</h2>
+    <input onInput="{{ onJoinName }}" value="{{ joinName }}" placeholder="Seu nome (jogador)" style="width:100%;background:#0d0c11;border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:14px;font-size:16px;color:#e9e3d4;text-align:center;margin-bottom:18px;outline:none"/>
+    <button onClick="{{ toChar }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Continuar →</button>
+  </div>
+</div>
+>>>>>>> c0d034c79babe645e39e4d3316546c9dfbd14fa2
 </sc-if>
 
 <!-- ========================= JOGADOR · ESCOLHER PERSONAGEM ========================= -->
 <sc-if value="{{ isJChar }}" data-screen-label="Jogador Personagem">
+<<<<<<< HEAD
 <dc-import name="JChar" toWizard="{{ toWizard }}" toIntro="{{ toIntro }}"/>
+=======
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-arquivo.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:420px">
+    <div style="text-align:center;margin-bottom:24px">
+      <h2 style="font-family:'Cinzel';font-weight:700;font-size:24px;margin:0;color:#efe8d8">Seu personagem</h2>
+      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Como você entra em Saint Vesper?</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div onClick="{{ toWizard }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:8px;padding:20px 22px;transition:.25s" style-hover="border-color:rgba(224,193,121,.6);box-shadow:0 0 30px rgba(198,163,94,.1)">
+        <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;margin-bottom:5px">✦ Criar novo personagem</div>
+        <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0">Ficha guiada em 7 etapas — do nome às perícias.</p>
+      </div>
+      <sc-for list="{{ savedCharsForJoin }}" as="sc">
+        <div onClick="{{ sc.onSelect }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(196,30,58,.25);border-radius:8px;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(196,30,58,.6)">
+          <div style="font-family:'Cinzel';font-weight:600;font-size:17px;color:#efe8d8;margin-bottom:4px">⚇ {{ sc.name }}</div>
+          <p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:0">{{ sc.sensLabel }} — usar esta ficha</p>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noSavedChars }}">
+        <div style="background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:18px 22px;opacity:.5">
+          <div style="font-size:15px;color:#6f6b61;margin-bottom:3px">↺ Selecionar personagem existente</div>
+          <p style="font-family:'Cormorant Garamond';font-size:15px;color:#6f6b61;margin:0">Você ainda não tem fichas salvas.</p>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ========================= JOGADOR · LOBBY (aguardando mestre) ========================= -->
+<sc-if value="{{ isJLobby }}" data-screen-label="Jogador Lobby">
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 80px;animation:fadeUp .5s ease">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.60);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:500px">
+    <!-- header -->
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">{{ joinTableType }}</div>
+      <h2 style="font-family:'Cinzel';font-weight:700;font-size:28px;margin:0 0 8px;color:#efe8d8">{{ joinTableName }}</h2>
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border:1px solid rgba(127,174,143,.3);border-radius:20px;background:rgba(127,174,143,.06)">
+        <span style="width:7px;height:7px;border-radius:50%;background:#7fae8f;animation:glowPulse 2s ease-in-out infinite;display:inline-block"></span>
+        <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7fae8f">Aguardando o Mestre iniciar</span>
+      </div>
+    </div>
+    <!-- my char card -->
+    <div style="background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:10px;padding:18px 20px;margin-bottom:20px">
+      <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:12px">Sua ficha</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:46px;height:46px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:20px;color:#efe8d8;background:#1a1820;border:2px solid {{ myCharAccent }}">{{ myCharInitial }}</div>
+        <div>
+          <div style="font-family:'Cinzel';font-weight:600;font-size:17px;color:#efe8d8">{{ myCharName }}</div>
+          <div style="font-size:13px;color:#a39e90;margin-top:2px">{{ myCharSensLabel }}</div>
+        </div>
+        <div style="flex:1"></div>
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7fae8f;padding:5px 12px;border:1px solid rgba(127,174,143,.35);border-radius:20px">✓ Pronto</span>
+      </div>
+    </div>
+    <!-- all players -->
+    <div style="background:rgba(20,18,24,.7);border:1px solid rgba(198,166,100,.15);border-radius:10px;padding:20px">
+      <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:14px">Jogadores na mesa · {{ lobbyPlayerCount }}</div>
+      <sc-if value="{{ noLobbyPlayers }}">
+        <div style="text-align:center;padding:24px 0;color:#4a4740;font-family:'Cormorant Garamond';font-size:16px;font-style:italic">Aguardando outros jogadores...</div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ lobbyPlayers }}" as="lp">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;background:#0f0e13;border:1px solid {{ lp.border }};border-radius:5px">
+            <div style="width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:15px;color:#efe8d8;background:#1a1820;border:1.5px solid {{ lp.acc }}">{{ lp.initial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;color:#e9e3d4;font-weight:500">{{ lp.char }} <sc-if value="{{ lp.isMe }}"><span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#c6a35e;margin-left:6px">você</span></sc-if></div>
+              <div style="font-size:12px;color:#7e7a70;font-style:italic;font-family:'Cormorant Garamond'">{{ lp.player }}</div>
+            </div>
+            <span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:{{ lp.statusCol }};padding:4px 10px;border:1px solid {{ lp.statusCol }}44;border-radius:14px">{{ lp.statusLabel }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+>>>>>>> c0d034c79babe645e39e4d3316546c9dfbd14fa2
 </sc-if>
 
 <!-- ========================= JOGADOR · WIZARD ========================= -->
@@ -1433,7 +1701,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil',
-    joinCode:'', joinName:'',
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinTableId:null, joinTableName:'', joinTableType:'', memberId:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -1467,13 +1735,13 @@ class Component extends DCLogic {
     wizStep:1, sensHover:null, pxImgA:'assets/images/nat-default.png', pxImgB:'assets/images/nat-default.png', pxSlot:'a',
     wiz:{name:'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''},
     playerTab:'mapa', centerTab:'mapa', playerFocus:null, playerNarrow:false,
-    pending:{from:'Mestre',label:'Analisar o frasco lacrado no palco',attrKey:'mente',skillKey:'analise',difficulty:13,vis:'privado'},
+    pending:null,
     pRoll:null, pRolling:false, pRollTemp:null,
-    self:{char:'Helena Voss',nick:'A Legista',sens:'vampiros',attrs:{corpo:1,reflexo:2,mente:3,presenca:2,instinto:1},skills:{analise:3,investigacao:2,ocultismo:2,percepcao:2,persuasao:1},weaknesses:['Sono irregular','Fascínio desconfortável por sangue','Sensação de frio perto de vampiros antigos'],wounds:[{lvl:'leve',desc:'Corte superficial'}],conditions:['Abalado'],history:'Legista do Centro Cívico. Viu sangue se mover sozinho numa autópsia — e nunca mais dormiu direito.'},
-    scene:{local:'Salão de Leilões — Alta Vesper',clima:'Tensão aristocrática',desc:'Cristais pendem do teto como lâminas. O ar cheira a cera, perfume caro e algo metálico por baixo. Os convidados sorriem demais. No palco, um frasco lacrado aguarda o próximo lance.',npc:'Aurelian Voss',pistas:['Taça com resíduo']}
+    self:{char:'',nick:'',sens:null,attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},weaknesses:[],wounds:[],conditions:[],history:''},
+    scene:{local:'',clima:'',desc:'',npc:'',pistas:[]}
   };
 
-  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
+  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; this._initFromUrl(); }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
     this._pxHandler=(ev)=>{ if(this.state.screen!=='j_wizard'||this.state.wizStep!==2) return; const w=window.innerWidth||1, h=window.innerHeight||1; this._pxN={x:ev.clientX/w-0.5, y:ev.clientY/h-0.5}; if(this._pxRaf) return; this._pxRaf=requestAnimationFrame(()=>{ this._pxRaf=null; const n=this._pxN||{x:0,y:0}; document.querySelectorAll('[data-px]').forEach(el=>{ const d=parseFloat(el.getAttribute('data-px'))||0; el.style.transform=`translate3d(${(-n.x*d*30).toFixed(1)}px, ${(-n.y*d*30).toFixed(1)}px, 0)`; }); }); };
     window.addEventListener('mousemove',this._pxHandler,{passive:true});
   }
@@ -1482,7 +1750,7 @@ class Component extends DCLogic {
   // Sem servidor: os dados da mesa vivem no navegador. Abas/janelas do MESMO navegador
   // (ex.: Mestre numa aba, Jogador noutra) ficam sincronizadas em tempo real via
   // BroadcastChannel; entre dispositivos diferentes exigiria um backend.
-  _syncKeys(){ return ['players','clocks','stressBars','npcs','clues','log','scene','inventory','library']; }
+  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
   _initSync(){
     try{ this._bc=('BroadcastChannel' in window)? new BroadcastChannel('afterdark:session') : null; }catch(e){ this._bc=null; }
@@ -1510,12 +1778,56 @@ class Component extends DCLogic {
       sb.auth.getSession().then(({data})=>{ if(data&&data.session){ this.setState({auth:this._authFromUser(data.session.user)}); this._loadUserData(); } });
       sb.auth.onAuthStateChange((event,session)=>{
         this.setState({auth: session? this._authFromUser(session.user) : {loggedIn:false,name:'',email:'',phone:''}});
-        if(event==='SIGNED_IN') this._loadUserData();
+        if(event==='SIGNED_IN'){ this._loadUserData(); this._resumePendingCode(); }
         if(event==='SIGNED_OUT') this.setState({characters:[],tables:[]});
       });
       return true;
     };
     if(!setup()){ let n=0; this._authIv=setInterval(()=>{ if(setup()||++n>200) clearInterval(this._authIv); },50); }
+  }
+  _initFromUrl(){
+    try{
+      const params=new URLSearchParams(window.location.search);
+      const code=params.get('code');
+      if(code){ window.history.replaceState({},'',window.location.pathname); try{ localStorage.setItem('afterdark:pendingCode',code.toUpperCase()); }catch(e){} this.setState({joinCode:code.toUpperCase(),role:'jogador'}); this.go('j_join'); }
+    }catch(e){}
+  }
+  _resumePendingCode(){
+    try{
+      const code=localStorage.getItem('afterdark:pendingCode');
+      if(!code) return;
+      localStorage.removeItem('afterdark:pendingCode');
+      this.setState({joinCode:code,role:'jogador'});
+      this.go('j_join');
+    }catch(e){}
+  }
+  _startMemberPolling(){
+    clearInterval(this._mpoll);
+    const poll=async()=>{
+      if(!this.sb) return;
+      const nm=this.sessionTitle();
+      const t=this.state.tables.find(x=>x.name===nm);
+      if(!t||!t.id) return;
+      const {data}=await this.sb.from('table_members').select('*').eq('table_id',t.id).order('joined_at',{ascending:true});
+      if(!data) return;
+      const mapMember=m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:(m.char_data&&m.char_data.sens)||null,attrs:(m.char_data&&m.char_data.attrs)||{},skills:(m.char_data&&m.char_data.skills)||{},wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)});
+      this.setState({players:data.map(mapMember)});
+    };
+    poll();
+    this._mpoll=setInterval(poll,2000);
+  }
+  _startPlayerPolling(tableId){
+    clearInterval(this._ppoll);
+    if(!tableId||!this.sb) return;
+    const poll=async()=>{
+      if(!this.sb) return;
+      const {data}=await this.sb.from('table_members').select('*').eq('table_id',tableId).order('joined_at',{ascending:true});
+      if(!data) return;
+      const mapMember=m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:(m.char_data&&m.char_data.sens)||null,attrs:(m.char_data&&m.char_data.attrs)||{},skills:(m.char_data&&m.char_data.skills)||{},wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)});
+      this.setState({players:data.map(mapMember)});
+    };
+    poll();
+    this._ppoll=setInterval(poll,2000);
   }
   async _loadUserData(){
     if(!this.sb) return;
@@ -1524,9 +1836,9 @@ class Component extends DCLogic {
       this.sb.from('tables').select('*').order('created_at',{ascending:true})
     ]);
     if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
-    if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,role:'mestre',target:'m_session'}))});
+    if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,role:'mestre',target:'m_session'}))});
   }
-  componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
+  componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
   _switchPxBg(key){
     const url=this._NAT_BG[key]||'assets/images/nat-default.png';
@@ -1589,6 +1901,7 @@ class Component extends DCLogic {
     if(!l.email||!l.pass){ this.setState({loginError:'Informe email e senha para entrar.'}); return; }
     if(!this.sb){ this.setState({loginError:'Serviço indisponível no momento. Tente recarregar a página.'}); return; }
     this.setState({authBusy:true,loginError:false});
+    await this.sb.auth.signOut();
     const {data,error}=await this.sb.auth.signInWithPassword({email:l.email,password:l.pass});
     if(error){ this.setState({authBusy:false,loginError:this._authErrorMsg(error)}); return; }
     this.setState({authBusy:false,auth:this._authFromUser(data.user),screen:'profile',nav:[],profileTab:'personagens',login:{email:'',pass:''}});
@@ -1605,19 +1918,24 @@ class Component extends DCLogic {
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
   openTable(t){ this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':null, screen:t.target, nav:['profile']})); }
+  _genInviteCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return 'SV-'+Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join(''); }
   saveCurrentTable(){
     const s=this.state; const nm=(s.tableName||'').trim();
     if(!nm || s.tables.some(t=>t.name===nm)) return Promise.resolve();
     const sel=s.oneshot?this.ONESHOTS[s.oneshot]:null;
     const theme=sel? (s.oneshot==='gota'?'vampire':s.oneshot==='misterios'?'demon':'werewolf') : 'human';
-    const row={name:nm,type:s.mode==='capitulos'?'Campanha':'One-shot',faction:sel?sel.faction.split(' · ')[0]:'Misto',theme,status:'Aguardando jogadores'};
+    const invite_code=this._genInviteCode();
+    const row={name:nm,type:s.mode==='capitulos'?'Campanha':'One-shot',faction:sel?sel.faction.split(' · ')[0]:'Misto',theme,status:'Aguardando jogadores',invite_code};
     const commit=(entry)=>new Promise(resolve=>this.setState(st=>({tables:[entry,...st.tables]}),resolve));
     if(this.sb && s.auth.loggedIn){
       return this.sb.from('tables').insert(row).select().single().then(({data,error})=>{
-        const entry=(!error&&data)? {id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,role:'mestre',target:'m_session'} : {id:'t'+Date.now(),...row,role:'mestre',target:'m_session'};
+        const entry=(!error&&data)? {id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,invite_code:data.invite_code,role:'mestre',target:'m_session'} : {id:'t'+Date.now(),...row,role:'mestre',target:'m_session'};
         return commit(entry);
       });
     }
+    // Sem conta: código fica só no estado local — salva no localStorage para que
+    // o jogador na mesma máquina possa encontrá-lo sem precisar de Supabase.
+    try{ localStorage.setItem('afterdark:localTable',JSON.stringify({code:invite_code,name:nm,type:row.type})); }catch(e){}
     return commit({id:'t'+Date.now(),...row,role:'mestre',target:'m_session'});
   }
 
@@ -1627,8 +1945,51 @@ class Component extends DCLogic {
   closeManage(){ this.setState(s=>({manage:{...s.manage,open:false}})); }
   manageSetView(v){ this.setState(s=>({manage:{...s.manage,view:v,copied:false}})); }
   async saveProgress(){ await this.saveCurrentTable(); this.setState(s=>({manage:{...s.manage,saved:true},log:[{icon:'💾',t:'Mesa',txt:'Progresso da mesa salvo.'},...s.log]})); }
-  copyInvite(){ this.setState(s=>({manage:{...s.manage,copied:true}})); }
-  lobbyCopy(which){ const txt=which==='link'?'afterdark.online/j/SV-7K92':'SV-7K92'; try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){} clearTimeout(this._lcT); this.setState({lobbyCopied:which}); this._lcT=setTimeout(()=>this.setState({lobbyCopied:null}),2000); }
+  copyInvite(){
+    const code=this._currentTableCode();
+    const mg=this.state.manage; const isSpec=mg.view==='invite-spectator';
+    const txt=`https://afterdark-rpg.netlify.app/?code=${code}${isSpec?'&obs=1':''}`;
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){}
+    this.setState(s=>({manage:{...s.manage,copied:true}}));
+  }
+  _currentTableCode(){
+    const s=this.state; const nm=this.sessionTitle();
+    const t=s.tables.find(t=>t.name===nm);
+    return (t&&t.invite_code)||'—';
+  }
+  async joinByCode(){
+    const code=(this.state.joinCode||'').trim().toUpperCase();
+    if(!code){ return; }
+    // 1. Verifica mesa local (mestre sem conta no mesmo dispositivo)
+    try{
+      const lc=localStorage.getItem('afterdark:localTable');
+      if(lc){
+        const lt=JSON.parse(lc);
+        if(lt.code===code){
+          this.setState({joinTableId:null,joinTableName:lt.name,joinTableType:lt.type||'One-shot'});
+          this.go('j_name');
+          return;
+        }
+      }
+    }catch(e){}
+    // 2. Verifica no Supabase (mestre logado)
+    if(this.sb){
+      this.setState({joinBusy:true,joinError:''});
+      const {data,error}=await this.sb.from('tables').select('id,name,type,theme').eq('invite_code',code).single();
+      this.setState({joinBusy:false});
+      if(error||!data){ this.setState({joinError:'Código não encontrado. Verifique se o Mestre está conectado e a mesa foi criada.'}); return; }
+      this.setState({joinTableId:data.id,joinTableName:data.name,joinTableType:data.type||'One-shot'});
+      const {data:mbr}=await this.sb.from('table_members').insert({table_id:data.id,player_name:this.state.auth.name||'',user_id:this.state.auth.loggedIn?(await this.sb.auth.getUser()).data?.user?.id:null,status:'conectando'}).select('id').single();
+      if(mbr) this.setState({memberId:mbr.id});
+    }
+    this.go('j_name');
+  }
+  lobbyCopy(which){
+    const code=this._currentTableCode();
+    const txt=which==='link'?`https://afterdark-rpg.netlify.app/?code=${code}`:code;
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){}
+    clearTimeout(this._lcT); this.setState({lobbyCopied:which}); this._lcT=setTimeout(()=>this.setState({lobbyCopied:null}),2000);
+  }
   async updateTableStatus(status,label){
     await this.saveCurrentTable();
     const nm=this.sessionTitle();
@@ -1821,7 +2182,7 @@ class Component extends DCLogic {
   }
   rollMaster(){
     const s=this.state, td=s.testDraft;
-    const p=s.players.find(x=>x.id===td.playerId)||s.players[1];
+    const p=s.players.find(x=>x.id===td.playerId)||s.players[1]||{attrs:{},skills:{},char:'?'};
     if(s.testMode==='combate'){
       const av=(p.attrs[td.combatAttr]||1), b=(p.skills[td.combatSkill]||0);
       const wpn=s.library.weapons.find(w=>w.id===td.weaponId)||{bonus:0,dano:0,name:'Desarmado'};
@@ -1854,7 +2215,21 @@ class Component extends DCLogic {
   wizNext(){
     if(this.state.wizStep<7){ this.setState(s=>({wizStep:s.wizStep+1})); return; }
     if(this.state.wizReturn==='profile'){ this._finishCharWizard(); return; }
-    this.setState(s=>({screen:'j_intro',nav:[...s.nav,'j_wizard']}));
+    this._finishPlayerWizard();
+  }
+  async _finishPlayerWizard(){
+    try{
+      const s=this.state, w=s.wiz;
+      const attrs={}; (this.ATTRS||[]).forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
+      const charName=w.charName||'Personagem';
+      const charData={name:charName,sens:w.sens||'humano',attrs,skills:{...w.skills},weaknesses:[...(w.weaknesses||[])]};
+      if(this.sb && s.memberId){
+        await this.sb.from('table_members').update({player_name:w.name||s.auth.name||'Jogador',char_name:charName,char_data:charData,status:'pronto'}).eq('id',s.memberId);
+      }
+    }catch(e){ console.error('_finishPlayerWizard update error:',e); }
+    const tid=this.state.joinTableId;
+    this.setState(st=>({screen:'j_lobby',nav:[...st.nav,'j_wizard']}));
+    this._startPlayerPolling(tid);
   }
   async _finishCharWizard(){
     const w=this.state.wiz;
@@ -1873,7 +2248,17 @@ class Component extends DCLogic {
   setPlayerFocus(f){ this.setState({playerFocus:f,playerMenuOpen:false}); }
   clearFocus(){ this.setState({playerFocus:null}); }
   createCharProfile(){ this.setState({wizReturn:'profile',wizStep:1,wiz:{name:this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
-  startCharWizard(){ this.setState({wizReturn:'player',wizStep:1,wiz:{name:'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
+  startCharWizard(){ this.setState({wizReturn:'player',wizStep:1,wiz:{name:this.state.joinName||this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
+  async _selectSavedChar(c){
+    const s=this.state;
+    const charData={name:c.name,sens:c.sens||'humano',attrs:c.attrs||{},skills:c.skills||{},weaknesses:c.weaknesses||[]};
+    if(this.sb && s.memberId){
+      await this.sb.from('table_members').update({player_name:s.joinName||s.auth.name||'Jogador',char_name:c.name,char_data:charData,status:'pronto'}).eq('id',s.memberId);
+    }
+    this.setState({self:{char:c.name,nick:'',sens:c.sens||null,attrs:c.attrs||{},skills:c.skills||{},weaknesses:c.weaknesses||[],wounds:[],conditions:[],history:c.bio||''}});
+    this.go('j_lobby');
+    this._startPlayerPolling(s.joinTableId);
+  }
 
   // ---- character sheet + photo ----
   openChar(id){ this.setState({selectedChar:id}); }
@@ -2008,7 +2393,7 @@ class Component extends DCLogic {
     const selChapter=chaptersView[s.chapter]||chaptersView[0];
 
     const oneshotList=Object.values(this.ONESHOTS).map(o=>{ const sd=o.key===s.oneshot; return {...o, selected:sd,
-      onClick:()=>this.pickOneshot(o.key), onCreate:()=>{ this.setState({oneshot:o.key},()=>{ this.saveCurrentTable(); this.go('m_lobby'); }); },
+      onClick:()=>this.pickOneshot(o.key), onCreate:()=>{ this.setState({oneshot:o.key},()=>{ this.saveCurrentTable().then(()=>{ this._startMemberPolling(); this.go('m_lobby'); }); }); },
       borderCol:sd?o.acc:'rgba(255,255,255,.1)', shadow:sd?('0 16px 50px rgba(0,0,0,.5), 0 0 40px '+o.glow):'0 12px 30px rgba(0,0,0,.4)',
       btnBg:sd?o.acc:'transparent', btnCol:sd?'#0b0b10':o.acc
     }; });
@@ -2063,7 +2448,7 @@ class Component extends DCLogic {
     const clues=s.clues.map(k=>({...k, sColor:clueColor[k.status]||'#7e7a70'}));
 
     const selfV=s.self; const selfSens=this.SENS[selfV.sens];
-    const selfAttr=this.ATTRS.map(a=>({...a, val:selfV.attrs[a.key]||0}));
+    const selfAttr=this.ATTRS.map(a=>({...a, val:(selfV.attrs&&selfV.attrs[a.key])||0}));
     const selfSkill=this.SKILLS.filter(a=>selfV.skills[a.key]).map(a=>({...a, val:selfV.skills[a.key]}));
     const selfWeak=selfV.weaknesses.map(x=>({txt:x}));
     const selfStress=s.stressBars.filter(b=>b.playerId===selfId).map(b=>this.stressView(b));
@@ -2079,7 +2464,7 @@ class Component extends DCLogic {
     const diffOptions=diffs.map(d=>({v:d.v, l:d.l, sel:s.testDraft.difficulty===d.v, onClick:()=>this.setState(st=>({testDraft:{...st.testDraft,difficulty:d.v,[diffKey]:d.v}})), bg:s.testDraft.difficulty===d.v?'#c6a35e':'#0e0d12', border:s.testDraft.difficulty===d.v?'#c6a35e':'rgba(255,255,255,.1)', col:s.testDraft.difficulty===d.v?'#0b0b10':'#cfc7b4' }));
     const selWeapon=s.library.weapons.find(w=>w.id===s.testDraft.weaponId)||s.library.weapons[0]||{name:'Desarmado',bonus:0,dano:0,alcance:'—',ruido:'—'};
     const combatWeapons=s.library.weapons.map(w=>({...w, sel:s.testDraft.weaponId===w.id, onClick:()=>this.setDraft('weaponId',w.id), bonusLabel:(w.bonus>=0?'+':'')+w.bonus, bg:s.testDraft.weaponId===w.id?'rgba(196,30,58,.14)':'#0e0d12', border:s.testDraft.weaponId===w.id?'#c41e3a':'rgba(255,255,255,.1)', nameCol:s.testDraft.weaponId===w.id?'#efe8d8':'#cdc6b6'}));
-    const draftPlayer=s.players.find(p=>p.id===s.testDraft.playerId)||s.players[1]||{attrs:{},skills:{}};
+    const draftPlayer=s.players.find(p=>p.id===s.testDraft.playerId)||s.players[1]||{attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},char:'?'};
     const dPattr=draftPlayer.attrs[isCombat?s.testDraft.combatAttr:s.testDraft.attrKey]||1;
     const dPskill=draftPlayer.skills[isCombat?s.testDraft.combatSkill:s.testDraft.skillKey]||0;
     const combatTotalLine=`1d10 + ${dPattr} (atr) + ${dPskill} (perícia) + ${selWeapon.bonus} (arma)`;
@@ -2165,7 +2550,8 @@ class Component extends DCLogic {
     const mg=s.manage;
     const sessionTitle=this.sessionTitle();
     const inviteIsSpectator=mg.view==='invite-spectator';
-    const inviteCode=inviteIsSpectator?'SV-OBS3':'SV-7K92';
+    const tableCode=this._currentTableCode();
+    const inviteCode=inviteIsSpectator?tableCode+'-OBS':tableCode;
 
     // ---- master center stage ----
     const stageCena=s.sceneView==='cena';
@@ -2253,7 +2639,7 @@ class Component extends DCLogic {
     const histCol=(g)=>{ if(/Falha|Desastre|Errou/.test(g)) return '#c0473f'; if(/Parcial|Acertou/.test(g)) return '#d2a23a'; return '#7fae8f'; };
     const testHistory=s.log.filter(e=>e.t==='Teste'||e.t==='Combate').slice(0,4).map(e=>{ const m=e.txt.match(/^(.*?) — (.*?) \(/); return {label:m?m[1]:e.txt, grade:m?m[2]:'—', col:histCol(m?m[2]:'')}; });
     const pt=s.pending;
-    const pendingFormula=pt.mode==='combate' ? `Ataque · 1d10 + atributo + perícia · DEF ${pt.difficulty}` : `${this.attrLabel(pt.attrKey)} (${selfV.attrs?selfV.attrs[pt.attrKey]||1:1}d20) + ${this.skillLabel(pt.skillKey)} · DIF ${pt.difficulty}`;
+    const pendingFormula=pt ? (pt.mode==='combate' ? `Ataque · 1d10 + atributo + perícia · DEF ${pt.difficulty}` : `${this.attrLabel(pt.attrKey)} (${selfV.attrs?selfV.attrs[pt.attrKey]||1:1}d20) + ${this.skillLabel(pt.skillKey)} · DIF ${pt.difficulty}`) : '';
     const pendingDot=s.testNotif;
 
     // inventory
@@ -2286,7 +2672,7 @@ class Component extends DCLogic {
       isLanding:screen==='landing', isRegister:screen==='auth_register', isLogin:screen==='auth_login', isForgot:screen==='auth_forgot', isProfile:screen==='profile', isStart:screen==='start', isTableName:screen==='m_tablename',
       isRole:screen==='home', isMMode:screen==='m_mode', isMChapters:screen==='m_chapters', isMOneshots:screen==='m_oneshots',
       isMLobby:screen==='m_lobby', isMSession:screen==='m_session',
-      isJJoin:screen==='j_join', isJName:screen==='j_name', isJChar:screen==='j_char', isJWizard:screen==='j_wizard', isJIntro:screen==='j_intro', isJPanel:screen==='j_panel',
+      isJJoin:screen==='j_join', isJName:screen==='j_name', isJChar:screen==='j_char', isJLobby:screen==='j_lobby', isJWizard:screen==='j_wizard', isJIntro:screen==='j_intro', isJPanel:screen==='j_panel',
       // register
       reg:s.reg, regError:s.regError, regSent:s.regSent, regFormVisible:!s.regSent,
       regErrorMsg: s.regErrorText || ((s.reg.pass&&s.reg.pass!==s.reg.pass2)?'As senhas não coincidem.':'Preencha todos os campos corretamente (email válido, senha de 6+ dígitos).'),
@@ -2318,12 +2704,12 @@ class Component extends DCLogic {
       copyCodeLabel:s.lobbyCopied==='code'?'✓ Copiado':'Copiar código', copyLinkLabel:s.lobbyCopied==='link'?'✓ Copiado':'Copiar link',
       copyCodeBg:s.lobbyCopied==='code'?'rgba(127,174,143,.12)':'transparent', copyCodeCol:s.lobbyCopied==='code'?'#7fae8f':'#cfc7b4',
       copyLinkBg:s.lobbyCopied==='link'?'rgba(127,174,143,.12)':'transparent', copyLinkCol:s.lobbyCopied==='link'?'#7fae8f':'#cfc7b4',
-      lobbyCopiedMsg:s.lobbyCopied==='code'?'Código SV-7K92 copiado.':(s.lobbyCopied==='link'?'Link de convite copiado.':null),
+      lobbyCopiedMsg:s.lobbyCopied==='code'?`Código ${tableCode} copiado.`:(s.lobbyCopied==='link'?'Link de convite copiado.':null),
       saveLabel:mg.saved?'Progresso salvo':'Salvar progresso da mesa', saveSub:mg.saved?'Salvo agora — disponível no seu perfil':'Guarda relógios, cenas e fichas no estado atual', saveIcon:mg.saved?'✓':'💾', saveBorder:mg.saved?'rgba(127,174,143,.5)':'rgba(255,255,255,.08)',
       inviteIcon:inviteIsSpectator?'◉':'＋', inviteAcc:inviteIsSpectator?'#7ea6d4':'#e0c179',
       inviteTitle:inviteIsSpectator?'Convidar espectador':'Convidar novo jogador',
       inviteDesc:inviteIsSpectator?'Compartilhe o código de observador. Ele assiste à mesa sem entrar nas cenas.':'Compartilhe o código abaixo. Ele entra com ficha e participa das rolagens.',
-      inviteCode, inviteLink:'afterdark.online/'+(inviteIsSpectator?'obs':'j')+'/'+inviteCode,
+      inviteCode, inviteLink:`https://afterdark-rpg.netlify.app/?code=${inviteCode}`,
       copyLabel:mg.copied?'Copiado ✓':'Copiar', copyBg:mg.copied?'rgba(127,174,143,.12)':'transparent', copyCol:mg.copied?'#7fae8f':'#cfc7b4',
       // character sheet
       charOpen:!!selChar, charDetail, closeChar:()=>this.closeChar(), onCharPhoto:(e)=>this.onCharPhoto(e), removeCharPhoto:()=>this.removeCharPhoto(),
@@ -2349,7 +2735,7 @@ class Component extends DCLogic {
       goMestre:()=>this.pickRole('mestre'), goJogador:()=>this.pickRole('jogador'),
       back:()=>this.back(), reset:()=>this.reset(),
       pickCap:()=>this.pickMode('capitulos'), pickOne:()=>this.pickMode('oneshots'),
-      toLobby:()=>{ this.saveCurrentTable(); this.go('m_lobby'); }, startSession:()=>{ this.saveCurrentTable(); this.go('m_session'); }, closeScene:()=>this.closeScene(),
+      toLobby:()=>{ this.saveCurrentTable().then(()=>{ this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>{ this._startMemberPolling(); this.saveCurrentTable(); this.go('m_session'); }, closeScene:()=>this.closeScene(),
       onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:'Salão de Leilões',acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:'As portas duplas se abrem. O Salão de Leilões respira ouro e ameaça. No palco, sob luz de recorte, o frasco lacrado de sangue aguarda — e cada par de olhos na sala já decidiu quanto está disposto a pagar.'}),
       onSceneNpc:()=>this.openScene({title:'NPC Revelado',sub:'Aurelian Voss',acc:'#c41e3a',surf:'#2e1117',glow:'rgba(196,30,58,.45)',text:'Ele atravessa o salão sem pressa, como quem já é dono de tudo. "Sangue antigo reconhece sangue antigo", diz — e o frio na sua nuca confirma o que você temia.'}),
       oneshotList, chaptersView, selChapter, sessTheme, sessName, centerBorder:'rgba(198,166,100,.18)',
@@ -2410,6 +2796,7 @@ class Component extends DCLogic {
       invOwned, noOwned:invOwned.length===0, emptyStuffMsg:s.invDivider==='armas'?'Você não carrega armas ainda.':'Você não carrega itens ainda.',
       invAvailable, noAvailable:invAvailable.length===0, noClues:cluesFoundV.length===0,
       players, readyCount, total:s.players.length, clocksAll, log:s.log, npcs, clues,
+      tableCode, lobbyInviteLink:`https://afterdark-rpg.netlify.app/?code=${tableCode}`, lobbyNoAuth:!s.auth.loggedIn,
       tools, ptabs,
       toolRoteiro:s.masterTool==='roteiro', roteiroChoosing:!rt.mode, roteiroIsPadrao:rt.mode==='padrao', roteiroIsProprio:rt.mode==='proprio',
       roteiroEvents, roteiroDoneCount, roteiroTotal, roteiroText:rt.text,
@@ -2447,8 +2834,22 @@ class Component extends DCLogic {
       onDraftCombatAttr:(e)=>this.setDraft('combatAttr',e.target.value), onDraftCombatSkill:(e)=>this.setDraft('combatSkill',e.target.value),
       rollMaster:()=>this.rollMaster(), rolling:s.rolling, rollTemp:s.rollTemp?s.rollTemp.map(d=>({d})):null, roll:decorate(s.roll), hasRoll:!!s.roll,
       qr,
-      joinCode:s.joinCode, joinName:s.joinName, onJoinCode:(e)=>this.setState({joinCode:e.target.value}), onJoinName:(e)=>this.setState({joinName:e.target.value}),
-      toName:()=>this.go('j_name'), toChar:()=>this.go('j_char'), toWizard:()=>this.startCharWizard(), toIntro:()=>this.go('j_intro'), toPanel:()=>this.go('j_panel'),
+      joinCode:s.joinCode, joinName:s.joinName, joinTableName:s.joinTableName, joinTableType:s.joinTableType||'Mesa',
+      onJoinCode:(e)=>this.setState({joinCode:e.target.value,joinError:''}), onJoinName:(e)=>this.setState({joinName:e.target.value}),
+      joinBusy:s.joinBusy, joinError:s.joinError, hasJoinError:!!s.joinError,
+      joinInputBorder:s.joinError?'rgba(196,30,58,.6)':'rgba(198,166,100,.3)',
+      joinBtnBg:s.joinBusy?'#2a2830':'#c6a35e', joinBtnCol:s.joinBusy?'#6f6b61':'#0b0b10',
+      joinBtnCursor:s.joinBusy?'not-allowed':'pointer', joinBtnLabel:s.joinBusy?'Verificando...':'Entrar →',
+      toName:()=>this.joinByCode(), toChar:()=>this.go('j_char'), toWizard:()=>this.startCharWizard(), toIntro:()=>this.go('j_intro'), toPanel:()=>this.go('j_panel'),
+      savedCharsForJoin:s.characters.map(c=>({name:c.name,sensLabel:this.SENS[c.sens]?this.SENS[c.sens].label:'Sensitivo',onSelect:()=>this._selectSavedChar(c)})),
+      noSavedChars:s.characters.length===0,
+      // player lobby
+      myCharName:s.self.char||'Personagem', myCharInitial:(s.self.char||'?')[0].toUpperCase(),
+      myCharAccent:this.SENS_ACCENT[s.self.sens]||'#c6a35e',
+      myCharSensLabel:s.self.sens&&this.SENS[s.self.sens]?this.SENS[s.self.sens].label:'Sensitivo',
+      lobbyPlayers:s.players.map(m=>{ const isMine=m.id===s.memberId; const acc=this.SENS_ACCENT[m.sens]||'#b9a06a'; const statusLabel={pronto:'Pronto',conectando:'Conectando',escolhendo:'Escolhendo',criando:'Criando ficha'}; return { ...m, initial:m.char&&m.char!=='—'?m.char[0].toUpperCase():'?', acc, border:isMine?'rgba(198,166,100,.4)':'rgba(255,255,255,.07)', isMe:isMine, statusLabel:statusLabel[m.status]||m.status, statusCol:m.status==='pronto'?'#7fae8f':'#a39e90' }; }),
+      lobbyPlayerCount:s.players.length,
+      noLobbyPlayers:s.players.length===0,
       wizStep:s.wizStep, wiz:w, stepDots, stepTitle,
       step1:s.wizStep===1, step2:s.wizStep===2, step3:s.wizStep===3, step4:s.wizStep===4, step5:s.wizStep===5, step6:s.wizStep===6, step7:s.wizStep===7,
       attrView, skillView, skillGroups, weakOpts, sensList, hasSens:!!w.sens,
@@ -2469,7 +2870,7 @@ class Component extends DCLogic {
       sumSens:sensInfo?sensInfo.label:'—', sumSensColor:sensInfo?sensInfo.accent:'#8d887c', sumBonus:sensInfo?sensInfo.bonus:'—', sumRef:sensInfo?sensInfo.ref:'—', sumManifest:w.manifest||(isHumano?'—':'(não informado)'), sumIsHumano:isHumano,
       sumAttrs, sumSkills, sumHasSkills:sumSkills.length>0, sumWeak:sumWeakFull, sumHasWeak:sumWeakFull.length>0, sumHistory:w.history||'(sem histórico escrito)', sumHasHistory:!!w.history, narrative,
       scene:s.scene, self:selfV, selfSens, selfAttr, selfSkill, selfWeak,
-      pending:s.pending, pendingAttr:this.attrLabel(s.pending.attrKey), pendingSkill:this.skillLabel(s.pending.skillKey), pendingDice:(selfV.attrs[s.pending.attrKey]||1),
+      pending:s.pending, pendingAttr:s.pending?this.attrLabel(s.pending.attrKey):'', pendingSkill:s.pending?this.skillLabel(s.pending.skillKey):'', pendingDice:s.pending?(selfV.attrs[s.pending.attrKey]||1):1,
       rollPlayer:()=>this.rollPlayer(), pRolling:s.pRolling, pRollTemp:s.pRollTemp?s.pRollTemp.map(d=>({d})):null, pRoll:decorate(s.pRoll), hasPRoll:!!s.pRoll, noPRoll:(!s.pRoll&&!s.pRolling),
       npcsKnown:npcs.filter(n=>n.known), cluesFound:cluesFoundV
     };
