@@ -1338,14 +1338,18 @@
         <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;margin-bottom:5px">✦ Criar novo personagem</div>
         <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0">Ficha guiada em 7 etapas — do nome às perícias.</p>
       </div>
-      <div onClick="{{ toIntro }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(196,30,58,.25);border-radius:8px;padding:20px 22px;transition:.25s" style-hover="border-color:rgba(196,30,58,.6)">
-        <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;margin-bottom:5px">⚇ Usar personagem pronto</div>
-        <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0">Helena Voss · A Legista — sensível a vampiros, pronta para jogar.</p>
-      </div>
-      <div onClick="{{ toIntro }}" style="cursor:pointer;background:#0f0e13;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(255,255,255,.18)">
-        <div style="font-size:15px;color:#cdc6b6;margin-bottom:3px">↺ Selecionar personagem existente</div>
-        <p style="font-family:'Cormorant Garamond';font-size:15px;color:#7e7a70;margin:0">Você ainda não tem fichas salvas.</p>
-      </div>
+      <sc-for list="{{ savedCharsForJoin }}" as="sc">
+        <div onClick="{{ sc.onSelect }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(196,30,58,.25);border-radius:8px;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(196,30,58,.6)">
+          <div style="font-family:'Cinzel';font-weight:600;font-size:17px;color:#efe8d8;margin-bottom:4px">⚇ {{ sc.name }}</div>
+          <p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:0">{{ sc.sensLabel }} — usar esta ficha</p>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noSavedChars }}">
+        <div style="background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:18px 22px;opacity:.5">
+          <div style="font-size:15px;color:#6f6b61;margin-bottom:3px">↺ Selecionar personagem existente</div>
+          <p style="font-family:'Cormorant Garamond';font-size:15px;color:#6f6b61;margin:0">Você ainda não tem fichas salvas.</p>
+        </div>
+      </sc-if>
     </div>
   </div>
 </div>
@@ -2239,10 +2243,10 @@ class Component extends DCLogic {
     wizStep:1, sensHover:null, pxImgA:'assets/images/nat-default.png', pxImgB:'assets/images/nat-default.png', pxSlot:'a',
     wiz:{name:'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''},
     playerTab:'mapa', centerTab:'mapa', playerFocus:null, playerNarrow:false,
-    pending:{from:'Mestre',label:'Analisar o frasco lacrado no palco',attrKey:'mente',skillKey:'analise',difficulty:13,vis:'privado'},
+    pending:null,
     pRoll:null, pRolling:false, pRollTemp:null,
-    self:{char:'Helena Voss',nick:'A Legista',sens:'vampiros',attrs:{corpo:1,reflexo:2,mente:3,presenca:2,instinto:1},skills:{analise:3,investigacao:2,ocultismo:2,percepcao:2,persuasao:1},weaknesses:['Sono irregular','Fascínio desconfortável por sangue','Sensação de frio perto de vampiros antigos'],wounds:[{lvl:'leve',desc:'Corte superficial'}],conditions:['Abalado'],history:'Legista do Centro Cívico. Viu sangue se mover sozinho numa autópsia — e nunca mais dormiu direito.'},
-    scene:{local:'Salão de Leilões — Alta Vesper',clima:'Tensão aristocrática',desc:'Cristais pendem do teto como lâminas. O ar cheira a cera, perfume caro e algo metálico por baixo. Os convidados sorriem demais. No palco, um frasco lacrado aguarda o próximo lance.',npc:'Aurelian Voss',pistas:['Taça com resíduo']}
+    self:{char:'',nick:'',sens:null,attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},weaknesses:[],wounds:[],conditions:[],history:''},
+    scene:{local:'',clima:'',desc:'',npc:'',pistas:[]}
   };
 
   componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._initFromUrl(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
@@ -2709,7 +2713,16 @@ class Component extends DCLogic {
   setPlayerFocus(f){ this.setState({playerFocus:f,playerMenuOpen:false}); }
   clearFocus(){ this.setState({playerFocus:null}); }
   createCharProfile(){ this.setState({wizReturn:'profile',wizStep:1,wiz:{name:this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
-  startCharWizard(){ this.setState({wizReturn:'player',wizStep:1,wiz:{name:'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
+  startCharWizard(){ this.setState({wizReturn:'player',wizStep:1,wiz:{name:this.state.joinName||this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
+  async _selectSavedChar(c){
+    const s=this.state;
+    const charData={name:c.name,sens:c.sens||'humano',attrs:c.attrs||{},skills:c.skills||{},weaknesses:c.weaknesses||[]};
+    if(this.sb && s.memberId){
+      await this.sb.from('table_members').update({player_name:s.joinName||s.auth.name||'Jogador',char_name:c.name,char_data:charData,status:'pronto'}).eq('id',s.memberId);
+    }
+    this.setState({self:{char:c.name,nick:'',sens:c.sens||null,attrs:c.attrs||{},skills:c.skills||{},weaknesses:c.weaknesses||[],wounds:[],conditions:[],history:c.bio||''}});
+    this.go('j_intro');
+  }
 
   // ---- character sheet + photo ----
   openChar(id){ this.setState({selectedChar:id}); }
@@ -3291,6 +3304,8 @@ class Component extends DCLogic {
       joinBtnBg:s.joinBusy?'#2a2830':'#c6a35e', joinBtnCol:s.joinBusy?'#6f6b61':'#0b0b10',
       joinBtnCursor:s.joinBusy?'not-allowed':'pointer', joinBtnLabel:s.joinBusy?'Verificando...':'Entrar →',
       toName:()=>this.joinByCode(), toChar:()=>this.go('j_char'), toWizard:()=>this.startCharWizard(), toIntro:()=>this.go('j_intro'), toPanel:()=>this.go('j_panel'),
+      savedCharsForJoin:s.characters.map(c=>({name:c.name,sensLabel:this.SENS[c.sens]?this.SENS[c.sens].label:'Sensitivo',onSelect:()=>this._selectSavedChar(c)})),
+      noSavedChars:s.characters.length===0,
       wizStep:s.wizStep, wiz:w, stepDots, stepTitle,
       step1:s.wizStep===1, step2:s.wizStep===2, step3:s.wizStep===3, step4:s.wizStep===4, step5:s.wizStep===5, step6:s.wizStep===6, step7:s.wizStep===7,
       attrView, skillView, skillGroups, weakOpts, sensList, hasSens:!!w.sens,
@@ -3311,7 +3326,7 @@ class Component extends DCLogic {
       sumSens:sensInfo?sensInfo.label:'—', sumSensColor:sensInfo?sensInfo.accent:'#8d887c', sumBonus:sensInfo?sensInfo.bonus:'—', sumRef:sensInfo?sensInfo.ref:'—', sumManifest:w.manifest||(isHumano?'—':'(não informado)'), sumIsHumano:isHumano,
       sumAttrs, sumSkills, sumHasSkills:sumSkills.length>0, sumWeak:sumWeakFull, sumHasWeak:sumWeakFull.length>0, sumHistory:w.history||'(sem histórico escrito)', sumHasHistory:!!w.history, narrative,
       scene:s.scene, self:selfV, selfSens, selfAttr, selfSkill, selfWeak,
-      pending:s.pending, pendingAttr:this.attrLabel(s.pending.attrKey), pendingSkill:this.skillLabel(s.pending.skillKey), pendingDice:(selfV.attrs[s.pending.attrKey]||1),
+      pending:s.pending, pendingAttr:s.pending?this.attrLabel(s.pending.attrKey):'', pendingSkill:s.pending?this.skillLabel(s.pending.skillKey):'', pendingDice:s.pending?(selfV.attrs[s.pending.attrKey]||1):1,
       rollPlayer:()=>this.rollPlayer(), pRolling:s.pRolling, pRollTemp:s.pRollTemp?s.pRollTemp.map(d=>({d})):null, pRoll:decorate(s.pRoll), hasPRoll:!!s.pRoll, noPRoll:(!s.pRoll&&!s.pRolling),
       npcsKnown:npcs.filter(n=>n.known), cluesFound:cluesFoundV
     };
