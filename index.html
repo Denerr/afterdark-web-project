@@ -2378,7 +2378,7 @@ class Component extends DCLogic {
       this.setState({players:data.map(m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:m.char_data&&m.char_data.sens||null,wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)}))});
     };
     poll();
-    this._mpoll=setInterval(poll,5000);
+    this._mpoll=setInterval(poll,2000);
   }
   _startPlayerPolling(tableId){
     clearInterval(this._ppoll);
@@ -2390,7 +2390,7 @@ class Component extends DCLogic {
       this.setState({players:data.map(m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:m.char_data&&m.char_data.sens||null,wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)}))});
     };
     poll();
-    this._ppoll=setInterval(poll,5000);
+    this._ppoll=setInterval(poll,2000);
   }
   async _loadUserData(){
     if(!this.sb) return;
