@@ -2375,7 +2375,8 @@ class Component extends DCLogic {
       if(!t||!t.id) return;
       const {data}=await this.sb.from('table_members').select('*').eq('table_id',t.id).order('joined_at',{ascending:true});
       if(!data) return;
-      this.setState({players:data.map(m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:m.char_data&&m.char_data.sens||null,wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)}))});
+      const mapMember=m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:(m.char_data&&m.char_data.sens)||null,attrs:(m.char_data&&m.char_data.attrs)||{},skills:(m.char_data&&m.char_data.skills)||{},wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)});
+      this.setState({players:data.map(mapMember)});
     };
     poll();
     this._mpoll=setInterval(poll,2000);
@@ -2387,7 +2388,8 @@ class Component extends DCLogic {
       if(!this.sb) return;
       const {data}=await this.sb.from('table_members').select('*').eq('table_id',tableId).order('joined_at',{ascending:true});
       if(!data) return;
-      this.setState({players:data.map(m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:m.char_data&&m.char_data.sens||null,wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)}))});
+      const mapMember=m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:(m.char_data&&m.char_data.sens)||null,attrs:(m.char_data&&m.char_data.attrs)||{},skills:(m.char_data&&m.char_data.skills)||{},wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)});
+      this.setState({players:data.map(mapMember)});
     };
     poll();
     this._ppoll=setInterval(poll,2000);
@@ -2745,7 +2747,7 @@ class Component extends DCLogic {
   }
   rollMaster(){
     const s=this.state, td=s.testDraft;
-    const p=s.players.find(x=>x.id===td.playerId)||s.players[1];
+    const p=s.players.find(x=>x.id===td.playerId)||s.players[1]||{attrs:{},skills:{},char:'?'};
     if(s.testMode==='combate'){
       const av=(p.attrs[td.combatAttr]||1), b=(p.skills[td.combatSkill]||0);
       const wpn=s.library.weapons.find(w=>w.id===td.weaponId)||{bonus:0,dano:0,name:'Desarmado'};
@@ -3011,7 +3013,7 @@ class Component extends DCLogic {
     const clues=s.clues.map(k=>({...k, sColor:clueColor[k.status]||'#7e7a70'}));
 
     const selfV=s.self; const selfSens=this.SENS[selfV.sens];
-    const selfAttr=this.ATTRS.map(a=>({...a, val:selfV.attrs[a.key]||0}));
+    const selfAttr=this.ATTRS.map(a=>({...a, val:(selfV.attrs&&selfV.attrs[a.key])||0}));
     const selfSkill=this.SKILLS.filter(a=>selfV.skills[a.key]).map(a=>({...a, val:selfV.skills[a.key]}));
     const selfWeak=selfV.weaknesses.map(x=>({txt:x}));
     const selfStress=s.stressBars.filter(b=>b.playerId===selfId).map(b=>this.stressView(b));
@@ -3027,7 +3029,7 @@ class Component extends DCLogic {
     const diffOptions=diffs.map(d=>({v:d.v, l:d.l, sel:s.testDraft.difficulty===d.v, onClick:()=>this.setState(st=>({testDraft:{...st.testDraft,difficulty:d.v,[diffKey]:d.v}})), bg:s.testDraft.difficulty===d.v?'#c6a35e':'#0e0d12', border:s.testDraft.difficulty===d.v?'#c6a35e':'rgba(255,255,255,.1)', col:s.testDraft.difficulty===d.v?'#0b0b10':'#cfc7b4' }));
     const selWeapon=s.library.weapons.find(w=>w.id===s.testDraft.weaponId)||s.library.weapons[0]||{name:'Desarmado',bonus:0,dano:0,alcance:'—',ruido:'—'};
     const combatWeapons=s.library.weapons.map(w=>({...w, sel:s.testDraft.weaponId===w.id, onClick:()=>this.setDraft('weaponId',w.id), bonusLabel:(w.bonus>=0?'+':'')+w.bonus, bg:s.testDraft.weaponId===w.id?'rgba(196,30,58,.14)':'#0e0d12', border:s.testDraft.weaponId===w.id?'#c41e3a':'rgba(255,255,255,.1)', nameCol:s.testDraft.weaponId===w.id?'#efe8d8':'#cdc6b6'}));
-    const draftPlayer=s.players.find(p=>p.id===s.testDraft.playerId)||s.players[1]||{attrs:{},skills:{}};
+    const draftPlayer=s.players.find(p=>p.id===s.testDraft.playerId)||s.players[1]||{attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},char:'?'};
     const dPattr=draftPlayer.attrs[isCombat?s.testDraft.combatAttr:s.testDraft.attrKey]||1;
     const dPskill=draftPlayer.skills[isCombat?s.testDraft.combatSkill:s.testDraft.skillKey]||0;
     const combatTotalLine=`1d10 + ${dPattr} (atr) + ${dPskill} (perícia) + ${selWeapon.bonus} (arma)`;
