@@ -261,7 +261,7 @@
         <span style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">Criar personagem</span>
         <span style="font-size:12px;color:#8d887c">Ficha guiada em 7 etapas</span>
       </div>
-      <sc-for list="{{ charactersView }}" as="c" hint-placeholder-count="3">
+      <sc-for list="{{ charactersView }}" as="c">
         <div onClick="{{ c.onOpen }}" style="border-radius:10px;overflow:hidden;border:1px solid {{ c.border }};background:#13121a;display:flex;flex-direction:column;cursor:pointer;transition:.22s" style-hover="border-color:rgba(224,193,121,.55);transform:translateY(-3px);box-shadow:0 14px 36px rgba(0,0,0,.4)">
           <div style="height:84px;position:relative;background:radial-gradient(120% 120% at 30% 0%, {{ c.surf }}, #0c0a10);display:flex;align-items:flex-end;padding:12px 14px">
             <div style="position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background: {{ c.avatarBg }};border:1.5px solid {{ c.acc }};display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8">{{ c.avatarInitial }}</div>
@@ -562,9 +562,9 @@
     <div style="flex:1;min-width:280px;background:rgba(20,18,24,.65);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:26px">
       <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:18px">Convite</div>
       <div style="font-size:11px;color:#8d887c;margin-bottom:6px;letter-spacing:.1em;text-transform:uppercase">Código</div>
-      <div style="font-family:'Space Mono';font-weight:700;font-size:30px;letter-spacing:.18em;color:#e0c179;margin-bottom:20px">SV-7K92</div>
+      <div style="font-family:'Space Mono';font-weight:700;font-size:30px;letter-spacing:.18em;color:#e0c179;margin-bottom:20px">{{ tableCode }}</div>
       <div style="display:flex;gap:10px;margin-bottom:14px">
-        <div style="flex:1;font-family:'Space Mono';font-size:12px;color:#a39e90;background:#0e0d12;border:1px solid rgba(255,255,255,.08);border-radius:3px;padding:11px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">afterdark.app/j/SV-7K92</div>
+        <div style="flex:1;font-family:'Space Mono';font-size:12px;color:#a39e90;background:#0e0d12;border:1px solid rgba(255,255,255,.08);border-radius:3px;padding:11px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ lobbyInviteLink }}</div>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:10px">
         <button onClick="{{ onCopyCode }}" style="flex:1;padding:9px;background: {{ copyCodeBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyCodeCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyCodeLabel }}</button>
@@ -585,7 +585,7 @@
         <div style="font-family:'Space Mono';font-size:13px;color:#e0c179">{{ readyCount }} prontos · {{ total }}/8</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <sc-for list="{{ players }}" as="p" hint-placeholder-count="4">
+        <sc-for list="{{ players }}" as="p">
           <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;background:#0f0e13;border:1px solid {{ p.rowBorder }};border-radius:5px">
             <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8;background: {{ p.avatarBg }};border:1.5px solid {{ p.acc }}">{{ p.avatarInitial }}</div>
             <div style="flex:1;min-width:0">
@@ -2205,7 +2205,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinTableId:null, joinTableName:'',
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinTableId:null, joinTableName:'', memberId:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -2245,7 +2245,7 @@ class Component extends DCLogic {
     scene:{local:'Salão de Leilões — Alta Vesper',clima:'Tensão aristocrática',desc:'Cristais pendem do teto como lâminas. O ar cheira a cera, perfume caro e algo metálico por baixo. Os convidados sorriem demais. No palco, um frasco lacrado aguarda o próximo lance.',npc:'Aurelian Voss',pistas:['Taça com resíduo']}
   };
 
-  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
+  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._initFromUrl(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
     this._pxHandler=(ev)=>{ if(this.state.screen!=='j_wizard'||this.state.wizStep!==2) return; const w=window.innerWidth||1, h=window.innerHeight||1; this._pxN={x:ev.clientX/w-0.5, y:ev.clientY/h-0.5}; if(this._pxRaf) return; this._pxRaf=requestAnimationFrame(()=>{ this._pxRaf=null; const n=this._pxN||{x:0,y:0}; document.querySelectorAll('[data-px]').forEach(el=>{ const d=parseFloat(el.getAttribute('data-px'))||0; el.style.transform=`translate3d(${(-n.x*d*30).toFixed(1)}px, ${(-n.y*d*30).toFixed(1)}px, 0)`; }); }); };
     window.addEventListener('mousemove',this._pxHandler,{passive:true});
   }
@@ -2288,6 +2288,27 @@ class Component extends DCLogic {
       return true;
     };
     if(!setup()){ let n=0; this._authIv=setInterval(()=>{ if(setup()||++n>200) clearInterval(this._authIv); },50); }
+  }
+  _initFromUrl(){
+    try{
+      const params=new URLSearchParams(window.location.search);
+      const code=params.get('code');
+      if(code){ window.history.replaceState({},'',window.location.pathname); this.setState({joinCode:code.toUpperCase(),role:'jogador'}); this.go('j_join'); }
+    }catch(e){}
+  }
+  _startMemberPolling(){
+    clearInterval(this._mpoll);
+    const poll=async()=>{
+      if(!this.sb) return;
+      const nm=this.sessionTitle();
+      const t=this.state.tables.find(x=>x.name===nm);
+      if(!t||!t.id) return;
+      const {data}=await this.sb.from('table_members').select('*').eq('table_id',t.id).order('joined_at',{ascending:true});
+      if(!data) return;
+      this.setState({players:data.map(m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:m.char_data&&m.char_data.sens||null,wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)}))});
+    };
+    poll();
+    this._mpoll=setInterval(poll,5000);
   }
   async _loadUserData(){
     if(!this.sb) return;
@@ -2423,6 +2444,8 @@ class Component extends DCLogic {
       this.setState({joinBusy:false});
       if(error||!data){ this.setState({joinError:'Código não encontrado. Verifique com seu Mestre.'}); return; }
       this.setState({joinTableId:data.id,joinTableName:data.name});
+      const {data:mbr}=await this.sb.from('table_members').insert({table_id:data.id,player_name:this.state.auth.name||'',user_id:this.state.auth.loggedIn?(await this.sb.auth.getUser()).data?.user?.id:null,status:'conectando'}).select('id').single();
+      if(mbr) this.setState({memberId:mbr.id});
     }
     this.go('j_name');
   }
@@ -2657,7 +2680,17 @@ class Component extends DCLogic {
   wizNext(){
     if(this.state.wizStep<7){ this.setState(s=>({wizStep:s.wizStep+1})); return; }
     if(this.state.wizReturn==='profile'){ this._finishCharWizard(); return; }
-    this.setState(s=>({screen:'j_intro',nav:[...s.nav,'j_wizard']}));
+    this._finishPlayerWizard();
+  }
+  async _finishPlayerWizard(){
+    const s=this.state, w=s.wiz;
+    const attrs={}; this.ATTRS.forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
+    const charName=w.charName||'Personagem';
+    const charData={name:charName,sens:w.sens||'humano',attrs,skills:{...w.skills},weaknesses:[...w.weaknesses]};
+    if(this.sb && s.memberId){
+      await this.sb.from('table_members').update({player_name:w.name||s.auth.name||'Jogador',char_name:charName,char_data:charData,status:'pronto'}).eq('id',s.memberId);
+    }
+    this.setState(st=>({screen:'j_intro',nav:[...st.nav,'j_wizard']}));
   }
   async _finishCharWizard(){
     const w=this.state.wiz;
@@ -3153,7 +3186,7 @@ class Component extends DCLogic {
       goMestre:()=>this.pickRole('mestre'), goJogador:()=>this.pickRole('jogador'),
       back:()=>this.back(), reset:()=>this.reset(),
       pickCap:()=>this.pickMode('capitulos'), pickOne:()=>this.pickMode('oneshots'),
-      toLobby:()=>{ this.saveCurrentTable(); this.go('m_lobby'); }, startSession:()=>{ this.saveCurrentTable(); this.go('m_session'); }, closeScene:()=>this.closeScene(),
+      toLobby:()=>{ this.saveCurrentTable().then(()=>{ this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>{ this._startMemberPolling(); this.saveCurrentTable(); this.go('m_session'); }, closeScene:()=>this.closeScene(),
       onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:'Salão de Leilões',acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:'As portas duplas se abrem. O Salão de Leilões respira ouro e ameaça. No palco, sob luz de recorte, o frasco lacrado de sangue aguarda — e cada par de olhos na sala já decidiu quanto está disposto a pagar.'}),
       onSceneNpc:()=>this.openScene({title:'NPC Revelado',sub:'Aurelian Voss',acc:'#c41e3a',surf:'#2e1117',glow:'rgba(196,30,58,.45)',text:'Ele atravessa o salão sem pressa, como quem já é dono de tudo. "Sangue antigo reconhece sangue antigo", diz — e o frio na sua nuca confirma o que você temia.'}),
       oneshotList, chaptersView, selChapter, sessTheme, sessName, centerBorder:'rgba(198,166,100,.18)',
@@ -3214,6 +3247,7 @@ class Component extends DCLogic {
       invOwned, noOwned:invOwned.length===0, emptyStuffMsg:s.invDivider==='armas'?'Você não carrega armas ainda.':'Você não carrega itens ainda.',
       invAvailable, noAvailable:invAvailable.length===0, noClues:cluesFoundV.length===0,
       players, readyCount, total:s.players.length, clocksAll, log:s.log, npcs, clues,
+      tableCode, lobbyInviteLink:`https://afterdark-rpg.netlify.app/?code=${tableCode}`,
       tools, ptabs,
       toolRoteiro:s.masterTool==='roteiro', roteiroChoosing:!rt.mode, roteiroIsPadrao:rt.mode==='padrao', roteiroIsProprio:rt.mode==='proprio',
       roteiroEvents, roteiroDoneCount, roteiroTotal, roteiroText:rt.text,
