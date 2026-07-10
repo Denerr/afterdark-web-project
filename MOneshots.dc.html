@@ -1,0 +1,34 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-faccoes.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
+<div style="max-width:1160px;margin:0 auto;padding:48px 28px 80px;animation:fadeUp .5s ease;position:relative">
+  <div style="text-align:center;margin-bottom:36px">
+    <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">Modo One-shot · Demos Oficiais</div>
+    <h2 style="font-family:'Cinzel';font-weight:700;font-size:32px;margin:0;color:#efe8d8">Três faces de Saint Vesper</h2>
+  </div>
+  <div style="display:flex;gap:22px;flex-wrap:wrap">
+    <sc-for list="{{ oneshotList }}" as="o" hint-placeholder-count="3">
+      <div onClick="{{ o.onClick }}" style="flex:1;min-width:300px;cursor:pointer;border-radius:6px;overflow:hidden;border:1px solid {{ o.borderCol }};background:#100e14;transition:.3s;box-shadow: {{ o.shadow }}" style-hover="transform:translateY(-4px)">
+        <div style="height:188px;position:relative;background:radial-gradient(90% 120% at 50% 0%, {{ o.surf }}, {{ o.bg }});display:flex;align-items:flex-end;padding:18px 20px">
+          <div style="position:absolute;inset:0;background-image:url('{{ o.cover }}');background-size:cover;background-position: {{ o.coverPos }};background-repeat:no-repeat"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(8,8,12,.12) 0%, rgba(8,8,12,0) 42%, rgba(16,14,20,.55) 78%, rgba(16,14,20,.92) 100%)"></div>
+          <div style="position:absolute;inset:0;background:radial-gradient(70% 60% at 70% 15%, {{ o.glow }}, transparent 72%);opacity:.35;mix-blend-mode:screen"></div>
+          <div style="position:absolute;top:16px;left:18px;width:42px;height:42px;border:1px solid {{ o.acc }};border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;color: {{ o.acc }};background:rgba(8,8,12,.5);backdrop-filter:blur(2px)">✦</div>
+          <span style="position:relative;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:20px;background:rgba(8,8,12,.55);border:1px solid {{ o.acc }};color: {{ o.acc }}">{{ o.tone }}</span>
+        </div>
+        <div style="padding:22px 22px 24px">
+          <div style="font-family:'Cinzel';font-weight:600;font-size:23px;color:#efe8d8;margin-bottom:4px">{{ o.title }}</div>
+          <div style="font-size:12px;letter-spacing:.06em;color: {{ o.acc }};margin-bottom:14px">{{ o.faction }}</div>
+          <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.5;color:#a39e90;margin:0 0 18px;min-height:76px">{{ o.summary }}</p>
+          <div style="display:flex;gap:16px;font-size:12px;color:#8d887c;margin-bottom:18px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
+            <span>◷ {{ o.dur }}</span><span>♟ {{ o.players }} jogadores</span><span>◈ {{ o.ready }} prontos</span>
+          </div>
+          <button onClick="{{ o.onCreate }}" style="width:100%;padding:13px;background: {{ o.btnBg }};color: {{ o.btnCol }};border:1px solid {{ o.acc }};border-radius:2px;font:600 12px/1 'Archivo';letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.25s" style-hover="filter:brightness(1.15)">Criar Lobby</button>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</div>
+</x-dc>

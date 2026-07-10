@@ -1,0 +1,64 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-mapa.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
+<div style="max-width:1120px;margin:0 auto;padding:44px 28px 80px;animation:fadeUp .5s ease;position:relative" style="--acc: {{ sessTheme.acc }}">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px">
+    <div>
+      <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:8px">Lobby da Sessão</div>
+      <h2 style="font-family:'Cinzel';font-weight:700;font-size:32px;margin:0;color:#efe8d8">{{ sessName }}</h2>
+      <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:17px;color:#a39e90;margin-top:4px">Modo One-shot · Aguardando o grupo</div>
+    </div>
+    <button onClick="{{ startSession }}" style="padding:15px 34px;background: {{ sessTheme.acc }};color:#0b0b10;border:none;border-radius:2px;font:700 12px/1 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:.25s;box-shadow:0 0 0 1px {{ sessTheme.acc }}" style-hover="filter:brightness(1.18);box-shadow:0 0 30px {{ sessTheme.glow }}">▸ Iniciar RPG</button>
+  </div>
+
+  <div style="display:flex;gap:24px;flex-wrap:wrap">
+    <!-- invite -->
+    <div style="flex:1;min-width:280px;background:rgba(20,18,24,.65);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:26px">
+      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:18px">Convite</div>
+      <div style="font-size:11px;color:#8d887c;margin-bottom:6px;letter-spacing:.1em;text-transform:uppercase">Código</div>
+      <div style="font-family:'Space Mono';font-weight:700;font-size:30px;letter-spacing:.18em;color:#e0c179;margin-bottom:20px">SV-7K92</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px">
+        <div style="flex:1;font-family:'Space Mono';font-size:12px;color:#a39e90;background:#0e0d12;border:1px solid rgba(255,255,255,.08);border-radius:3px;padding:11px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">afterdark.app/j/SV-7K92</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button onClick="{{ onCopyCode }}" style="flex:1;padding:9px;background: {{ copyCodeBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyCodeCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyCodeLabel }}</button>
+        <button onClick="{{ onCopyLink }}" style="flex:1;padding:9px;background: {{ copyLinkBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyLinkCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyLinkLabel }}</button>
+      </div>
+      <sc-if value="{{ lobbyCopiedMsg }}"><div style="font-size:11px;color:#7fae8f;letter-spacing:.04em;margin-bottom:14px;animation:fadeIn .3s ease">✓ {{ lobbyCopiedMsg }}</div></sc-if>
+      <div style="display:flex;gap:18px;align-items:center">
+        <div style="width:108px;height:108px;background:#0d0c11;border:1px solid rgba(198,166,100,.2);border-radius:5px;padding:9px;display:grid;grid-template-columns:repeat(21,1fr);gap:0">
+          <sc-for list="{{ qr }}" as="q" hint-placeholder-count="441"><div style="width:100%;padding-bottom:100%;background: {{ q.cell }}"></div></sc-for>
+        </div>
+        <div style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;line-height:1.5">Aponte a câmera<br>para entrar pelo<br>celular.</div>
+      </div>
+    </div>
+    <!-- players -->
+    <div style="flex:2;min-width:340px;background:rgba(20,18,24,.65);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:26px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c">Jogadores conectados</div>
+        <div style="font-family:'Space Mono';font-size:13px;color:#e0c179">{{ readyCount }} prontos · {{ total }}/8</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <sc-for list="{{ players }}" as="p" hint-placeholder-count="4">
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;background:#0f0e13;border:1px solid {{ p.rowBorder }};border-radius:5px">
+            <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8;background: {{ p.avatarBg }};border:1.5px solid {{ p.acc }}">{{ p.avatarInitial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:15px;color:#e9e3d4;font-weight:500">{{ p.char }} <span style="color:#7e7a70;font-style:italic;font-family:'Cormorant Garamond';font-size:15px">· {{ p.player }}</span></div>
+              <div style="font-size:12px;color: {{ p.cColor }};letter-spacing:.04em">{{ p.sLabel }}</div>
+            </div>
+            <sc-if value="{{ p.ready }}"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7fae8f;padding:5px 12px;border:1px solid rgba(127,174,143,.4);border-radius:20px">✓ Pronto</span></sc-if>
+            <sc-if value="{{ p.notReady }}"><button onClick="{{ p.onApprove }}" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfc7b4;padding:6px 13px;border:1px solid rgba(198,166,100,.35);border-radius:20px;background:transparent;cursor:pointer" style-hover="border-color:rgba(198,166,100,.7)">Aprovar</button></sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
+        <span style="font-size:11px;color:#7e7a70;padding:6px 12px;border:1px solid rgba(255,255,255,.07);border-radius:20px">Permitir personagens prontos</span>
+        <span style="font-size:11px;color:#7e7a70;padding:6px 12px;border:1px solid rgba(255,255,255,.07);border-radius:20px">Rolagens públicas</span>
+        <span style="font-size:11px;color:#7e7a70;padding:6px 12px;border:1px solid rgba(255,255,255,.07);border-radius:20px">Tom: Sombrio</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</x-dc>

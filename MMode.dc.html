@@ -1,0 +1,37 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-faccoes.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
+<div style="max-width:980px;margin:0 auto;padding:60px 28px 80px;animation:fadeUp .5s ease;position:relative">
+  <div style="text-align:center;margin-bottom:48px">
+    <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:14px">Criar Sessão · RPG Afterdark</div>
+    <h2 style="font-family:'Cinzel';font-weight:700;font-size:38px;margin:0;color:#efe8d8">Escolha o modo da sessão</h2>
+    <p style="font-family:'Cormorant Garamond';font-size:19px;color:#a39e90;margin:14px auto 0;max-width:520px">A história de Saint Vesper segue um fio condutor — você decide se conduz uma campanha em capítulos ou uma noite fechada.</p>
+  </div>
+  <div style="display:flex;gap:24px;flex-wrap:wrap">
+    <div onClick="{{ pickCap }}" style="flex:1;min-width:300px;cursor:pointer;background:linear-gradient(180deg,rgba(28,24,18,.7),rgba(16,15,18,.7));border:1px solid rgba(198,166,100,.28);border-radius:5px;padding:38px 34px;transition:.3s" style-hover="border-color:rgba(224,193,121,.65);box-shadow:0 16px 44px rgba(0,0,0,.5),0 0 36px rgba(198,163,94,.1);transform:translateY(-3px)">
+      <div style="font-family:'Cinzel';font-weight:700;font-size:14px;letter-spacing:.16em;color:#e0c179;margin-bottom:18px">CAPÍTULOS</div>
+      <div style="font-family:'Cinzel';font-weight:600;font-size:27px;color:#efe8d8;margin-bottom:12px">Campanha contínua</div>
+      <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.55;color:#a39e90;margin:0 0 26px">Uma narrativa em arcos: cinco capítulos que evoluem personagens, relógios e facções ao longo das sessões.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
+        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px;color:#cfc7b4">5 capítulos</span>
+        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px;color:#cfc7b4">Progressão</span>
+        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px;color:#cfc7b4">Persistente</span>
+      </div>
+      <span style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#e0c179">Ver capítulos →</span>
+    </div>
+    <div onClick="{{ pickOne }}" style="flex:1;min-width:300px;cursor:pointer;background:linear-gradient(180deg,rgba(34,16,22,.6),rgba(16,15,18,.7));border:1px solid rgba(196,30,58,.3);border-radius:5px;padding:38px 34px;transition:.3s" style-hover="border-color:rgba(196,30,58,.65);box-shadow:0 16px 44px rgba(0,0,0,.5),0 0 36px rgba(196,30,58,.12);transform:translateY(-3px)">
+      <div style="font-family:'Cinzel';font-weight:700;font-size:14px;letter-spacing:.16em;color:#e07a8a;margin-bottom:18px">ONE-SHOT</div>
+      <div style="font-family:'Cinzel';font-weight:600;font-size:27px;color:#efe8d8;margin-bottom:12px">Uma noite fechada</div>
+      <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.55;color:#a39e90;margin:0 0 26px">Três aventuras-demo prontas, cada uma com a face de uma facção: Demônios, Vampiros e Lobisomens.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
+        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(196,30,58,.3);border-radius:20px;color:#cfc7b4">3 demos</span>
+        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(196,30,58,.3);border-radius:20px;color:#cfc7b4">Sessão única</span>
+        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(196,30,58,.3);border-radius:20px;color:#cfc7b4">Pronto p/ jogar</span>
+      </div>
+      <span style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#e07a8a">Ver one-shots →</span>
+    </div>
+  </div>
+</div>
+</div>
+</x-dc>

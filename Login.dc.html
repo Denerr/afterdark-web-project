@@ -1,0 +1,27 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:400px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:16px;padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
+    <div style="text-align:center;margin-bottom:26px">
+      <div style="width:52px;height:52px;border:1.5px solid rgba(198,166,100,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:'Cinzel';font-weight:800;font-size:23px;color:#e0c179">A</div>
+      <h2 style="font-family:'Cinzel';font-weight:700;font-size:24px;margin:0;color:#efe8d8">Entrar</h2>
+      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Bem-vindo de volta a Saint Vesper</p>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div>
+        <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Email</label>
+        <input value="{{ login.email }}" onInput="{{ onLoginEmail }}" placeholder="voce@email.com" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
+      </div>
+      <div>
+        <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Senha</label>
+        <input type="password" value="{{ login.pass }}" onInput="{{ onLoginPass }}" placeholder="••••••" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
+      </div>
+      <div style="text-align:right"><span onClick="{{ goForgot }}" style="font-size:13px;color:#a39e90;cursor:pointer" style-hover="color:#e0c179">Esqueci minha senha</span></div>
+      <sc-if value="{{ loginError }}"><div style="font-size:13px;color:#e08a8a;font-family:'Cormorant Garamond';font-style:italic">{{ loginError }}</div></sc-if>
+      <button onClick="{{ submitLogin }}" disabled="{{ authBusy }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">{{ loginBtnLabel }}</button>
+    </div>
+    <div style="text-align:center;margin-top:18px;font-size:13px;color:#8d887c">Não possui cadastro? <span onClick="{{ goRegister }}" style="color:#e0c179;cursor:pointer;text-decoration:underline">Cadastre-se</span></div>
+  </div>
+</div>
+</x-dc>

@@ -1,0 +1,19 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:30px 18px;animation:fadeIn .6s ease">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.42);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:440px;border-radius:14px;overflow:hidden;border:1px solid rgba(196,30,58,.3);box-shadow:0 30px 80px rgba(0,0,0,.6)">
+    <div style="height:220px;position:relative;background:radial-gradient(90% 110% at 50% 0%, #2e1117, #16080b)">
+      <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 20%, rgba(196,30,58,.3), transparent 70%)"></div>
+      <div style="position:absolute;left:0;right:0;bottom:0;padding:24px;background:linear-gradient(180deg,transparent,rgba(10,6,8,.9))">
+        <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#c44a5e;margin-bottom:8px">One-shot · A Última Gota</div>
+        <h2 style="font-family:'Cinzel';font-weight:700;font-size:30px;margin:0;color:#efe8d8;line-height:1.1">A Última Gota</h2>
+      </div>
+    </div>
+    <div style="background:#100c0e;padding:26px 26px 30px">
+      <p style="font-family:'Cormorant Garamond';font-size:19px;line-height:1.6;color:#cdc6b6;margin:0 0 22px">A noite cai sobre Alta Vesper. Um banco aristocrático guarda mais que ouro — e o sangue que circula por seus cofres começou a faltar. Você foi chamado porque percebe o que os outros não veem. Hoje, alguém vai pagar a última gota.</p>
+      <button onClick="{{ toPanel }}" style="width:100%;padding:15px;background:#c41e3a;color:#fff;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#d6324c;box-shadow:0 0 28px rgba(196,30,58,.4)">Continuar →</button>
+    </div>
+  </div>
+</div>
+</x-dc>

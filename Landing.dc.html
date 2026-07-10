@@ -1,0 +1,25 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;padding:60px 24px 72px;background:#07080c">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-skyline.png');background-size:cover;background-position:center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,8,12,.55) 0%, rgba(7,8,12,.25) 38%, rgba(7,8,12,.72) 78%, rgba(7,8,12,.94) 100%)"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(70% 50% at 50% 85%, rgba(196,30,58,.1), transparent 70%);pointer-events:none"></div>
+  <div style="position:relative;display:flex;flex-direction:column;align-items:center">
+  <div style="width:84px;height:84px;border:1.5px solid rgba(198,166,100,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:28px;position:relative;animation:glowPulse 5s ease-in-out infinite;background:rgba(8,8,12,.45);backdrop-filter:blur(2px)">
+    <div style="position:absolute;inset:-8px;border:1px solid rgba(198,166,100,.2);border-radius:50%"></div>
+    <span style="font-family:'Cinzel';font-weight:800;font-size:38px;color:#e0c179">A</span>
+  </div>
+  <h1 style="font-family:'Cinzel';font-weight:800;font-size:clamp(42px,8vw,84px);letter-spacing:.18em;margin:0;color:#efe8d8;line-height:1;text-shadow:0 4px 30px rgba(0,0,0,.7),0 2px 8px rgba(0,0,0,.9)">AFTERDARK</h1>
+  <div style="display:flex;align-items:center;gap:18px;margin:22px 0 8px">
+    <div style="width:54px;height:1px;background:linear-gradient(90deg,transparent,rgba(198,166,100,.6))"></div>
+    <span style="font-family:'Cormorant Garamond';font-style:italic;font-size:21px;color:#d8d1c2;text-shadow:0 2px 12px rgba(0,0,0,.8)">Entre sombras, sangue e segredos.</span>
+    <div style="width:54px;height:1px;background:linear-gradient(90deg,rgba(198,166,100,.6),transparent)"></div>
+  </div>
+  <p style="font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:#9a9488;margin:6px 0 40px;text-shadow:0 2px 10px rgba(0,0,0,.8)">Saint Vesper · Jogue direto no navegador</p>
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
+    <button onClick="{{ goRoleSelect }}" style="padding:16px 34px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.5)" style-hover="background:#e0c179;box-shadow:0 0 30px rgba(214,193,121,.35)">Entrar na Mesa</button>
+    <button onClick="{{ goJogador }}" style="padding:16px 34px;background:rgba(12,11,17,.55);backdrop-filter:blur(3px);color:#e0c179;border:1px solid rgba(198,166,100,.5);border-radius:3px;font:600 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.9);background:rgba(12,11,17,.7)">Tenho um código</button>
+  </div>
+  <p style="position:relative;margin:24px 0 0;font-size:13px;color:#8d887c;text-shadow:0 2px 10px rgba(0,0,0,.8)">Sem instalar nada, sem custo — abra o link e jogue. <span onClick="{{ goRegister }}" style="color:#e0c179;cursor:pointer;text-decoration:underline">Criar conta</span> é opcional, só para salvar suas mesas.</p>
+  </div>
+</div>
+</x-dc>

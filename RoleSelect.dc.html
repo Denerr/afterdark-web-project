@@ -1,0 +1,70 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;background:#07080c">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-faccoes.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.30);pointer-events:none"></div>
+  <div style="position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 30%, rgba(198,163,94,.07), transparent 70%);pointer-events:none"></div>
+
+  <!-- direction toggle -->
+  <div style="position:absolute;top:24px;right:24px;z-index:5;display:flex;gap:6px;align-items:center">
+    <span style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#6f6b61;margin-right:4px">Direção</span>
+    <button onClick="{{ setHomeA }}" style="width:34px;height:30px;border-radius:2px;font:600 12px 'Archivo';cursor:pointer;background: {{ homeAbg }};color: {{ homeAcol }};border:1px solid rgba(198,166,100,.35)">A</button>
+    <button onClick="{{ setHomeB }}" style="width:34px;height:30px;border-radius:2px;font:600 12px 'Archivo';cursor:pointer;background: {{ homeBbg }};color: {{ homeBcol }};border:1px solid rgba(198,166,100,.35)">B</button>
+  </div>
+
+  <!-- DIRECTION A : centered emblem -->
+  <sc-if value="{{ homeA }}">
+  <div style="min-height:calc(100vh - 54px);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;animation:fadeIn .6s ease">
+    <div style="width:88px;height:88px;border:1.5px solid rgba(198,166,100,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:34px;position:relative;animation:glowPulse 5s ease-in-out infinite">
+      <div style="position:absolute;inset:-8px;border:1px solid rgba(198,166,100,.18);border-radius:50%"></div>
+      <span style="font-family:'Cinzel';font-weight:800;font-size:38px;color:#e0c179">A</span>
+    </div>
+    <h1 style="font-family:'Cinzel';font-weight:800;font-size:clamp(40px,8vw,82px);letter-spacing:.18em;margin:0;color:#efe8d8;line-height:1">AFTERDARK</h1>
+    <div style="display:flex;align-items:center;gap:18px;margin:22px 0 6px">
+      <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(198,166,100,.6))"></div>
+      <span style="font-family:'Cormorant Garamond';font-style:italic;font-size:20px;color:#b9b2a2;letter-spacing:.04em">Entre sombras, sangue e segredos.</span>
+      <div style="width:60px;height:1px;background:linear-gradient(90deg,rgba(198,166,100,.6),transparent)"></div>
+    </div>
+    <p style="font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:#6f6b61;margin:6px 0 48px">Saint Vesper · Jogue direto no navegador</p>
+
+    <div style="display:flex;gap:22px;flex-wrap:wrap;justify-content:center;max-width:720px;width:100%">
+      <div onClick="{{ goMestre }}" style="flex:1;min-width:260px;cursor:pointer;background:linear-gradient(180deg,rgba(34,28,20,.7),rgba(18,16,20,.6));border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:34px 28px;text-align:left;transition:.3s" style-hover="border-color:rgba(224,193,121,.7);box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 40px rgba(198,163,94,.12);transform:translateY(-3px)">
+        <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#c6a35e;margin-bottom:14px">O Mestre</div>
+        <div style="font-family:'Cinzel';font-weight:600;font-size:25px;color:#efe8d8;margin-bottom:10px">Conduzir a noite</div>
+        <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.5;color:#a39e90;margin:0 0 20px">Criar sessões, mover relógios, revelar NPCs e segurar os segredos de Saint Vesper.</p>
+        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#e0c179">Entrar como Mestre →</span>
+      </div>
+      <div onClick="{{ goJogador }}" style="flex:1;min-width:260px;cursor:pointer;background:linear-gradient(180deg,rgba(40,16,22,.6),rgba(18,16,20,.6));border:1px solid rgba(196,30,58,.3);border-radius:4px;padding:34px 28px;text-align:left;transition:.3s" style-hover="border-color:rgba(196,30,58,.7);box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 40px rgba(196,30,58,.14);transform:translateY(-3px)">
+        <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#c44a5e;margin-bottom:14px">O Jogador</div>
+        <div style="font-family:'Cinzel';font-weight:600;font-size:25px;color:#efe8d8;margin-bottom:10px">Viver um sensitivo</div>
+        <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.5;color:#a39e90;margin:0 0 20px">Entrar com um código, criar sua ficha e investigar o sobrenatural pele a pele.</p>
+        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#e07a8a">Entrar como Jogador →</span>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- DIRECTION B : split screen -->
+  <sc-if value="{{ homeB }}">
+  <div style="min-height:calc(100vh - 54px);position:relative;display:flex;flex-direction:column;animation:fadeIn .6s ease">
+    <div style="text-align:center;padding:48px 24px 28px">
+      <h1 style="font-family:'Cinzel';font-weight:800;font-size:clamp(36px,7vw,68px);letter-spacing:.2em;margin:0;color:#efe8d8">AFTERDARK</h1>
+      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:18px;color:#b9b2a2;margin:10px 0 0">Entre sombras, sangue e segredos.</p>
+    </div>
+    <div style="flex:1;display:flex;min-height:440px;flex-wrap:wrap">
+      <div onClick="{{ goMestre }}" style="flex:1;min-width:300px;cursor:pointer;position:relative;overflow:hidden;background:radial-gradient(80% 70% at 50% 100%, rgba(60,48,28,.5), #0d0c0e);border-right:1px solid rgba(198,166,100,.2);display:flex;flex-direction:column;justify-content:flex-end;padding:48px 40px;transition:.4s" style-hover="background:radial-gradient(80% 80% at 50% 100%, rgba(80,64,36,.6), #100e0f)">
+        <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:16px">Mesa do Mestre</div>
+        <div style="font-family:'Cinzel';font-weight:700;font-size:34px;color:#efe8d8;line-height:1.1;margin-bottom:14px">Conduzir<br>Saint Vesper</div>
+        <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.5;color:#a39e90;max-width:340px;margin:0 0 22px">Bastidores, relógios ocultos, NPCs por revelar — controle total da noite.</p>
+        <span style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#e0c179">Entrar como Mestre →</span>
+      </div>
+      <div onClick="{{ goJogador }}" style="flex:1;min-width:300px;cursor:pointer;position:relative;overflow:hidden;background:radial-gradient(80% 70% at 50% 100%, rgba(70,18,28,.55), #0c0a0c);display:flex;flex-direction:column;justify-content:flex-end;padding:48px 40px;transition:.4s" style-hover="background:radial-gradient(80% 80% at 50% 100%, rgba(96,24,38,.65), #100a0c)">
+        <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c44a5e;margin-bottom:16px">Mesa do Jogador</div>
+        <div style="font-family:'Cinzel';font-weight:700;font-size:34px;color:#efe8d8;line-height:1.1;margin-bottom:14px">Viver entre<br>os monstros</div>
+        <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.5;color:#a39e90;max-width:340px;margin:0 0 22px">Uma ficha, uma cena, um teste por vez. Imersão pura na sombra.</p>
+        <span style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#e07a8a">Entrar como Jogador →</span>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+</div>
+</x-dc>

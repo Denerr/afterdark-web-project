@@ -104,109 +104,17 @@
 
 <!-- ========================= LANDING (deslogado) ========================= -->
 <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}" data-screen-label="Landing">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;text-align:center;padding:60px 24px 72px;background:#07080c">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-skyline.png');background-size:cover;background-position:center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(7,8,12,.55) 0%, rgba(7,8,12,.25) 38%, rgba(7,8,12,.72) 78%, rgba(7,8,12,.94) 100%)"></div>
-  <div style="position:absolute;inset:0;background:radial-gradient(70% 50% at 50% 85%, rgba(196,30,58,.1), transparent 70%);pointer-events:none"></div>
-  <div style="position:relative;display:flex;flex-direction:column;align-items:center">
-  <div style="width:84px;height:84px;border:1.5px solid rgba(198,166,100,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:28px;position:relative;animation:glowPulse 5s ease-in-out infinite;background:rgba(8,8,12,.45);backdrop-filter:blur(2px)">
-    <div style="position:absolute;inset:-8px;border:1px solid rgba(198,166,100,.2);border-radius:50%"></div>
-    <span style="font-family:'Cinzel';font-weight:800;font-size:38px;color:#e0c179">A</span>
-  </div>
-  <h1 style="font-family:'Cinzel';font-weight:800;font-size:clamp(42px,8vw,84px);letter-spacing:.18em;margin:0;color:#efe8d8;line-height:1;text-shadow:0 4px 30px rgba(0,0,0,.7),0 2px 8px rgba(0,0,0,.9)">AFTERDARK</h1>
-  <div style="display:flex;align-items:center;gap:18px;margin:22px 0 8px">
-    <div style="width:54px;height:1px;background:linear-gradient(90deg,transparent,rgba(198,166,100,.6))"></div>
-    <span style="font-family:'Cormorant Garamond';font-style:italic;font-size:21px;color:#d8d1c2;text-shadow:0 2px 12px rgba(0,0,0,.8)">Entre sombras, sangue e segredos.</span>
-    <div style="width:54px;height:1px;background:linear-gradient(90deg,rgba(198,166,100,.6),transparent)"></div>
-  </div>
-  <p style="font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:#9a9488;margin:6px 0 40px;text-shadow:0 2px 10px rgba(0,0,0,.8)">Saint Vesper · Jogue direto no navegador</p>
-  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
-    <button onClick="{{ goRoleSelect }}" style="padding:16px 34px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 30px rgba(0,0,0,.5)" style-hover="background:#e0c179;box-shadow:0 0 30px rgba(214,193,121,.35)">Entrar na Mesa</button>
-    <button onClick="{{ goJogador }}" style="padding:16px 34px;background:rgba(12,11,17,.55);backdrop-filter:blur(3px);color:#e0c179;border:1px solid rgba(198,166,100,.5);border-radius:3px;font:600 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.9);background:rgba(12,11,17,.7)">Tenho um código</button>
-  </div>
-  <p style="position:relative;margin:24px 0 0;font-size:13px;color:#8d887c;text-shadow:0 2px 10px rgba(0,0,0,.8)">Sem instalar nada, sem custo — abra o link e jogue. <span onClick="{{ goRegister }}" style="color:#e0c179;cursor:pointer;text-decoration:underline">Criar conta</span> é opcional, só para salvar suas mesas.</p>
-  </div>
-</div>
+<dc-import name="Landing" goRoleSelect="{{ goRoleSelect }}" goJogador="{{ goJogador }}" goRegister="{{ goRegister }}"/>
 </sc-if>
 
 <!-- ========================= CADASTRO ========================= -->
 <sc-if value="{{ isRegister }}" data-screen-label="Cadastro">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
-  <div style="position:relative;width:100%;max-width:420px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:16px;padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
-    <sc-if value="{{ regSent }}">
-      <div style="text-align:center">
-        <div style="width:52px;height:52px;border:1.5px solid rgba(127,174,143,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:#7fae8f">✓</div>
-        <h2 style="font-family:'Cinzel';font-weight:700;font-size:22px;margin:0;color:#efe8d8">Confirme seu email</h2>
-        <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:12px 0 0;line-height:1.5">Enviamos um link de confirmação para {{ reg.email }}. Clique nele para ativar seu cadastro e depois volte para entrar.</p>
-        <div style="text-align:center;margin-top:22px;font-size:13px;color:#8d887c"><span onClick="{{ goLogin }}" style="color:#e0c179;cursor:pointer;text-decoration:underline">← Voltar para o login</span></div>
-      </div>
-    </sc-if>
-    <sc-if value="{{ regFormVisible }}">
-    <div style="text-align:center;margin-bottom:26px">
-      <h2 style="font-family:'Cinzel';font-weight:700;font-size:26px;margin:0;color:#efe8d8">Criar Cadastro</h2>
-      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Sua entrada para Saint Vesper</p>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:13px">
-      <div>
-        <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Nome</label>
-        <input value="{{ reg.name }}" onInput="{{ onRegName }}" placeholder="Seu nome completo" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-      </div>
-      <div>
-        <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Email</label>
-        <input value="{{ reg.email }}" onInput="{{ onRegEmail }}" placeholder="voce@email.com" style="width:100%;background:#0d0c11;border:1px solid {{ regEmailBorder }};border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-      </div>
-      <div>
-        <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Celular</label>
-        <input value="{{ reg.phone }}" onInput="{{ onRegPhone }}" placeholder="(00) 00000-0000" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-      </div>
-      <div style="display:flex;gap:11px">
-        <div style="flex:1">
-          <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Senha</label>
-          <input type="password" value="{{ reg.pass }}" onInput="{{ onRegPass }}" placeholder="••••••" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-        </div>
-        <div style="flex:1">
-          <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Confirmar</label>
-          <input type="password" value="{{ reg.pass2 }}" onInput="{{ onRegPass2 }}" placeholder="••••••" style="width:100%;background:#0d0c11;border:1px solid {{ regPass2Border }};border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-        </div>
-      </div>
-      <sc-if value="{{ regError }}"><div style="font-size:13px;color:#e08a8a;font-family:'Cormorant Garamond';font-style:italic">{{ regErrorMsg }}</div></sc-if>
-      <button onClick="{{ submitRegister }}" disabled="{{ regDisabled }}" style="width:100%;margin-top:6px;padding:14px;background: {{ regBtnBg }};color: {{ regBtnCol }};border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor: {{ regCursor }}">{{ regBtnLabel }}</button>
-    </div>
-    <div style="text-align:center;margin-top:18px;font-size:13px;color:#8d887c">Já possui cadastro? <span onClick="{{ goLogin }}" style="color:#e0c179;cursor:pointer;text-decoration:underline">Entrar</span></div>
-    </sc-if>
-  </div>
-</div>
+<dc-import name="Cadastro" regSent="{{ regSent }}" reg="{{ reg }}" goLogin="{{ goLogin }}" regFormVisible="{{ regFormVisible }}" onRegName="{{ onRegName }}" onRegEmail="{{ onRegEmail }}" regEmailBorder="{{ regEmailBorder }}" onRegPhone="{{ onRegPhone }}" onRegPass="{{ onRegPass }}" onRegPass2="{{ onRegPass2 }}" regPass2Border="{{ regPass2Border }}" regError="{{ regError }}" regErrorMsg="{{ regErrorMsg }}" submitRegister="{{ submitRegister }}" regDisabled="{{ regDisabled }}" regBtnBg="{{ regBtnBg }}" regBtnCol="{{ regBtnCol }}" regCursor="{{ regCursor }}" regBtnLabel="{{ regBtnLabel }}"/>
 </sc-if>
 
 <!-- ========================= LOGIN ========================= -->
 <sc-if value="{{ isLogin }}" data-screen-label="Login">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
-  <div style="position:relative;width:100%;max-width:400px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:16px;padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
-    <div style="text-align:center;margin-bottom:26px">
-      <div style="width:52px;height:52px;border:1.5px solid rgba(198,166,100,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:'Cinzel';font-weight:800;font-size:23px;color:#e0c179">A</div>
-      <h2 style="font-family:'Cinzel';font-weight:700;font-size:24px;margin:0;color:#efe8d8">Entrar</h2>
-      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Bem-vindo de volta a Saint Vesper</p>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <div>
-        <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Email</label>
-        <input value="{{ login.email }}" onInput="{{ onLoginEmail }}" placeholder="voce@email.com" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-      </div>
-      <div>
-        <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Senha</label>
-        <input type="password" value="{{ login.pass }}" onInput="{{ onLoginPass }}" placeholder="••••••" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-      </div>
-      <div style="text-align:right"><span onClick="{{ goForgot }}" style="font-size:13px;color:#a39e90;cursor:pointer" style-hover="color:#e0c179">Esqueci minha senha</span></div>
-      <sc-if value="{{ loginError }}"><div style="font-size:13px;color:#e08a8a;font-family:'Cormorant Garamond';font-style:italic">{{ loginError }}</div></sc-if>
-      <button onClick="{{ submitLogin }}" disabled="{{ authBusy }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">{{ loginBtnLabel }}</button>
-    </div>
-    <div style="text-align:center;margin-top:18px;font-size:13px;color:#8d887c">Não possui cadastro? <span onClick="{{ goRegister }}" style="color:#e0c179;cursor:pointer;text-decoration:underline">Cadastre-se</span></div>
-  </div>
-</div>
+<dc-import name="Login" login="{{ login }}" onLoginEmail="{{ onLoginEmail }}" onLoginPass="{{ onLoginPass }}" goForgot="{{ goForgot }}" loginError="{{ loginError }}" submitLogin="{{ submitLogin }}" authBusy="{{ authBusy }}" loginBtnLabel="{{ loginBtnLabel }}" goRegister="{{ goRegister }}"/>
 </sc-if>
 
 <!-- ========================= ESQUECI SENHA ========================= -->
@@ -216,396 +124,47 @@
 
 <!-- ========================= CONTA NÃO CONECTADA (gate) ========================= -->
 <sc-if value="{{ isConnectGate }}" data-screen-label="Conta nao conectada">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 24px;animation:fadeUp .5s ease">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
-  <div style="position:relative;width:100%;max-width:440px;text-align:center">
-    <div style="width:66px;height:66px;border:1.5px solid rgba(198,166,100,.45);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:27px;color:#c6a35e">⚿</div>
-    <h2 style="font-family:'Cinzel';font-weight:700;font-size:27px;margin:0;color:#efe8d8">Conta não conectada</h2>
-    <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:18px;color:#a39e90;margin:12px auto 30px;max-width:360px">Deseja se conectar para ver {{ gateWhat }}?</p>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <button onClick="{{ goLogin }}" style="padding:14px 32px;background:transparent;color:#e0c179;border:1px solid rgba(198,166,100,.5);border-radius:3px;font:600 12px 'Archivo';letter-spacing:.14em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.9);background:rgba(198,163,94,.08)">Entrar</button>
-      <button onClick="{{ goRegister }}" style="padding:14px 32px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.14em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Cadastrar</button>
-    </div>
-    <p style="margin:26px 0 0;font-size:13px;color:#6f6b61">Ou <span onClick="{{ goHome }}" style="color:#cfc7b4;cursor:pointer;text-decoration:underline">volte para a Home</span> e jogue sem conta.</p>
-  </div>
-</div>
+<dc-import name="ConnectGate" gateWhat="{{ gateWhat }}" goLogin="{{ goLogin }}" goRegister="{{ goRegister }}" goHome="{{ goHome }}"/>
 </sc-if>
 
 <!-- ========================= PERFIL ========================= -->
 <sc-if value="{{ isProfile }}" data-screen-label="Perfil">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-mapa.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.50);pointer-events:none"></div>
-<div style="max-width:920px;margin:0 auto;padding:44px 24px 80px;animation:fadeUp .5s ease;position:relative">
-  <!-- welcome -->
-  <div style="position:relative;overflow:hidden;border-radius:12px;border:1px solid rgba(198,166,100,.22);background:radial-gradient(100% 140% at 0% 0%, rgba(60,48,28,.4), #13121a 60%);padding:30px 32px;margin-bottom:28px">
-    <div style="position:absolute;top:-30px;right:-10px;font-family:'Cinzel';font-weight:800;font-size:140px;color:rgba(198,166,100,.06);line-height:1">A</div>
-    <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">Bem-vindo de volta</div>
-    <h1 style="font-family:'Cinzel';font-weight:700;font-size:34px;margin:0;color:#efe8d8">{{ userName }}</h1>
-    <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:19px;color:#b9b2a2;margin:8px 0 20px;max-width:480px">As sombras de Saint Vesper aguardam. Reúna seus sensitivos, conduza suas mesas — ou comece uma nova noite.</p>
-    <button onClick="{{ goStart }}" style="padding:13px 28px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 11px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">▸ Iniciar nova aventura</button>
-  </div>
-
-  <!-- tabs -->
-  <div style="display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)">
-    <button onClick="{{ onProfilePers }}" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid {{ tabPersUnder }};color: {{ tabPersCol }};font:600 13px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:-1px">Personagens <span style="font-family:'Space Mono';opacity:.7">{{ charCount }}</span></button>
-    <button onClick="{{ onProfileMesas }}" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid {{ tabMesasUnder }};color: {{ tabMesasCol }};font:600 13px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:-1px">Mesas <span style="font-family:'Space Mono';opacity:.7">{{ tableCount }}</span></button>
-  </div>
-
-  <!-- PERSONAGENS -->
-  <sc-if value="{{ profilePers }}">
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
-      <div onClick="{{ createCharProfile }}" style="cursor:pointer;min-height:172px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:1.5px dashed rgba(198,166,100,.35);border-radius:10px;background:rgba(198,163,94,.03);transition:.25s" style-hover="border-color:rgba(224,193,121,.7);background:rgba(198,163,94,.07)">
-        <div style="width:46px;height:46px;border-radius:50%;border:1.5px solid #c6a35e;display:flex;align-items:center;justify-content:center;font-size:24px;color:#e0c179">+</div>
-        <span style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">Criar personagem</span>
-        <span style="font-size:12px;color:#8d887c">Ficha guiada em 7 etapas</span>
-      </div>
-      <sc-for list="{{ charactersView }}" as="c" hint-placeholder-count="3">
-        <div onClick="{{ c.onOpen }}" style="border-radius:10px;overflow:hidden;border:1px solid {{ c.border }};background:#13121a;display:flex;flex-direction:column;cursor:pointer;transition:.22s" style-hover="border-color:rgba(224,193,121,.55);transform:translateY(-3px);box-shadow:0 14px 36px rgba(0,0,0,.4)">
-          <div style="height:84px;position:relative;background:radial-gradient(120% 120% at 30% 0%, {{ c.surf }}, #0c0a10);display:flex;align-items:flex-end;padding:12px 14px">
-            <div style="position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background: {{ c.avatarBg }};border:1.5px solid {{ c.acc }};display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8">{{ c.avatarInitial }}</div>
-            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color: {{ c.acc }};padding:4px 9px;border:1px solid {{ c.acc }}55;border-radius:12px;background:rgba(8,8,12,.5)">{{ c.sensLabel }}</span>
-          </div>
-          <div style="padding:14px 16px 16px;flex:1;display:flex;flex-direction:column">
-            <div style="font-family:'Cinzel';font-weight:600;font-size:19px;color:#efe8d8">{{ c.name }}</div>
-            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90;margin-bottom:12px">{{ c.role }}</div>
-            <div style="flex:1"></div>
-            <sc-if value="{{ c.inUse }}">
-              <div style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:rgba(198,163,94,.08);border:1px solid rgba(198,166,100,.25);border-radius:6px">
-                <span style="width:7px;height:7px;border-radius:50%;background:#7fae8f;box-shadow:0 0 8px rgba(127,174,143,.6)"></span>
-                <span style="font-size:12px;color:#cdc6b6">Utilizando em: <span style="color:#e0c179">{{ c.usedIn }}</span></span>
-              </div>
-            </sc-if>
-            <sc-if value="{{ c.free }}">
-              <div style="font-size:12px;color:#7e7a70;font-family:'Cormorant Garamond';font-style:italic;padding:8px 0">Disponível · não está em nenhuma mesa</div>
-            </sc-if>
-          </div>
-        </div>
-      </sc-for>
-    </div>
-  </sc-if>
-
-  <!-- MESAS -->
-  <sc-if value="{{ profileMesas }}">
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <sc-for list="{{ tablesView }}" as="t" hint-placeholder-count="3">
-        <div onClick="{{ t.onOpen }}" style="cursor:pointer;display:flex;align-items:center;gap:18px;border-radius:10px;border:1px solid {{ t.border }};border-left:3px solid {{ t.acc }};background:#13121a;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(198,166,100,.5);transform:translateX(2px)">
-          <div style="width:52px;height:52px;border-radius:8px;flex-shrink:0;background:radial-gradient(120% 120% at 30% 0%, {{ t.surf }}, #0c0a10);border:1px solid {{ t.acc }}55;display:flex;align-items:center;justify-content:center;font-size:20px;color: {{ t.acc }}">{{ t.icon }}</div>
-          <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">
-              <span style="font-family:'Cinzel';font-weight:600;font-size:20px;color:#efe8d8">{{ t.name }}</span>
-              <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background: {{ t.roleBg }};color: {{ t.roleCol }};border:1px solid {{ t.roleBorder }}">{{ t.roleLabel }}</span>
-            </div>
-            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90">{{ t.type }} · {{ t.faction }} · {{ t.status }}</div>
-          </div>
-          <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#e0c179;flex-shrink:0">{{ t.cta }} →</span>
-        </div>
-      </sc-for>
-      <div onClick="{{ goStart }}" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border:1.5px dashed rgba(198,166,100,.3);border-radius:10px;color:#cfc7b4;transition:.25s" style-hover="border-color:rgba(224,193,121,.6);color:#e9e3d4">
-        <span style="font-size:18px;color:#e0c179">+</span><span style="font-family:'Cinzel';font-weight:600;font-size:15px">Criar ou entrar em uma nova mesa</span>
-      </div>
-    </div>
-  </sc-if>
-</div>
-</div>
+<dc-import name="Perfil" userName="{{ userName }}" goStart="{{ goStart }}" onProfilePers="{{ onProfilePers }}" tabPersUnder="{{ tabPersUnder }}" tabPersCol="{{ tabPersCol }}" charCount="{{ charCount }}" onProfileMesas="{{ onProfileMesas }}" tabMesasUnder="{{ tabMesasUnder }}" tabMesasCol="{{ tabMesasCol }}" tableCount="{{ tableCount }}" profilePers="{{ profilePers }}" createCharProfile="{{ createCharProfile }}" charactersView="{{ charactersView }}" profileMesas="{{ profileMesas }}" tablesView="{{ tablesView }}"/>
 </sc-if>
 
 <!-- ========================= INÍCIO (Hora de começar) ========================= -->
 <sc-if value="{{ isStart }}" data-screen-label="Inicio Aventura">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:60px 24px;background:#07080c">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-skyline.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.30);pointer-events:none"></div>
-  <div style="position:absolute;inset:0;background:radial-gradient(50% 45% at 50% 40%, rgba(196,30,58,.08), transparent 70%);pointer-events:none"></div>
-  <div style="position:relative;display:flex;flex-direction:column;align-items:center;text-align:center">
-    <div style="font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:#c6a35e;margin-bottom:22px">Saint Vesper te espera</div>
-    <h1 style="font-family:'Cinzel';font-weight:800;font-size:clamp(34px,6vw,62px);letter-spacing:.06em;margin:0;color:#efe8d8;line-height:1.15;max-width:760px;text-wrap:balance">Hora de Começar<br>sua Aventura</h1>
-    <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:21px;color:#b9b2a2;margin:24px 0 44px;max-width:520px;line-height:1.5">Crie uma nova mesa como Mestre ou entre na noite de alguém como Jogador.</p>
-    <button onClick="{{ goRoleSelect }}" style="padding:18px 46px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 13px 'Archivo';letter-spacing:.2em;text-transform:uppercase;cursor:pointer;animation:glowPulse 4s ease-in-out infinite" style-hover="background:#e0c179;box-shadow:0 0 40px rgba(214,193,121,.3)">Vamos lá →</button>
-  </div>
-</div>
+<dc-import name="Start" goRoleSelect="{{ goRoleSelect }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · NOME DA MESA ========================= -->
 <sc-if value="{{ isTableName }}" data-screen-label="Nome da Mesa">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-mapa.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.50);pointer-events:none"></div>
-  <div style="position:relative;width:100%;max-width:480px">
-    <div style="text-align:center;margin-bottom:28px">
-      <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:12px">Mestre · Nova Mesa</div>
-      <h2 style="font-family:'Cinzel';font-weight:700;font-size:30px;margin:0;color:#efe8d8">Dê um nome à sua mesa</h2>
-      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:17px;color:#a39e90;margin:10px auto 0;max-width:380px">Ela fica salva neste navegador — você pode voltar para editar ou continuar o progresso, sem precisar de conta.</p>
-    </div>
-    <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:14px;padding:28px">
-      <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:8px">Nome da mesa</label>
-      <input value="{{ tableName }}" onInput="{{ onTableName }}" placeholder="Ex.: As Crônicas de Alta Vesper" style="width:100%;background:#0d0c11;border:1px solid rgba(198,166,100,.3);border-radius:6px;padding:15px;font-family:'Cinzel';font-size:18px;color:#e9e3d4;outline:none;margin-bottom:18px"/>
-      <button onClick="{{ tableNameNext }}" disabled="{{ tableNameDisabled }}" style="width:100%;padding:15px;background: {{ tableNameBg }};color: {{ tableNameCol }};border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor: {{ tableNameCursor }}">Escolher o modo →</button>
-    </div>
-  </div>
-</div>
+<dc-import name="TableName" tableName="{{ tableName }}" onTableName="{{ onTableName }}" tableNameNext="{{ tableNameNext }}" tableNameDisabled="{{ tableNameDisabled }}" tableNameBg="{{ tableNameBg }}" tableNameCol="{{ tableNameCol }}" tableNameCursor="{{ tableNameCursor }}"/>
 </sc-if>
 
 <!-- ========================= HOME (Role Select) ========================= -->
 <sc-if value="{{ isRole }}" data-screen-label="Role Select">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;background:#07080c">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-faccoes.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.30);pointer-events:none"></div>
-  <div style="position:absolute;inset:0;background:radial-gradient(60% 50% at 50% 30%, rgba(198,163,94,.07), transparent 70%);pointer-events:none"></div>
-
-  <!-- direction toggle -->
-  <div style="position:absolute;top:24px;right:24px;z-index:5;display:flex;gap:6px;align-items:center">
-    <span style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#6f6b61;margin-right:4px">Direção</span>
-    <button onClick="{{ setHomeA }}" style="width:34px;height:30px;border-radius:2px;font:600 12px 'Archivo';cursor:pointer;background: {{ homeAbg }};color: {{ homeAcol }};border:1px solid rgba(198,166,100,.35)">A</button>
-    <button onClick="{{ setHomeB }}" style="width:34px;height:30px;border-radius:2px;font:600 12px 'Archivo';cursor:pointer;background: {{ homeBbg }};color: {{ homeBcol }};border:1px solid rgba(198,166,100,.35)">B</button>
-  </div>
-
-  <!-- DIRECTION A : centered emblem -->
-  <sc-if value="{{ homeA }}">
-  <div style="min-height:calc(100vh - 54px);position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 24px;text-align:center;animation:fadeIn .6s ease">
-    <div style="width:88px;height:88px;border:1.5px solid rgba(198,166,100,.55);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:34px;position:relative;animation:glowPulse 5s ease-in-out infinite">
-      <div style="position:absolute;inset:-8px;border:1px solid rgba(198,166,100,.18);border-radius:50%"></div>
-      <span style="font-family:'Cinzel';font-weight:800;font-size:38px;color:#e0c179">A</span>
-    </div>
-    <h1 style="font-family:'Cinzel';font-weight:800;font-size:clamp(40px,8vw,82px);letter-spacing:.18em;margin:0;color:#efe8d8;line-height:1">AFTERDARK</h1>
-    <div style="display:flex;align-items:center;gap:18px;margin:22px 0 6px">
-      <div style="width:60px;height:1px;background:linear-gradient(90deg,transparent,rgba(198,166,100,.6))"></div>
-      <span style="font-family:'Cormorant Garamond';font-style:italic;font-size:20px;color:#b9b2a2;letter-spacing:.04em">Entre sombras, sangue e segredos.</span>
-      <div style="width:60px;height:1px;background:linear-gradient(90deg,rgba(198,166,100,.6),transparent)"></div>
-    </div>
-    <p style="font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:#6f6b61;margin:6px 0 48px">Saint Vesper · Jogue direto no navegador</p>
-
-    <div style="display:flex;gap:22px;flex-wrap:wrap;justify-content:center;max-width:720px;width:100%">
-      <div onClick="{{ goMestre }}" style="flex:1;min-width:260px;cursor:pointer;background:linear-gradient(180deg,rgba(34,28,20,.7),rgba(18,16,20,.6));border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:34px 28px;text-align:left;transition:.3s" style-hover="border-color:rgba(224,193,121,.7);box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 40px rgba(198,163,94,.12);transform:translateY(-3px)">
-        <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#c6a35e;margin-bottom:14px">O Mestre</div>
-        <div style="font-family:'Cinzel';font-weight:600;font-size:25px;color:#efe8d8;margin-bottom:10px">Conduzir a noite</div>
-        <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.5;color:#a39e90;margin:0 0 20px">Criar sessões, mover relógios, revelar NPCs e segurar os segredos de Saint Vesper.</p>
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#e0c179">Entrar como Mestre →</span>
-      </div>
-      <div onClick="{{ goJogador }}" style="flex:1;min-width:260px;cursor:pointer;background:linear-gradient(180deg,rgba(40,16,22,.6),rgba(18,16,20,.6));border:1px solid rgba(196,30,58,.3);border-radius:4px;padding:34px 28px;text-align:left;transition:.3s" style-hover="border-color:rgba(196,30,58,.7);box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 40px rgba(196,30,58,.14);transform:translateY(-3px)">
-        <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#c44a5e;margin-bottom:14px">O Jogador</div>
-        <div style="font-family:'Cinzel';font-weight:600;font-size:25px;color:#efe8d8;margin-bottom:10px">Viver um sensitivo</div>
-        <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.5;color:#a39e90;margin:0 0 20px">Entrar com um código, criar sua ficha e investigar o sobrenatural pele a pele.</p>
-        <span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#e07a8a">Entrar como Jogador →</span>
-      </div>
-    </div>
-  </div>
-  </sc-if>
-
-  <!-- DIRECTION B : split screen -->
-  <sc-if value="{{ homeB }}">
-  <div style="min-height:calc(100vh - 54px);position:relative;display:flex;flex-direction:column;animation:fadeIn .6s ease">
-    <div style="text-align:center;padding:48px 24px 28px">
-      <h1 style="font-family:'Cinzel';font-weight:800;font-size:clamp(36px,7vw,68px);letter-spacing:.2em;margin:0;color:#efe8d8">AFTERDARK</h1>
-      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:18px;color:#b9b2a2;margin:10px 0 0">Entre sombras, sangue e segredos.</p>
-    </div>
-    <div style="flex:1;display:flex;min-height:440px;flex-wrap:wrap">
-      <div onClick="{{ goMestre }}" style="flex:1;min-width:300px;cursor:pointer;position:relative;overflow:hidden;background:radial-gradient(80% 70% at 50% 100%, rgba(60,48,28,.5), #0d0c0e);border-right:1px solid rgba(198,166,100,.2);display:flex;flex-direction:column;justify-content:flex-end;padding:48px 40px;transition:.4s" style-hover="background:radial-gradient(80% 80% at 50% 100%, rgba(80,64,36,.6), #100e0f)">
-        <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:16px">Mesa do Mestre</div>
-        <div style="font-family:'Cinzel';font-weight:700;font-size:34px;color:#efe8d8;line-height:1.1;margin-bottom:14px">Conduzir<br>Saint Vesper</div>
-        <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.5;color:#a39e90;max-width:340px;margin:0 0 22px">Bastidores, relógios ocultos, NPCs por revelar — controle total da noite.</p>
-        <span style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#e0c179">Entrar como Mestre →</span>
-      </div>
-      <div onClick="{{ goJogador }}" style="flex:1;min-width:300px;cursor:pointer;position:relative;overflow:hidden;background:radial-gradient(80% 70% at 50% 100%, rgba(70,18,28,.55), #0c0a0c);display:flex;flex-direction:column;justify-content:flex-end;padding:48px 40px;transition:.4s" style-hover="background:radial-gradient(80% 80% at 50% 100%, rgba(96,24,38,.65), #100a0c)">
-        <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c44a5e;margin-bottom:16px">Mesa do Jogador</div>
-        <div style="font-family:'Cinzel';font-weight:700;font-size:34px;color:#efe8d8;line-height:1.1;margin-bottom:14px">Viver entre<br>os monstros</div>
-        <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.5;color:#a39e90;max-width:340px;margin:0 0 22px">Uma ficha, uma cena, um teste por vez. Imersão pura na sombra.</p>
-        <span style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#e07a8a">Entrar como Jogador →</span>
-      </div>
-    </div>
-  </div>
-  </sc-if>
-</div>
+<dc-import name="RoleSelect" setHomeA="{{ setHomeA }}" homeAbg="{{ homeAbg }}" homeAcol="{{ homeAcol }}" setHomeB="{{ setHomeB }}" homeBbg="{{ homeBbg }}" homeBcol="{{ homeBcol }}" homeA="{{ homeA }}" goMestre="{{ goMestre }}" goJogador="{{ goJogador }}" homeB="{{ homeB }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · MODO ========================= -->
 <sc-if value="{{ isMMode }}" data-screen-label="Mestre Modo">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-faccoes.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
-<div style="max-width:980px;margin:0 auto;padding:60px 28px 80px;animation:fadeUp .5s ease;position:relative">
-  <div style="text-align:center;margin-bottom:48px">
-    <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:14px">Criar Sessão · RPG Afterdark</div>
-    <h2 style="font-family:'Cinzel';font-weight:700;font-size:38px;margin:0;color:#efe8d8">Escolha o modo da sessão</h2>
-    <p style="font-family:'Cormorant Garamond';font-size:19px;color:#a39e90;margin:14px auto 0;max-width:520px">A história de Saint Vesper segue um fio condutor — você decide se conduz uma campanha em capítulos ou uma noite fechada.</p>
-  </div>
-  <div style="display:flex;gap:24px;flex-wrap:wrap">
-    <div onClick="{{ pickCap }}" style="flex:1;min-width:300px;cursor:pointer;background:linear-gradient(180deg,rgba(28,24,18,.7),rgba(16,15,18,.7));border:1px solid rgba(198,166,100,.28);border-radius:5px;padding:38px 34px;transition:.3s" style-hover="border-color:rgba(224,193,121,.65);box-shadow:0 16px 44px rgba(0,0,0,.5),0 0 36px rgba(198,163,94,.1);transform:translateY(-3px)">
-      <div style="font-family:'Cinzel';font-weight:700;font-size:14px;letter-spacing:.16em;color:#e0c179;margin-bottom:18px">CAPÍTULOS</div>
-      <div style="font-family:'Cinzel';font-weight:600;font-size:27px;color:#efe8d8;margin-bottom:12px">Campanha contínua</div>
-      <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.55;color:#a39e90;margin:0 0 26px">Uma narrativa em arcos: cinco capítulos que evoluem personagens, relógios e facções ao longo das sessões.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
-        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px;color:#cfc7b4">5 capítulos</span>
-        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px;color:#cfc7b4">Progressão</span>
-        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px;color:#cfc7b4">Persistente</span>
-      </div>
-      <span style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#e0c179">Ver capítulos →</span>
-    </div>
-    <div onClick="{{ pickOne }}" style="flex:1;min-width:300px;cursor:pointer;background:linear-gradient(180deg,rgba(34,16,22,.6),rgba(16,15,18,.7));border:1px solid rgba(196,30,58,.3);border-radius:5px;padding:38px 34px;transition:.3s" style-hover="border-color:rgba(196,30,58,.65);box-shadow:0 16px 44px rgba(0,0,0,.5),0 0 36px rgba(196,30,58,.12);transform:translateY(-3px)">
-      <div style="font-family:'Cinzel';font-weight:700;font-size:14px;letter-spacing:.16em;color:#e07a8a;margin-bottom:18px">ONE-SHOT</div>
-      <div style="font-family:'Cinzel';font-weight:600;font-size:27px;color:#efe8d8;margin-bottom:12px">Uma noite fechada</div>
-      <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.55;color:#a39e90;margin:0 0 26px">Três aventuras-demo prontas, cada uma com a face de uma facção: Demônios, Vampiros e Lobisomens.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px">
-        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(196,30,58,.3);border-radius:20px;color:#cfc7b4">3 demos</span>
-        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(196,30,58,.3);border-radius:20px;color:#cfc7b4">Sessão única</span>
-        <span style="font-size:11px;letter-spacing:.1em;padding:5px 11px;border:1px solid rgba(196,30,58,.3);border-radius:20px;color:#cfc7b4">Pronto p/ jogar</span>
-      </div>
-      <span style="font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:#e07a8a">Ver one-shots →</span>
-    </div>
-  </div>
-</div>
-</div>
+<dc-import name="MMode" pickCap="{{ pickCap }}" pickOne="{{ pickOne }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · CAPÍTULOS (carrossel) ========================= -->
 <sc-if value="{{ isMChapters }}" data-screen-label="Mestre Capitulos">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-mapa.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
-<div style="max-width:1180px;margin:0 auto;padding:48px 28px 80px;animation:fadeUp .5s ease;position:relative">
-  <div style="margin-bottom:30px">
-    <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">Modo Capítulos</div>
-    <h2 style="font-family:'Cinzel';font-weight:700;font-size:32px;margin:0;color:#efe8d8">A história de Saint Vesper</h2>
-    <div style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:7px 14px;background:rgba(185,160,106,.08);border:1px solid rgba(185,160,106,.3);border-radius:20px">
-      <span style="width:6px;height:6px;border-radius:50%;background:#b9a06a"></span>
-      <span style="font-size:11px;letter-spacing:.06em;color:#cdc6b6">Conteúdo em desenvolvimento — capítulos são conceitos de interface, ainda não escritos.</span>
-    </div>
-  </div>
-  <div style="display:flex;gap:20px;overflow-x:auto;padding:8px 4px 24px;scroll-snap-type:x mandatory">
-    <sc-for list="{{ chaptersView }}" as="ch" hint-placeholder-count="5">
-      <div onClick="{{ ch.onClick }}" style="scroll-snap-align:center;flex:0 0 268px;cursor:pointer;border-radius:6px;overflow:hidden;position:relative;border:1px solid {{ ch.borderCol }};background:#111016;transition:.3s;transform: {{ ch.scale }}" style-hover="transform:scale(1.03)">
-        <div style="height:300px;position:relative;background:linear-gradient(160deg,#241c2c,#15121a 60%,#0c0a10);display:flex;align-items:flex-end">
-          <div style="position:absolute;top:14px;left:14px;font-family:'Cinzel';font-weight:800;font-size:46px;color:rgba(198,166,100,.22);line-height:.8">{{ ch.n }}</div>
-          <div style="position:absolute;top:14px;right:14px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:20px;background:rgba(8,8,12,.7);border:1px solid {{ ch.badgeBorder }};color: {{ ch.badgeColor }}">{{ ch.bad.l }}</div>
-          <sc-if value="{{ ch.locked }}"><div style="position:absolute;inset:0;background:rgba(6,6,10,.55);display:flex;align-items:center;justify-content:center;font-size:30px;color:rgba(255,255,255,.4)">⌧</div></sc-if>
-          <div style="position:relative;padding:20px 18px 18px;width:100%;background:linear-gradient(180deg,transparent,rgba(8,8,12,.92))">
-            <div style="font-family:'Cinzel';font-weight:600;font-size:21px;color:#efe8d8;margin-bottom:6px;text-wrap:balance">{{ ch.title }}</div>
-            <div style="font-size:12px;color:#9b9588;font-family:'Cormorant Garamond';font-style:italic;margin-bottom:10px">{{ ch.tone }} · {{ ch.dur }}</div>
-            <div style="font-size:10px;color:#7e7a70;font-style:italic;font-family:'Cormorant Garamond';margin-bottom:12px">Nome e conteúdo sujeitos à definição narrativa.</div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70">Tensão</span>
-              <div style="display:flex;gap:3px">
-                <sc-for list="{{ ch.dots }}" as="d" hint-placeholder-count="5"><div style="width:7px;height:7px;border-radius:50%;background: {{ d.col }}"></div></sc-for>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </sc-for>
-  </div>
-  <!-- selected detail -->
-  <div style="margin-top:18px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;background:rgba(20,18,24,.6);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:24px 28px">
-    <div>
-      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#c6a35e;margin-bottom:6px">Capítulo {{ selChapter.n }} selecionado</div>
-      <div style="font-family:'Cinzel';font-weight:600;font-size:24px;color:#efe8d8">{{ selChapter.title }}</div>
-      <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:17px;color:#a39e90;margin-top:4px">{{ selChapter.tone }} · {{ selChapter.dur }}</div>
-    </div>
-    <button onClick="{{ toLobby }}" style="padding:15px 32px;background:#c6a35e;color:#0b0b10;border:none;border-radius:2px;font:600 12px/1 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:.25s" style-hover="background:#e0c179;box-shadow:0 0 30px rgba(214,193,121,.3)">Criar Lobby →</button>
-  </div>
-</div>
-</div>
+<dc-import name="MChapters" chaptersView="{{ chaptersView }}" selChapter="{{ selChapter }}" toLobby="{{ toLobby }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · ONE-SHOTS ========================= -->
 <sc-if value="{{ isMOneshots }}" data-screen-label="Mestre OneShots">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-faccoes.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
-<div style="max-width:1160px;margin:0 auto;padding:48px 28px 80px;animation:fadeUp .5s ease;position:relative">
-  <div style="text-align:center;margin-bottom:36px">
-    <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">Modo One-shot · Demos Oficiais</div>
-    <h2 style="font-family:'Cinzel';font-weight:700;font-size:32px;margin:0;color:#efe8d8">Três faces de Saint Vesper</h2>
-  </div>
-  <div style="display:flex;gap:22px;flex-wrap:wrap">
-    <sc-for list="{{ oneshotList }}" as="o" hint-placeholder-count="3">
-      <div onClick="{{ o.onClick }}" style="flex:1;min-width:300px;cursor:pointer;border-radius:6px;overflow:hidden;border:1px solid {{ o.borderCol }};background:#100e14;transition:.3s;box-shadow: {{ o.shadow }}" style-hover="transform:translateY(-4px)">
-        <div style="height:188px;position:relative;background:radial-gradient(90% 120% at 50% 0%, {{ o.surf }}, {{ o.bg }});display:flex;align-items:flex-end;padding:18px 20px">
-          <div style="position:absolute;inset:0;background-image:url('{{ o.cover }}');background-size:cover;background-position: {{ o.coverPos }};background-repeat:no-repeat"></div>
-          <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(8,8,12,.12) 0%, rgba(8,8,12,0) 42%, rgba(16,14,20,.55) 78%, rgba(16,14,20,.92) 100%)"></div>
-          <div style="position:absolute;inset:0;background:radial-gradient(70% 60% at 70% 15%, {{ o.glow }}, transparent 72%);opacity:.35;mix-blend-mode:screen"></div>
-          <div style="position:absolute;top:16px;left:18px;width:42px;height:42px;border:1px solid {{ o.acc }};border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;color: {{ o.acc }};background:rgba(8,8,12,.5);backdrop-filter:blur(2px)">✦</div>
-          <span style="position:relative;font-size:10px;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:20px;background:rgba(8,8,12,.55);border:1px solid {{ o.acc }};color: {{ o.acc }}">{{ o.tone }}</span>
-        </div>
-        <div style="padding:22px 22px 24px">
-          <div style="font-family:'Cinzel';font-weight:600;font-size:23px;color:#efe8d8;margin-bottom:4px">{{ o.title }}</div>
-          <div style="font-size:12px;letter-spacing:.06em;color: {{ o.acc }};margin-bottom:14px">{{ o.faction }}</div>
-          <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.5;color:#a39e90;margin:0 0 18px;min-height:76px">{{ o.summary }}</p>
-          <div style="display:flex;gap:16px;font-size:12px;color:#8d887c;margin-bottom:18px;border-top:1px solid rgba(255,255,255,.06);padding-top:14px">
-            <span>◷ {{ o.dur }}</span><span>♟ {{ o.players }} jogadores</span><span>◈ {{ o.ready }} prontos</span>
-          </div>
-          <button onClick="{{ o.onCreate }}" style="width:100%;padding:13px;background: {{ o.btnBg }};color: {{ o.btnCol }};border:1px solid {{ o.acc }};border-radius:2px;font:600 12px/1 'Archivo';letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.25s" style-hover="filter:brightness(1.15)">Criar Lobby</button>
-        </div>
-      </div>
-    </sc-for>
-  </div>
-</div>
-</div>
+<dc-import name="MOneshots" oneshotList="{{ oneshotList }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · LOBBY ========================= -->
 <sc-if value="{{ isMLobby }}" data-screen-label="Mestre Lobby">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-mapa.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
-<div style="max-width:1120px;margin:0 auto;padding:44px 28px 80px;animation:fadeUp .5s ease;position:relative" style="--acc: {{ sessTheme.acc }}">
-  <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:28px">
-    <div>
-      <div style="font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#c6a35e;margin-bottom:8px">Lobby da Sessão</div>
-      <h2 style="font-family:'Cinzel';font-weight:700;font-size:32px;margin:0;color:#efe8d8">{{ sessName }}</h2>
-      <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:17px;color:#a39e90;margin-top:4px">Modo One-shot · Aguardando o grupo</div>
-    </div>
-    <button onClick="{{ startSession }}" style="padding:15px 34px;background: {{ sessTheme.acc }};color:#0b0b10;border:none;border-radius:2px;font:700 12px/1 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:.25s;box-shadow:0 0 0 1px {{ sessTheme.acc }}" style-hover="filter:brightness(1.18);box-shadow:0 0 30px {{ sessTheme.glow }}">▸ Iniciar RPG</button>
-  </div>
-
-  <div style="display:flex;gap:24px;flex-wrap:wrap">
-    <!-- invite -->
-    <div style="flex:1;min-width:280px;background:rgba(20,18,24,.65);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:26px">
-      <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:18px">Convite</div>
-      <div style="font-size:11px;color:#8d887c;margin-bottom:6px;letter-spacing:.1em;text-transform:uppercase">Código</div>
-      <div style="font-family:'Space Mono';font-weight:700;font-size:30px;letter-spacing:.18em;color:#e0c179;margin-bottom:20px">SV-7K92</div>
-      <div style="display:flex;gap:10px;margin-bottom:14px">
-        <div style="flex:1;font-family:'Space Mono';font-size:12px;color:#a39e90;background:#0e0d12;border:1px solid rgba(255,255,255,.08);border-radius:3px;padding:11px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">afterdark.app/j/SV-7K92</div>
-      </div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <button onClick="{{ onCopyCode }}" style="flex:1;padding:9px;background: {{ copyCodeBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyCodeCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyCodeLabel }}</button>
-        <button onClick="{{ onCopyLink }}" style="flex:1;padding:9px;background: {{ copyLinkBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyLinkCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyLinkLabel }}</button>
-      </div>
-      <sc-if value="{{ lobbyCopiedMsg }}"><div style="font-size:11px;color:#7fae8f;letter-spacing:.04em;margin-bottom:14px;animation:fadeIn .3s ease">✓ {{ lobbyCopiedMsg }}</div></sc-if>
-      <div style="display:flex;gap:18px;align-items:center">
-        <div style="width:108px;height:108px;background:#0d0c11;border:1px solid rgba(198,166,100,.2);border-radius:5px;padding:9px;display:grid;grid-template-columns:repeat(21,1fr);gap:0">
-          <sc-for list="{{ qr }}" as="q" hint-placeholder-count="441"><div style="width:100%;padding-bottom:100%;background: {{ q.cell }}"></div></sc-for>
-        </div>
-        <div style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;line-height:1.5">Aponte a câmera<br>para entrar pelo<br>celular.</div>
-      </div>
-    </div>
-    <!-- players -->
-    <div style="flex:2;min-width:340px;background:rgba(20,18,24,.65);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:26px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-        <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c">Jogadores conectados</div>
-        <div style="font-family:'Space Mono';font-size:13px;color:#e0c179">{{ readyCount }} prontos · {{ total }}/8</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <sc-for list="{{ players }}" as="p" hint-placeholder-count="4">
-          <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;background:#0f0e13;border:1px solid {{ p.rowBorder }};border-radius:5px">
-            <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8;background: {{ p.avatarBg }};border:1.5px solid {{ p.acc }}">{{ p.avatarInitial }}</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:15px;color:#e9e3d4;font-weight:500">{{ p.char }} <span style="color:#7e7a70;font-style:italic;font-family:'Cormorant Garamond';font-size:15px">· {{ p.player }}</span></div>
-              <div style="font-size:12px;color: {{ p.cColor }};letter-spacing:.04em">{{ p.sLabel }}</div>
-            </div>
-            <sc-if value="{{ p.ready }}"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7fae8f;padding:5px 12px;border:1px solid rgba(127,174,143,.4);border-radius:20px">✓ Pronto</span></sc-if>
-            <sc-if value="{{ p.notReady }}"><button onClick="{{ p.onApprove }}" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfc7b4;padding:6px 13px;border:1px solid rgba(198,166,100,.35);border-radius:20px;background:transparent;cursor:pointer" style-hover="border-color:rgba(198,166,100,.7)">Aprovar</button></sc-if>
-          </div>
-        </sc-for>
-      </div>
-      <div style="display:flex;gap:8px;margin-top:18px;flex-wrap:wrap">
-        <span style="font-size:11px;color:#7e7a70;padding:6px 12px;border:1px solid rgba(255,255,255,.07);border-radius:20px">Permitir personagens prontos</span>
-        <span style="font-size:11px;color:#7e7a70;padding:6px 12px;border:1px solid rgba(255,255,255,.07);border-radius:20px">Rolagens públicas</span>
-        <span style="font-size:11px;color:#7e7a70;padding:6px 12px;border:1px solid rgba(255,255,255,.07);border-radius:20px">Tom: Sombrio</span>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
+<dc-import name="MLobby" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · SESSÃO (PAINEL) ========================= -->
@@ -1286,356 +845,27 @@
 
 <!-- ========================= JOGADOR · ENTRAR ========================= -->
 <sc-if value="{{ isJJoin }}" data-screen-label="Jogador Entrar">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
-  <div style="position:relative;width:100%;max-width:400px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:18px;padding:34px 28px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
-    <div style="text-align:center;margin-bottom:28px">
-      <div style="width:54px;height:54px;border:1.5px solid rgba(198,166,100,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-family:'Cinzel';font-weight:800;font-size:24px;color:#e0c179">A</div>
-      <h2 style="font-family:'Cinzel';font-weight:700;font-size:24px;margin:0;color:#efe8d8">Entrar na Mesa</h2>
-      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Use o código do seu Mestre</p>
-    </div>
-    <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:7px">Código de convite</label>
-    <input value="{{ joinCode }}" onInput="{{ onJoinCode }}" placeholder="SV-7K92" style="width:100%;background:#0d0c11;border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:14px;font-family:'Space Mono';font-weight:700;font-size:20px;letter-spacing:.16em;color:#e0c179;text-align:center;margin-bottom:18px;outline:none"/>
-    <button onClick="{{ toName }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;margin-bottom:18px" style-hover="background:#e0c179">Entrar →</button>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div><span style="font-size:11px;color:#6f6b61;letter-spacing:.1em">OU</span><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div></div>
-    <div style="display:flex;gap:10px">
-      <button onClick="{{ toName }}" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(198,166,100,.25);border-radius:3px;color:#cfc7b4;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.55)">⛓ Por Link</button>
-      <button onClick="{{ toName }}" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(198,166,100,.25);border-radius:3px;color:#cfc7b4;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.55)">▦ Ler QR</button>
-    </div>
-  </div>
-</div>
+<dc-import name="JJoin" joinCode="{{ joinCode }}" onJoinCode="{{ onJoinCode }}" toName="{{ toName }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · NOME ========================= -->
 <sc-if value="{{ isJName }}" data-screen-label="Jogador Nome">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
-  <div style="position:relative;width:100%;max-width:400px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:18px;padding:34px 28px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
-    <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7fae8f;margin-bottom:16px;text-align:center">✓ Conectado · A Última Gota</div>
-    <h2 style="font-family:'Cinzel';font-weight:700;font-size:23px;margin:0 0 22px;color:#efe8d8;text-align:center">Como devemos te chamar?</h2>
-    <input onInput="{{ onJoinName }}" value="{{ joinName }}" placeholder="Seu nome (jogador)" style="width:100%;background:#0d0c11;border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:14px;font-size:16px;color:#e9e3d4;text-align:center;margin-bottom:18px;outline:none"/>
-    <button onClick="{{ toChar }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Continuar →</button>
-  </div>
-</div>
+<dc-import name="JName" onJoinName="{{ onJoinName }}" joinName="{{ joinName }}" toChar="{{ toChar }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · ESCOLHER PERSONAGEM ========================= -->
 <sc-if value="{{ isJChar }}" data-screen-label="Jogador Personagem">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-arquivo.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
-  <div style="position:relative;width:100%;max-width:420px">
-    <div style="text-align:center;margin-bottom:24px">
-      <h2 style="font-family:'Cinzel';font-weight:700;font-size:24px;margin:0;color:#efe8d8">Seu personagem</h2>
-      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Como você entra em Saint Vesper?</p>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:12px">
-      <div onClick="{{ toWizard }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:8px;padding:20px 22px;transition:.25s" style-hover="border-color:rgba(224,193,121,.6);box-shadow:0 0 30px rgba(198,163,94,.1)">
-        <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;margin-bottom:5px">✦ Criar novo personagem</div>
-        <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0">Ficha guiada em 7 etapas — do nome às perícias.</p>
-      </div>
-      <div onClick="{{ toIntro }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(196,30,58,.25);border-radius:8px;padding:20px 22px;transition:.25s" style-hover="border-color:rgba(196,30,58,.6)">
-        <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;margin-bottom:5px">⚇ Usar personagem pronto</div>
-        <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0">Helena Voss · A Legista — sensível a vampiros, pronta para jogar.</p>
-      </div>
-      <div onClick="{{ toIntro }}" style="cursor:pointer;background:#0f0e13;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(255,255,255,.18)">
-        <div style="font-size:15px;color:#cdc6b6;margin-bottom:3px">↺ Selecionar personagem existente</div>
-        <p style="font-family:'Cormorant Garamond';font-size:15px;color:#7e7a70;margin:0">Você ainda não tem fichas salvas.</p>
-      </div>
-    </div>
-  </div>
-</div>
+<dc-import name="JChar" toWizard="{{ toWizard }}" toIntro="{{ toIntro }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · WIZARD ========================= -->
 <sc-if value="{{ isJWizard }}" data-screen-label="Jogador Wizard">
-<div style="min-height:calc(100vh - 54px);display:flex;justify-content:center;padding:30px 18px 60px;animation:fadeIn .4s ease;background:linear-gradient(rgba(5,6,12,0.48),rgba(5,6,12,0.48)),url('assets/images/bg-arquivo.png') center center/cover no-repeat">
-  <div style="width:100%;max-width: {{ wizMaxW }};transition:max-width .35s ease">
-    <!-- stepper -->
-    <div style="display:flex;gap:5px;margin-bottom:8px">
-      <sc-for list="{{ stepDots }}" as="s" hint-placeholder-count="7"><div style="flex:1;height:4px;border-radius:2px;background: {{ s.col }}"></div></sc-for>
-    </div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:22px">
-      <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e">Etapa {{ wizStep }} / 7</span>
-      <span style="font-size:11px;letter-spacing:.06em;color:#8d887c">{{ stepTitle }}</span>
-    </div>
-
-    <!-- STEP 1 identity -->
-    <sc-if value="{{ step1 }}">
-      <h2 style="font-family:'Cinzel';font-weight:600;font-size:24px;margin:0 0 18px;color:#efe8d8">Identidade</h2>
-      <div style="display:flex;flex-direction:column;gap:13px">
-        <input onInput="{{ onWizName }}" value="{{ wiz.name }}" placeholder="Nome do jogador *" style="background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-        <input onInput="{{ onWizChar }}" value="{{ wiz.charName }}" placeholder="Nome do personagem *" style="background:#0e0d12;border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-        <div style="display:flex;gap:10px">
-          <input onInput="{{ onWizAge }}" value="{{ wiz.age }}" placeholder="Idade" style="flex:1;background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-          <input onInput="{{ onWizOrigin }}" value="{{ wiz.origin }}" placeholder="Origem" style="flex:2;background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-        </div>
-        <input onInput="{{ onWizAppear }}" value="{{ wiz.appearance }}" placeholder="Aparência" style="background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-        <input onInput="{{ onWizClothes }}" value="{{ wiz.clothes }}" placeholder="Roupas e estilo" style="background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-        <input onInput="{{ onWizPers }}" value="{{ wiz.personality }}" placeholder="Personalidade" style="background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-      </div>
-    </sc-if>
-
-    <!-- STEP 2 sensibility -->
-    <sc-if value="{{ step2 }}">
-      <!-- parallax background -->
-      <div style="position:fixed;left:0;right:0;top:54px;bottom:0;z-index:0;overflow:hidden;pointer-events:none;background: {{ pxBase }};transition:background .9s ease">
-        <div style="position:absolute;inset:0;background-image:url('{{ pxImgA }}');background-size:cover;background-position:center;background-repeat:no-repeat;opacity:{{ pxImgAOp }};transition:opacity .42s ease;will-change:opacity"></div>
-        <div style="position:absolute;inset:0;background-image:url('{{ pxImgB }}');background-size:cover;background-position:center;background-repeat:no-repeat;opacity:{{ pxImgBOp }};transition:opacity .42s ease;will-change:opacity"></div>
-        <div data-px="0.4" style="position:absolute;inset:-10%;will-change:transform">
-          <div style="position:absolute;inset:0;background:radial-gradient(48% 42% at 50% 34%, rgba(196,30,58,.55), transparent 70%);opacity: {{ pxRedOp }};transition:opacity .9s ease"></div>
-          <div style="position:absolute;inset:0;background:radial-gradient(48% 42% at 50% 34%, rgba(126,166,212,.5), transparent 70%);opacity: {{ pxBlueOp }};transition:opacity .9s ease"></div>
-          <div style="position:absolute;inset:0;background:radial-gradient(48% 42% at 50% 34%, rgba(214,48,138,.55), transparent 70%);opacity: {{ pxMagOp }};transition:opacity .9s ease"></div>
-          <div style="position:absolute;inset:0;background:radial-gradient(48% 42% at 50% 34%, rgba(95,138,166,.5), transparent 70%);opacity: {{ pxSteelOp }};transition:opacity .9s ease"></div>
-        </div>
-        <div data-px="1.3" style="position:absolute;top:20%;left:50%;width:300px;height:300px;margin:-150px 0 0 -150px;will-change:transform">
-          <div style="position:absolute;inset:0;border-radius:50%;border:2px solid {{ pxColor }};box-shadow:0 0 70px {{ pxColor }}, inset 0 0 50px {{ pxGlow }};animation:ringPulse 6s ease-in-out infinite;transition:border-color .9s ease, box-shadow .9s ease"></div>
-        </div>
-        <div data-px="2.1" style="position:absolute;inset:0;will-change:transform">
-          <sc-for list="{{ embers }}" as="e" hint-placeholder-count="18"><div style="position:absolute;top: {{ e.top }};left: {{ e.left }};width: {{ e.size }};height: {{ e.size }};border-radius:50%;background: {{ pxColor }};box-shadow:0 0 8px {{ pxColor }};animation:ember {{ e.dur }} ease-in-out {{ e.delay }} infinite alternate;transition:background .9s ease,box-shadow .9s ease"></div></sc-for>
-        </div>
-        <div data-px="0.6" style="position:absolute;left:-6%;right:-6%;bottom:0;height:42%;will-change:transform;display:flex;align-items:flex-end;gap:0;opacity:.85">
-          <sc-for list="{{ skyline }}" as="b" hint-placeholder-count="24"><div style="width: {{ b.width }};height: {{ b.height }};margin-left: {{ b.left }};position:absolute;bottom:0;background:#070709;border-top:1px solid {{ pxColor }};box-shadow:0 0 12px {{ pxGlow }};transition:border-color .9s ease,box-shadow .9s ease"></div></sc-for>
-        </div>
-        <div style="position:absolute;inset:0;background:radial-gradient(82% 72% at 50% 38%, transparent 38%, rgba(6,6,10,.78))"></div>
-        <div style="position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(180deg,transparent,rgba(6,6,10,.85))"></div>
-      </div>
-
-      <div style="position:relative;z-index:1">
-        <h2 style="font-family:'Cinzel';font-weight:600;font-size:24px;margin:0 0 6px;color:#efe8d8;text-shadow:0 2px 14px rgba(0,0,0,.6)">Escolha sua Natureza</h2>
-        <p style="font-family:'Cormorant Garamond';font-size:16px;color:#b9b2a2;margin:0 0 18px;text-shadow:0 2px 10px rgba(0,0,0,.6)">Defina como seu personagem se relaciona com o sobrenatural de Saint Vesper.</p>
-<!-- DESKTOP · cards horizontais (2x2, identidade à esquerda, leitura à direita) -->
-        <sc-if value="{{ wizDesktop }}">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:stretch">
-          <sc-for list="{{ sensList }}" as="se" hint-placeholder-count="4">
-            <div onClick="{{ se.onClick }}" onMouseEnter="{{ se.onEnter }}" onMouseLeave="{{ se.onLeave }}" style="cursor:pointer;display:flex;gap:16px;background: {{ se.cardBg }};backdrop-filter:blur(6px);border:1px solid {{ se.cardBorder }};border-left:3px solid {{ se.accent }};border-radius:6px;padding:16px 18px;transition:transform .3s ease, box-shadow .4s ease, background .5s ease, border-color .4s ease;box-shadow: {{ se.cardShadow }};transform: {{ se.cardScale }}">
-              <div style="width:40%;flex-shrink:0;border-right:1px solid rgba(255,255,255,.08);padding-right:15px">
-                <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:10px">
-                  <span style="color: {{ se.accent }};font-size:15px;line-height:1.2">{{ se.check }}</span>
-                  <span style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8;line-height:1.18">{{ se.label }}</span>
-                </div>
-                <span style="display:inline-block;font-size:11px;font-family:'Space Mono';color: {{ se.accent }};padding:3px 9px;border:1px solid {{ se.accent }}55;border-radius:12px">{{ se.bonus }}</span>
-              </div>
-              <div style="flex:1;min-width:0">
-                <p style="font-family:'Cormorant Garamond';font-size:15px;line-height:1.42;color:#c2bcae;margin:0 0 10px">{{ se.effect }}</p>
-                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color: {{ se.accent }};margin-bottom:6px">Você percebe</div>
-                <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px">
-                  <sc-for list="{{ se.apt }}" as="ap" hint-placeholder-count="3"><div style="font-family:'Cormorant Garamond';font-size:14px;color:#cdc6b6;padding-left:14px;position:relative"><span style="position:absolute;left:0;color: {{ se.accent }}">•</span>{{ ap.txt }}</div></sc-for>
-                </div>
-                <div style="font-size:11px;color:#9b9588;font-family:'Cormorant Garamond';font-style:italic;border-top:1px solid rgba(255,255,255,.07);padding-top:8px">{{ se.custLabel }}</div>
-              </div>
-            </div>
-          </sc-for>
-        </div>
-        </sc-if>
-
-        <!-- MOBILE · acordeão 1x4 (só tipo + vantagem; expande o selecionado) -->
-        <sc-if value="{{ wizMobile }}">
-        <div style="display:flex;flex-direction:column;gap:9px">
-          <sc-for list="{{ sensList }}" as="se" hint-placeholder-count="4">
-            <div onClick="{{ se.onClick }}" style="cursor:pointer;background: {{ se.cardBg }};backdrop-filter:blur(6px);border:1px solid {{ se.cardBorder }};border-left:3px solid {{ se.accent }};border-radius:6px;padding:14px 16px;transition:background .4s ease, border-color .4s ease, box-shadow .4s ease;box-shadow: {{ se.cardShadow }}">
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-                <span style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8;display:flex;align-items:center;gap:8px"><span style="color: {{ se.accent }}">{{ se.check }}</span>{{ se.label }}</span>
-                <span style="flex-shrink:0;font-size:11px;font-family:'Space Mono';color: {{ se.accent }};padding:3px 9px;border:1px solid {{ se.accent }}55;border-radius:12px">{{ se.bonus }}</span>
-              </div>
-              <sc-if value="{{ se.selected }}">
-                <div style="margin-top:13px;animation:fadeIn .3s ease">
-                  <p style="font-family:'Cormorant Garamond';font-size:15px;line-height:1.45;color:#c2bcae;margin:0 0 12px">{{ se.effect }}</p>
-                  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color: {{ se.accent }};margin-bottom:6px">Você percebe</div>
-                  <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:12px">
-                    <sc-for list="{{ se.apt }}" as="ap" hint-placeholder-count="3"><div style="font-family:'Cormorant Garamond';font-size:15px;color:#cdc6b6;padding-left:14px;position:relative"><span style="position:absolute;left:0;color: {{ se.accent }}">•</span>{{ ap.txt }}</div></sc-for>
-                  </div>
-                  <div style="font-size:11px;color:#9b9588;font-family:'Cormorant Garamond';font-style:italic;border-top:1px solid rgba(255,255,255,.07);padding-top:9px">{{ se.custLabel }}</div>
-                </div>
-              </sc-if>
-            </div>
-          </sc-for>
-        </div>
-        </sc-if>
-        <sc-if value="{{ showManifest }}">
-          <input onInput="{{ onWizManifest }}" value="{{ wiz.manifest }}" placeholder="{{ manifestLabel }}" style="width:100%;margin-top:13px;background:rgba(14,13,18,.7);backdrop-filter:blur(4px);border:1px solid rgba(198,166,100,.25);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-        </sc-if>
-      </div>
-    </sc-if>
-
-    <!-- STEP 3 weaknesses -->
-    <sc-if value="{{ step3 }}">
-      <h2 style="font-family:'Cinzel';font-weight:600;font-size:24px;margin:0 0 4px;color:#efe8d8">{{ weakHeader }}</h2>
-      <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0 0 16px">{{ weakSubtitle }}</p>
-      <sc-if value="{{ isHumano }}">
-        <div style="background:rgba(95,138,166,.08);border:1px solid rgba(95,138,166,.3);border-radius:8px;padding:18px">
-          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7fa6bf;margin-bottom:8px">Limitação</div>
-          <p style="font-family:'Cormorant Garamond';font-size:16px;line-height:1.5;color:#cdc6b6;margin:0 0 14px">Humanos comuns não percebem fenômenos sobrenaturais ocultos automaticamente. Você depende de evidência, investigação e da ajuda de sensitivos.</p>
-          <textarea onInput="{{ onWizMarks }}" value="{{ wiz.marks }}" placeholder="Marcas pessoais ou limitações (opcional)" style="width:100%;min-height:80px;background:#0e0d12;border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:13px;font-family:'Cormorant Garamond';font-size:16px;color:#e9e3d4;outline:none;resize:vertical"></textarea>
-        </div>
-      </sc-if>
-      <sc-if value="{{ isSensitive }}">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div>
-        <span style="font-family:'Space Mono';font-size:13px;color: {{ weakCountColor }}">{{ weakCount }} de 3 selecionadas</span>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:9px">
-        <sc-for list="{{ weakOpts }}" as="w" hint-placeholder-count="6">
-          <div onClick="{{ w.onClick }}" style="cursor: {{ w.cursor }};display:flex;align-items:flex-start;gap:12px;padding:13px 15px;background: {{ w.bg }};border:1px solid {{ w.border }};border-radius:6px;transition:.18s;opacity: {{ w.opacity }}">
-            <div style="width:20px;height:20px;border-radius:4px;flex-shrink:0;margin-top:1px;border:1.5px solid {{ w.boxBorder }};background: {{ w.boxBg }};display:flex;align-items:center;justify-content:center;font-size:12px;color:#0b0b10">{{ w.check }}</div>
-            <div style="flex:1">
-              <div style="font-size:15px;color: {{ w.txtCol }};font-weight:500;margin-bottom:3px">{{ w.txt }}</div>
-              <div style="font-family:'Cormorant Garamond';font-size:14px;line-height:1.4;color:#9b9588">{{ w.desc }}</div>
-            </div>
-          </div>
-        </sc-for>
-      </div>
-      </sc-if>
-    </sc-if>
-
-    <!-- STEP 4 attributes -->
-    <sc-if value="{{ step4 }}">
-      <h2 style="font-family:'Cinzel';font-weight:600;font-size:24px;margin:0 0 4px;color:#efe8d8">Atributos</h2>
-      <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0 0 16px">Todos começam em 1. Distribua <span style="color:#e0c179;font-weight:600">3 pontos livres</span> (máx 3 por atributo). Pontos restantes: <span style="font-family:'Space Mono';color: {{ poolColor }};font-weight:700">{{ poolLeft }}</span></p>
-      <div style="display:flex;flex-direction:column;gap:11px">
-        <sc-for list="{{ attrView }}" as="a" hint-placeholder-count="6">
-          <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;background:#0f0e13;border:1px solid rgba(255,255,255,.08);border-radius:6px">
-            <div style="flex:1"><span style="font-size:15px;color:#e9e3d4">{{ a.label }}</span><sc-if value="{{ a.isBonus }}"><span style="font-size:11px;color:#c6a35e;margin-left:8px;font-family:'Space Mono';padding:2px 7px;border:1px solid rgba(198,166,100,.35);border-radius:10px">+{{ a.bonus }} Natureza</span></sc-if></div>
-            <button onClick="{{ a.onDec }}" style="width:30px;height:30px;border-radius:4px;background:#1a1820;border:1px solid rgba(255,255,255,.12);color:#cfc7b4;font-size:17px;cursor:pointer;opacity: {{ a.decOpacity }}">−</button>
-            <div style="width:36px;text-align:center;font-family:'Space Mono';font-weight:700;font-size:20px;color: {{ a.valColor }}">{{ a.eff }}</div>
-            <button onClick="{{ a.onInc }}" style="width:30px;height:30px;border-radius:4px;background:#1a1820;border:1px solid rgba(198,166,100,.4);color:#e0c179;font-size:17px;cursor: {{ a.incCursor }};opacity: {{ a.incOpacity }}">+</button>
-          </div>
-        </sc-for>
-      </div>
-    </sc-if>
-
-    <!-- STEP 5 skills -->
-    <sc-if value="{{ step5 }}">
-      <h2 style="font-family:'Cinzel';font-weight:600;font-size:24px;margin:0 0 4px;color:#efe8d8">Perícias</h2>
-      <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0 0 16px">Distribua 24 pontos, máx +3 cada — você pode colocar pelo menos 1 em cada perícia. Restantes: <span style="font-family:'Space Mono';color: {{ skillColor }};font-weight:700">{{ skillLeft }}</span></p>
-      <div style="display:flex;flex-direction:column;gap:18px">
-        <sc-for list="{{ skillGroups }}" as="g" hint-placeholder-count="6">
-          <div>
-            <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;font-weight:700;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid rgba(198,166,100,.2)">{{ g.attrLabel }}</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
-              <sc-for list="{{ g.skills }}" as="a" hint-placeholder-count="4">
-                <div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background: {{ a.bg }};border:1px solid {{ a.border }};border-radius:5px">
-                  <span style="flex:1;font-size:13px;color: {{ a.txtCol }}">{{ a.label }}</span>
-                  <button onClick="{{ a.onDec }}" style="width:24px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer">−</button>
-                  <span style="width:24px;text-align:center;font-family:'Space Mono';font-weight:700;font-size:15px;color: {{ a.valCol }}">{{ a.disp }}</span>
-                  <button onClick="{{ a.onInc }}" style="width:24px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(198,166,100,.35);color:#e0c179;font-size:14px;cursor:pointer">+</button>
-                </div>
-              </sc-for>
-            </div>
-          </div>
-        </sc-for>
-      </div>
-    </sc-if>
-
-    <!-- STEP 6 history -->
-    <sc-if value="{{ step6 }}">
-      <h2 style="font-family:'Cinzel';font-weight:600;font-size:24px;margin:0 0 4px;color:#efe8d8">Histórico</h2>
-      <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0 0 14px">A história do seu personagem. Deixe as perguntas te guiarem.</p>
-      <textarea onInput="{{ onWizHistory }}" value="{{ wiz.history }}" placeholder="Escreva livremente..." style="width:100%;min-height:130px;background:#0e0d12;border:1px solid rgba(198,166,100,.25);border-radius:5px;padding:14px;font-family:'Cormorant Garamond';font-size:17px;line-height:1.5;color:#e9e3d4;outline:none;resize:vertical"></textarea>
-      <div style="display:flex;flex-direction:column;gap:7px;margin-top:14px">
-        <sc-for list="{{ historyPrompts }}" as="h" hint-placeholder-count="4"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#8d887c;padding-left:14px;border-left:2px solid rgba(198,166,100,.3)">{{ h.q }}</div></sc-for>
-      </div>
-    </sc-if>
-
-    <!-- STEP 7 summary -->
-    <sc-if value="{{ step7 }}">
-      <h2 style="font-family:'Cinzel';font-weight:600;font-size:24px;margin:0 0 14px;color:#efe8d8">Resumo Final</h2>
-      <div style="display:flex;flex-direction:column;gap:14px">
-        <!-- Identidade -->
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
-          <div style="font-family:'Cinzel';font-weight:600;font-size:22px;color:#efe8d8">{{ sumName }}</div>
-          <div style="font-size:13px;color: {{ sumSensColor }};margin-bottom:14px">{{ sumSens }}</div>
-          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Identidade</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 18px">
-            <div style="font-size:13px;color:#a39e90">Jogador: <span style="color:#e9e3d4">{{ sumPlayerName }}</span></div>
-            <div style="font-size:13px;color:#a39e90">Idade: <span style="color:#e9e3d4">{{ sumAge }}</span></div>
-            <div style="font-size:13px;color:#a39e90">Origem: <span style="color:#e9e3d4">{{ sumOrigin }}</span></div>
-            <div style="font-size:13px;color:#a39e90">Personalidade: <span style="color:#e9e3d4">{{ sumPersonality }}</span></div>
-            <div style="font-size:13px;color:#a39e90">Aparência: <span style="color:#e9e3d4">{{ sumAppearance }}</span></div>
-            <div style="font-size:13px;color:#a39e90">Roupas: <span style="color:#e9e3d4">{{ sumClothes }}</span></div>
-          </div>
-        </div>
-        <!-- Natureza -->
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
-          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Natureza</div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-            <span style="font-family:'Cinzel';font-weight:600;font-size:17px;color: {{ sumSensColor }}">{{ sumSens }}</span>
-            <span style="font-size:12px;font-family:'Space Mono';color:#e0c179">{{ sumBonus }}</span>
-          </div>
-          <sc-if value="{{ sumIsHumano }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#9b9588">Sem manifestação sobrenatural.</div></sc-if>
-          <sc-if value="{{ showManifest }}"><div style="font-family:'Cormorant Garamond';font-size:15px;color:#cdc6b6">Manifestação: {{ sumManifest }}</div></sc-if>
-        </div>
-        <!-- Atributos -->
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
-          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:12px">Atributos</div>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between">
-            <sc-for list="{{ sumAttrs }}" as="a" hint-placeholder-count="6"><div style="text-align:center;flex:1;min-width:58px;background:#13121a;border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:9px 4px"><div style="font-family:'Space Mono';font-weight:700;font-size:18px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div></div></sc-for>
-          </div>
-        </div>
-        <!-- Perícias -->
-        <sc-if value="{{ sumHasSkills }}">
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
-          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Perícias treinadas</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap">
-            <sc-for list="{{ sumSkills }}" as="a" hint-placeholder-count="4"><span style="font-size:12px;color:#cdc6b6;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px">{{ a.label }} <span style="font-family:'Space Mono';color:#e0c179">+{{ a.val }}</span></span></sc-for>
-          </div>
-        </div>
-        </sc-if>
-        <!-- Fraquezas -->
-        <sc-if value="{{ sumHasWeak }}">
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
-          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Fraquezas</div>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <sc-for list="{{ sumWeak }}" as="w" hint-placeholder-count="3"><div><div style="font-size:14px;color:#e9e3d4;font-weight:500">{{ w.txt }}</div><div style="font-family:'Cormorant Garamond';font-size:14px;color:#9b9588;line-height:1.4">{{ w.desc }}</div></div></sc-for>
-          </div>
-        </div>
-        </sc-if>
-        <!-- Histórico -->
-        <sc-if value="{{ sumHasHistory }}">
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
-          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Histórico</div>
-          <p style="font-family:'Cormorant Garamond';font-size:16px;line-height:1.55;color:#cdc6b6;margin:0">{{ sumHistory }}</p>
-        </div>
-        </sc-if>
-        <!-- Resumo Narrativo -->
-        <div style="background:linear-gradient(180deg,rgba(34,28,20,.5),#0f0e13);border:1px solid rgba(198,166,100,.3);border-radius:8px;padding:20px">
-          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">Resumo Narrativo</div>
-          <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:17px;line-height:1.6;color:#d8d1c2;margin:0">{{ narrative }}</p>
-        </div>
-      </div>
-      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8d887c;text-align:center;margin:14px 0 0">O Mestre receberá este resumo para aprovação.</p>
-    </sc-if>
-
-    <!-- nav -->
-    <div style="position:relative;z-index:2;display:flex;gap:12px;margin-top:26px">
-      <button onClick="{{ wizPrev }}" style="padding:13px 22px;background:rgba(14,13,18,.7);border:1px solid rgba(255,255,255,.14);border-radius:3px;color:#cfc7b4;font:500 12px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(255,255,255,.3)">← Voltar</button>
-      <button onClick="{{ wizNext }}" disabled="{{ nextDisabled }}" style="flex:1;padding:13px;background: {{ nextBg }};color: {{ nextCol }};border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.14em;text-transform:uppercase;cursor: {{ nextCursor }};transition:.2s">{{ nextLabel }}</button>
-    </div>
-  </div>
-</div>
+<dc-import name="JWizard" wizMaxW="{{ wizMaxW }}" stepDots="{{ stepDots }}" wizStep="{{ wizStep }}" stepTitle="{{ stepTitle }}" step1="{{ step1 }}" onWizName="{{ onWizName }}" wiz="{{ wiz }}" onWizChar="{{ onWizChar }}" onWizAge="{{ onWizAge }}" onWizOrigin="{{ onWizOrigin }}" onWizAppear="{{ onWizAppear }}" onWizClothes="{{ onWizClothes }}" onWizPers="{{ onWizPers }}" step2="{{ step2 }}" pxBase="{{ pxBase }}" pxImgA="{{ pxImgA }}" pxImgAOp="{{ pxImgAOp }}" pxImgB="{{ pxImgB }}" pxImgBOp="{{ pxImgBOp }}" pxRedOp="{{ pxRedOp }}" pxBlueOp="{{ pxBlueOp }}" pxMagOp="{{ pxMagOp }}" pxSteelOp="{{ pxSteelOp }}" pxColor="{{ pxColor }}" pxGlow="{{ pxGlow }}" embers="{{ embers }}" skyline="{{ skyline }}" wizDesktop="{{ wizDesktop }}" sensList="{{ sensList }}" wizMobile="{{ wizMobile }}" showManifest="{{ showManifest }}" onWizManifest="{{ onWizManifest }}" manifestLabel="{{ manifestLabel }}" step3="{{ step3 }}" weakHeader="{{ weakHeader }}" weakSubtitle="{{ weakSubtitle }}" isHumano="{{ isHumano }}" onWizMarks="{{ onWizMarks }}" isSensitive="{{ isSensitive }}" weakCountColor="{{ weakCountColor }}" weakCount="{{ weakCount }}" weakOpts="{{ weakOpts }}" step4="{{ step4 }}" poolColor="{{ poolColor }}" poolLeft="{{ poolLeft }}" attrView="{{ attrView }}" step5="{{ step5 }}" skillColor="{{ skillColor }}" skillLeft="{{ skillLeft }}" skillGroups="{{ skillGroups }}" step6="{{ step6 }}" onWizHistory="{{ onWizHistory }}" historyPrompts="{{ historyPrompts }}" step7="{{ step7 }}" sumName="{{ sumName }}" sumSensColor="{{ sumSensColor }}" sumSens="{{ sumSens }}" sumPlayerName="{{ sumPlayerName }}" sumAge="{{ sumAge }}" sumOrigin="{{ sumOrigin }}" sumPersonality="{{ sumPersonality }}" sumAppearance="{{ sumAppearance }}" sumClothes="{{ sumClothes }}" sumBonus="{{ sumBonus }}" sumIsHumano="{{ sumIsHumano }}" sumManifest="{{ sumManifest }}" sumAttrs="{{ sumAttrs }}" sumHasSkills="{{ sumHasSkills }}" sumSkills="{{ sumSkills }}" sumHasWeak="{{ sumHasWeak }}" sumWeak="{{ sumWeak }}" sumHasHistory="{{ sumHasHistory }}" sumHistory="{{ sumHistory }}" narrative="{{ narrative }}" wizPrev="{{ wizPrev }}" wizNext="{{ wizNext }}" nextDisabled="{{ nextDisabled }}" nextBg="{{ nextBg }}" nextCol="{{ nextCol }}" nextCursor="{{ nextCursor }}" nextLabel="{{ nextLabel }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · INTRO ========================= -->
 <sc-if value="{{ isJIntro }}" data-screen-label="Jogador Intro">
-<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:30px 18px;animation:fadeIn .6s ease">
-  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
-  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.42);pointer-events:none"></div>
-  <div style="position:relative;width:100%;max-width:440px;border-radius:14px;overflow:hidden;border:1px solid rgba(196,30,58,.3);box-shadow:0 30px 80px rgba(0,0,0,.6)">
-    <div style="height:220px;position:relative;background:radial-gradient(90% 110% at 50% 0%, #2e1117, #16080b)">
-      <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 20%, rgba(196,30,58,.3), transparent 70%)"></div>
-      <div style="position:absolute;left:0;right:0;bottom:0;padding:24px;background:linear-gradient(180deg,transparent,rgba(10,6,8,.9))">
-        <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:#c44a5e;margin-bottom:8px">One-shot · A Última Gota</div>
-        <h2 style="font-family:'Cinzel';font-weight:700;font-size:30px;margin:0;color:#efe8d8;line-height:1.1">A Última Gota</h2>
-      </div>
-    </div>
-    <div style="background:#100c0e;padding:26px 26px 30px">
-      <p style="font-family:'Cormorant Garamond';font-size:19px;line-height:1.6;color:#cdc6b6;margin:0 0 22px">A noite cai sobre Alta Vesper. Um banco aristocrático guarda mais que ouro — e o sangue que circula por seus cofres começou a faltar. Você foi chamado porque percebe o que os outros não veem. Hoje, alguém vai pagar a última gota.</p>
-      <button onClick="{{ toPanel }}" style="width:100%;padding:15px;background:#c41e3a;color:#fff;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#d6324c;box-shadow:0 0 28px rgba(196,30,58,.4)">Continuar →</button>
-    </div>
-  </div>
-</div>
+<dc-import name="JIntro" toPanel="{{ toPanel }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · MESA (PAINEL / DASHBOARD) ========================= -->

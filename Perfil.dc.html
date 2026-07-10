@@ -1,0 +1,77 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-mapa.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.50);pointer-events:none"></div>
+<div style="max-width:920px;margin:0 auto;padding:44px 24px 80px;animation:fadeUp .5s ease;position:relative">
+  <!-- welcome -->
+  <div style="position:relative;overflow:hidden;border-radius:12px;border:1px solid rgba(198,166,100,.22);background:radial-gradient(100% 140% at 0% 0%, rgba(60,48,28,.4), #13121a 60%);padding:30px 32px;margin-bottom:28px">
+    <div style="position:absolute;top:-30px;right:-10px;font-family:'Cinzel';font-weight:800;font-size:140px;color:rgba(198,166,100,.06);line-height:1">A</div>
+    <div style="font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">Bem-vindo de volta</div>
+    <h1 style="font-family:'Cinzel';font-weight:700;font-size:34px;margin:0;color:#efe8d8">{{ userName }}</h1>
+    <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:19px;color:#b9b2a2;margin:8px 0 20px;max-width:480px">As sombras de Saint Vesper aguardam. Reúna seus sensitivos, conduza suas mesas — ou comece uma nova noite.</p>
+    <button onClick="{{ goStart }}" style="padding:13px 28px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 11px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">▸ Iniciar nova aventura</button>
+  </div>
+
+  <!-- tabs -->
+  <div style="display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid rgba(255,255,255,.08)">
+    <button onClick="{{ onProfilePers }}" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid {{ tabPersUnder }};color: {{ tabPersCol }};font:600 13px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:-1px">Personagens <span style="font-family:'Space Mono';opacity:.7">{{ charCount }}</span></button>
+    <button onClick="{{ onProfileMesas }}" style="padding:12px 20px;background:transparent;border:none;border-bottom:2px solid {{ tabMesasUnder }};color: {{ tabMesasCol }};font:600 13px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;margin-bottom:-1px">Mesas <span style="font-family:'Space Mono';opacity:.7">{{ tableCount }}</span></button>
+  </div>
+
+  <!-- PERSONAGENS -->
+  <sc-if value="{{ profilePers }}">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px">
+      <div onClick="{{ createCharProfile }}" style="cursor:pointer;min-height:172px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;border:1.5px dashed rgba(198,166,100,.35);border-radius:10px;background:rgba(198,163,94,.03);transition:.25s" style-hover="border-color:rgba(224,193,121,.7);background:rgba(198,163,94,.07)">
+        <div style="width:46px;height:46px;border-radius:50%;border:1.5px solid #c6a35e;display:flex;align-items:center;justify-content:center;font-size:24px;color:#e0c179">+</div>
+        <span style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">Criar personagem</span>
+        <span style="font-size:12px;color:#8d887c">Ficha guiada em 7 etapas</span>
+      </div>
+      <sc-for list="{{ charactersView }}" as="c" hint-placeholder-count="3">
+        <div onClick="{{ c.onOpen }}" style="border-radius:10px;overflow:hidden;border:1px solid {{ c.border }};background:#13121a;display:flex;flex-direction:column;cursor:pointer;transition:.22s" style-hover="border-color:rgba(224,193,121,.55);transform:translateY(-3px);box-shadow:0 14px 36px rgba(0,0,0,.4)">
+          <div style="height:84px;position:relative;background:radial-gradient(120% 120% at 30% 0%, {{ c.surf }}, #0c0a10);display:flex;align-items:flex-end;padding:12px 14px">
+            <div style="position:absolute;top:12px;right:12px;width:40px;height:40px;border-radius:50%;background: {{ c.avatarBg }};border:1.5px solid {{ c.acc }};display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8">{{ c.avatarInitial }}</div>
+            <span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color: {{ c.acc }};padding:4px 9px;border:1px solid {{ c.acc }}55;border-radius:12px;background:rgba(8,8,12,.5)">{{ c.sensLabel }}</span>
+          </div>
+          <div style="padding:14px 16px 16px;flex:1;display:flex;flex-direction:column">
+            <div style="font-family:'Cinzel';font-weight:600;font-size:19px;color:#efe8d8">{{ c.name }}</div>
+            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90;margin-bottom:12px">{{ c.role }}</div>
+            <div style="flex:1"></div>
+            <sc-if value="{{ c.inUse }}">
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 11px;background:rgba(198,163,94,.08);border:1px solid rgba(198,166,100,.25);border-radius:6px">
+                <span style="width:7px;height:7px;border-radius:50%;background:#7fae8f;box-shadow:0 0 8px rgba(127,174,143,.6)"></span>
+                <span style="font-size:12px;color:#cdc6b6">Utilizando em: <span style="color:#e0c179">{{ c.usedIn }}</span></span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ c.free }}">
+              <div style="font-size:12px;color:#7e7a70;font-family:'Cormorant Garamond';font-style:italic;padding:8px 0">Disponível · não está em nenhuma mesa</div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- MESAS -->
+  <sc-if value="{{ profileMesas }}">
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <sc-for list="{{ tablesView }}" as="t" hint-placeholder-count="3">
+        <div onClick="{{ t.onOpen }}" style="cursor:pointer;display:flex;align-items:center;gap:18px;border-radius:10px;border:1px solid {{ t.border }};border-left:3px solid {{ t.acc }};background:#13121a;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(198,166,100,.5);transform:translateX(2px)">
+          <div style="width:52px;height:52px;border-radius:8px;flex-shrink:0;background:radial-gradient(120% 120% at 30% 0%, {{ t.surf }}, #0c0a10);border:1px solid {{ t.acc }}55;display:flex;align-items:center;justify-content:center;font-size:20px;color: {{ t.acc }}">{{ t.icon }}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">
+              <span style="font-family:'Cinzel';font-weight:600;font-size:20px;color:#efe8d8">{{ t.name }}</span>
+              <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background: {{ t.roleBg }};color: {{ t.roleCol }};border:1px solid {{ t.roleBorder }}">{{ t.roleLabel }}</span>
+            </div>
+            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90">{{ t.type }} · {{ t.faction }} · {{ t.status }}</div>
+          </div>
+          <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#e0c179;flex-shrink:0">{{ t.cta }} →</span>
+        </div>
+      </sc-for>
+      <div onClick="{{ goStart }}" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border:1.5px dashed rgba(198,166,100,.3);border-radius:10px;color:#cfc7b4;transition:.25s" style-hover="border-color:rgba(224,193,121,.6);color:#e9e3d4">
+        <span style="font-size:18px;color:#e0c179">+</span><span style="font-family:'Cinzel';font-weight:600;font-size:15px">Criar ou entrar em uma nova mesa</span>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</div>
+</x-dc>
