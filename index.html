@@ -571,6 +571,12 @@
         <button onClick="{{ onCopyLink }}" style="flex:1;padding:9px;background: {{ copyLinkBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyLinkCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyLinkLabel }}</button>
       </div>
       <sc-if value="{{ lobbyCopiedMsg }}"><div style="font-size:11px;color:#7fae8f;letter-spacing:.04em;margin-bottom:14px;animation:fadeIn .3s ease">✓ {{ lobbyCopiedMsg }}</div></sc-if>
+      <sc-if value="{{ lobbyNoAuth }}">
+        <div style="background:rgba(196,30,58,.08);border:1px solid rgba(196,30,58,.3);border-radius:5px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:#e08a8a;line-height:1.5">
+          ⚠ Sem conta: o código só funciona neste dispositivo.<br>
+          <span style="color:#a39e90">Crie uma conta para que jogadores de outros dispositivos possam entrar.</span>
+        </div>
+      </sc-if>
       <div style="display:flex;gap:18px;align-items:center">
         <div style="width:108px;height:108px;background:#0d0c11;border:1px solid rgba(198,166,100,.2);border-radius:5px;padding:9px;display:grid;grid-template-columns:repeat(21,1fr);gap:0">
           <sc-for list="{{ qr }}" as="q" hint-placeholder-count="441"><div style="width:100%;padding-bottom:100%;background: {{ q.cell }}"></div></sc-for>
@@ -2490,6 +2496,9 @@ class Component extends DCLogic {
         return commit(entry);
       });
     }
+    // Sem conta: código fica só no estado local — salva no localStorage para que
+    // o jogador na mesma máquina possa encontrá-lo sem precisar de Supabase.
+    try{ localStorage.setItem('afterdark:localTable',JSON.stringify({code:invite_code,name:nm,type:row.type})); }catch(e){}
     return commit({id:'t'+Date.now(),...row,role:'mestre',target:'m_session'});
   }
 
@@ -2514,11 +2523,24 @@ class Component extends DCLogic {
   async joinByCode(){
     const code=(this.state.joinCode||'').trim().toUpperCase();
     if(!code){ return; }
+    // 1. Verifica mesa local (mestre sem conta no mesmo dispositivo)
+    try{
+      const lc=localStorage.getItem('afterdark:localTable');
+      if(lc){
+        const lt=JSON.parse(lc);
+        if(lt.code===code){
+          this.setState({joinTableId:null,joinTableName:lt.name,joinTableType:lt.type||'One-shot'});
+          this.go('j_name');
+          return;
+        }
+      }
+    }catch(e){}
+    // 2. Verifica no Supabase (mestre logado)
     if(this.sb){
       this.setState({joinBusy:true,joinError:''});
       const {data,error}=await this.sb.from('tables').select('id,name,type,theme').eq('invite_code',code).single();
       this.setState({joinBusy:false});
-      if(error||!data){ this.setState({joinError:'Código não encontrado. Verifique com seu Mestre.'}); return; }
+      if(error||!data){ this.setState({joinError:'Código não encontrado. Verifique se o Mestre está conectado e a mesa foi criada.'}); return; }
       this.setState({joinTableId:data.id,joinTableName:data.name,joinTableType:data.type||'One-shot'});
       const {data:mbr}=await this.sb.from('table_members').insert({table_id:data.id,player_name:this.state.auth.name||'',user_id:this.state.auth.loggedIn?(await this.sb.auth.getUser()).data?.user?.id:null,status:'conectando'}).select('id').single();
       if(mbr) this.setState({memberId:mbr.id});
@@ -2759,15 +2781,18 @@ class Component extends DCLogic {
     this._finishPlayerWizard();
   }
   async _finishPlayerWizard(){
-    const s=this.state, w=s.wiz;
-    const attrs={}; this.ATTRS.forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
-    const charName=w.charName||'Personagem';
-    const charData={name:charName,sens:w.sens||'humano',attrs,skills:{...w.skills},weaknesses:[...w.weaknesses]};
-    if(this.sb && s.memberId){
-      await this.sb.from('table_members').update({player_name:w.name||s.auth.name||'Jogador',char_name:charName,char_data:charData,status:'pronto'}).eq('id',s.memberId);
-    }
+    try{
+      const s=this.state, w=s.wiz;
+      const attrs={}; (this.ATTRS||[]).forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
+      const charName=w.charName||'Personagem';
+      const charData={name:charName,sens:w.sens||'humano',attrs,skills:{...w.skills},weaknesses:[...(w.weaknesses||[])]};
+      if(this.sb && s.memberId){
+        await this.sb.from('table_members').update({player_name:w.name||s.auth.name||'Jogador',char_name:charName,char_data:charData,status:'pronto'}).eq('id',s.memberId);
+      }
+    }catch(e){ console.error('_finishPlayerWizard update error:',e); }
+    const tid=this.state.joinTableId;
     this.setState(st=>({screen:'j_lobby',nav:[...st.nav,'j_wizard']}));
-    this._startPlayerPolling(this.state.joinTableId);
+    this._startPlayerPolling(tid);
   }
   async _finishCharWizard(){
     const w=this.state.wiz;
@@ -3334,7 +3359,7 @@ class Component extends DCLogic {
       invOwned, noOwned:invOwned.length===0, emptyStuffMsg:s.invDivider==='armas'?'Você não carrega armas ainda.':'Você não carrega itens ainda.',
       invAvailable, noAvailable:invAvailable.length===0, noClues:cluesFoundV.length===0,
       players, readyCount, total:s.players.length, clocksAll, log:s.log, npcs, clues,
-      tableCode, lobbyInviteLink:`https://afterdark-rpg.netlify.app/?code=${tableCode}`,
+      tableCode, lobbyInviteLink:`https://afterdark-rpg.netlify.app/?code=${tableCode}`, lobbyNoAuth:!s.auth.loggedIn,
       tools, ptabs,
       toolRoteiro:s.masterTool==='roteiro', roteiroChoosing:!rt.mode, roteiroIsPadrao:rt.mode==='padrao', roteiroIsProprio:rt.mode==='proprio',
       roteiroEvents, roteiroDoneCount, roteiroTotal, roteiroText:rt.text,
