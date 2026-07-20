@@ -1,0 +1,49 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 80px;animation:fadeUp .5s ease">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.60);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:500px">
+    <!-- header -->
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">{{ joinTableType }}</div>
+      <h2 style="font-family:'Cinzel';font-weight:700;font-size:28px;margin:0 0 8px;color:#efe8d8">{{ joinTableName }}</h2>
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:7px 16px;border:1px solid rgba(127,174,143,.3);border-radius:20px;background:rgba(127,174,143,.06)">
+        <span style="width:7px;height:7px;border-radius:50%;background:#7fae8f;animation:glowPulse 2s ease-in-out infinite;display:inline-block"></span>
+        <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7fae8f">Aguardando o Mestre iniciar</span>
+      </div>
+    </div>
+    <!-- my char card -->
+    <div style="background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:10px;padding:18px 20px;margin-bottom:20px">
+      <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:12px">Sua ficha</div>
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:46px;height:46px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:20px;color:#efe8d8;background:#1a1820;border:2px solid {{ myCharAccent }}">{{ myCharInitial }}</div>
+        <div>
+          <div style="font-family:'Cinzel';font-weight:600;font-size:17px;color:#efe8d8">{{ myCharName }}</div>
+          <div style="font-size:13px;color:#a39e90;margin-top:2px">{{ myCharSensLabel }}</div>
+        </div>
+        <div style="flex:1"></div>
+        <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7fae8f;padding:5px 12px;border:1px solid rgba(127,174,143,.35);border-radius:20px">✓ Pronto</span>
+      </div>
+    </div>
+    <!-- all players -->
+    <div style="background:rgba(20,18,24,.7);border:1px solid rgba(198,166,100,.15);border-radius:10px;padding:20px">
+      <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:14px">Jogadores na mesa · {{ lobbyPlayerCount }}</div>
+      <sc-if value="{{ noLobbyPlayers }}">
+        <div style="text-align:center;padding:24px 0;color:#4a4740;font-family:'Cormorant Garamond';font-size:16px;font-style:italic">Aguardando outros jogadores...</div>
+      </sc-if>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ lobbyPlayers }}" as="lp">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 13px;background:#0f0e13;border:1px solid {{ lp.border }};border-radius:5px">
+            <div style="width:36px;height:36px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:15px;color:#efe8d8;background:#1a1820;border:1.5px solid {{ lp.acc }}">{{ lp.initial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;color:#e9e3d4;font-weight:500">{{ lp.char }} <sc-if value="{{ lp.isMe }}"><span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#c6a35e;margin-left:6px">você</span></sc-if></div>
+              <div style="font-size:12px;color:#7e7a70;font-style:italic;font-family:'Cormorant Garamond'">{{ lp.player }}</div>
+            </div>
+            <span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:{{ lp.statusCol }};padding:4px 10px;border:1px solid {{ lp.statusCol }}44;border-radius:14px">{{ lp.statusLabel }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>

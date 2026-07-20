@@ -9,8 +9,10 @@
       <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Use o código do seu Mestre</p>
     </div>
     <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:7px">Código de convite</label>
-    <input value="{{ joinCode }}" onInput="{{ onJoinCode }}" placeholder="SV-7K92" style="width:100%;background:#0d0c11;border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:14px;font-family:'Space Mono';font-weight:700;font-size:20px;letter-spacing:.16em;color:#e0c179;text-align:center;margin-bottom:18px;outline:none"/>
-    <button onClick="{{ toName }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;margin-bottom:18px" style-hover="background:#e0c179">Entrar →</button>
+    <input value="{{ joinCode }}" onInput="{{ onJoinCode }}" placeholder="SV-7K92" style="width:100%;background:#0d0c11;border:1px solid {{ joinInputBorder }};border-radius:4px;padding:14px;font-family:'Space Mono';font-weight:700;font-size:20px;letter-spacing:.16em;color:#e0c179;text-align:center;margin-bottom:8px;outline:none"/>
+    <sc-if value="{{ hasJoinError }}"><p style="font-size:12px;color:#e08a8a;margin:0 0 12px;text-align:center">{{ joinError }}</p></sc-if>
+    <sc-if value="{{ !hasJoinError }}"><div style="height:20px"></div></sc-if>
+    <button onClick="{{ toName }}" disabled="{{ joinBusy }}" style="width:100%;padding:14px;background:{{ joinBtnBg }};color:{{ joinBtnCol }};border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:{{ joinBtnCursor }};margin-bottom:18px" style-hover="background:#e0c179">{{ joinBtnLabel }}</button>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div><span style="font-size:11px;color:#6f6b61;letter-spacing:.1em">OU</span><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div></div>
     <div style="display:flex;gap:10px">
       <button onClick="{{ toName }}" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(198,166,100,.25);border-radius:3px;color:#cfc7b4;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.55)">⛓ Por Link</button>

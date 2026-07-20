@@ -12,14 +12,18 @@
         <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;margin-bottom:5px">✦ Criar novo personagem</div>
         <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0">Ficha guiada em 7 etapas — do nome às perícias.</p>
       </div>
-      <div onClick="{{ toIntro }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(196,30,58,.25);border-radius:8px;padding:20px 22px;transition:.25s" style-hover="border-color:rgba(196,30,58,.6)">
-        <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;margin-bottom:5px">⚇ Usar personagem pronto</div>
-        <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0">Helena Voss · A Legista — sensível a vampiros, pronta para jogar.</p>
-      </div>
-      <div onClick="{{ toIntro }}" style="cursor:pointer;background:#0f0e13;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(255,255,255,.18)">
-        <div style="font-size:15px;color:#cdc6b6;margin-bottom:3px">↺ Selecionar personagem existente</div>
-        <p style="font-family:'Cormorant Garamond';font-size:15px;color:#7e7a70;margin:0">Você ainda não tem fichas salvas.</p>
-      </div>
+      <sc-for list="{{ savedCharsForJoin }}" as="sc">
+        <div onClick="{{ sc.onSelect }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(196,30,58,.25);border-radius:8px;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(196,30,58,.6)">
+          <div style="font-family:'Cinzel';font-weight:600;font-size:17px;color:#efe8d8;margin-bottom:4px">⚇ {{ sc.name }}</div>
+          <p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:0">{{ sc.sensLabel }} — usar esta ficha</p>
+        </div>
+      </sc-for>
+      <sc-if value="{{ noSavedChars }}">
+        <div style="background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:18px 22px;opacity:.5">
+          <div style="font-size:15px;color:#6f6b61;margin-bottom:3px">↺ Selecionar personagem existente</div>
+          <p style="font-family:'Cormorant Garamond';font-size:15px;color:#6f6b61;margin:0">Você ainda não tem fichas salvas.</p>
+        </div>
+      </sc-if>
     </div>
   </div>
 </div>

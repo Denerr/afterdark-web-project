@@ -3,7 +3,7 @@
   <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
   <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
   <div style="position:relative;width:100%;max-width:400px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:18px;padding:34px 28px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
-    <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7fae8f;margin-bottom:16px;text-align:center">✓ Conectado · A Última Gota</div>
+    <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#7fae8f;margin-bottom:16px;text-align:center">✓ Conectado · {{ joinTableName }}</div>
     <h2 style="font-family:'Cinzel';font-weight:700;font-size:23px;margin:0 0 22px;color:#efe8d8;text-align:center">Como devemos te chamar?</h2>
     <input onInput="{{ onJoinName }}" value="{{ joinName }}" placeholder="Seu nome (jogador)" style="width:100%;background:#0d0c11;border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:14px;font-size:16px;color:#e9e3d4;text-align:center;margin-bottom:18px;outline:none"/>
     <button onClick="{{ toChar }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Continuar →</button>

@@ -17,15 +17,21 @@
     <div style="flex:1;min-width:280px;background:rgba(20,18,24,.65);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:26px">
       <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:18px">Convite</div>
       <div style="font-size:11px;color:#8d887c;margin-bottom:6px;letter-spacing:.1em;text-transform:uppercase">Código</div>
-      <div style="font-family:'Space Mono';font-weight:700;font-size:30px;letter-spacing:.18em;color:#e0c179;margin-bottom:20px">SV-7K92</div>
+      <div style="font-family:'Space Mono';font-weight:700;font-size:30px;letter-spacing:.18em;color:#e0c179;margin-bottom:20px">{{ tableCode }}</div>
       <div style="display:flex;gap:10px;margin-bottom:14px">
-        <div style="flex:1;font-family:'Space Mono';font-size:12px;color:#a39e90;background:#0e0d12;border:1px solid rgba(255,255,255,.08);border-radius:3px;padding:11px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">afterdark.app/j/SV-7K92</div>
+        <div style="flex:1;font-family:'Space Mono';font-size:12px;color:#a39e90;background:#0e0d12;border:1px solid rgba(255,255,255,.08);border-radius:3px;padding:11px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ lobbyInviteLink }}</div>
       </div>
       <div style="display:flex;gap:8px;margin-bottom:10px">
         <button onClick="{{ onCopyCode }}" style="flex:1;padding:9px;background: {{ copyCodeBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyCodeCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyCodeLabel }}</button>
         <button onClick="{{ onCopyLink }}" style="flex:1;padding:9px;background: {{ copyLinkBg }};border:1px solid rgba(198,166,100,.3);border-radius:3px;color: {{ copyLinkCol }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.6)">{{ copyLinkLabel }}</button>
       </div>
       <sc-if value="{{ lobbyCopiedMsg }}"><div style="font-size:11px;color:#7fae8f;letter-spacing:.04em;margin-bottom:14px;animation:fadeIn .3s ease">✓ {{ lobbyCopiedMsg }}</div></sc-if>
+      <sc-if value="{{ lobbyNoAuth }}">
+        <div style="background:rgba(196,30,58,.08);border:1px solid rgba(196,30,58,.3);border-radius:5px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:#e08a8a;line-height:1.5">
+          ⚠ Sem conta: o código só funciona neste dispositivo.<br>
+          <span style="color:#a39e90">Crie uma conta para que jogadores de outros dispositivos possam entrar.</span>
+        </div>
+      </sc-if>
       <div style="display:flex;gap:18px;align-items:center">
         <div style="width:108px;height:108px;background:#0d0c11;border:1px solid rgba(198,166,100,.2);border-radius:5px;padding:9px;display:grid;grid-template-columns:repeat(21,1fr);gap:0">
           <sc-for list="{{ qr }}" as="q" hint-placeholder-count="441"><div style="width:100%;padding-bottom:100%;background: {{ q.cell }}"></div></sc-for>
@@ -40,7 +46,7 @@
         <div style="font-family:'Space Mono';font-size:13px;color:#e0c179">{{ readyCount }} prontos · {{ total }}/8</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <sc-for list="{{ players }}" as="p" hint-placeholder-count="4">
+        <sc-for list="{{ players }}" as="p">
           <div style="display:flex;align-items:center;gap:14px;padding:13px 15px;background:#0f0e13;border:1px solid {{ p.rowBorder }};border-radius:5px">
             <div style="width:40px;height:40px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8;background: {{ p.avatarBg }};border:1.5px solid {{ p.acc }}">{{ p.avatarInitial }}</div>
             <div style="flex:1;min-width:0">
