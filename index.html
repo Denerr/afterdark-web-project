@@ -1558,13 +1558,32 @@ class Component extends DCLogic {
     if(!tableId||!this.sb) return;
     const poll=async()=>{
       if(!this.sb) return;
-      const {data}=await this.sb.from('table_members').select('*').eq('table_id',tableId).order('joined_at',{ascending:true});
-      if(!data) return;
-      const mapMember=m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:(m.char_data&&m.char_data.sens)||null,attrs:(m.char_data&&m.char_data.attrs)||{},skills:(m.char_data&&m.char_data.skills)||{},wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)});
-      this.setState({players:data.map(mapMember)});
+      const [{data},{data:tbl}]=await Promise.all([
+        this.sb.from('table_members').select('*').eq('table_id',tableId).order('joined_at',{ascending:true}),
+        this.sb.from('tables').select('status').eq('id',tableId).single()
+      ]);
+      if(data){
+        const mapMember=m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:(m.char_data&&m.char_data.sens)||null,attrs:(m.char_data&&m.char_data.attrs)||{},skills:(m.char_data&&m.char_data.skills)||{},wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)});
+        this.setState({players:data.map(mapMember)});
+      }
+      if(tbl&&tbl.status==='Em andamento'){
+        clearInterval(this._ppoll);
+        this.setState(st=>({screen:'j_panel',nav:[...st.nav,'j_lobby']}));
+      }
     };
     poll();
     this._ppoll=setInterval(poll,2000);
+  }
+  async startGameSession(){
+    await this.saveCurrentTable();
+    this._startMemberPolling();
+    const nm=this.sessionTitle();
+    const row=this.state.tables.find(t=>t.name===nm);
+    if(this.sb && row && row.id && this.state.auth.loggedIn){
+      this.sb.from('tables').update({status:'Em andamento'}).eq('id',row.id).then(()=>{});
+      this.setState(st=>({tables:st.tables.map(t=>t.name===nm?{...t,status:'Em andamento'}:t)}));
+    }
+    this.go('m_session');
   }
   async _loadUserData(){
     if(!this.sb) return;
@@ -2472,7 +2491,7 @@ class Component extends DCLogic {
       goMestre:()=>this.pickRole('mestre'), goJogador:()=>this.pickRole('jogador'),
       back:()=>this.back(), reset:()=>this.reset(),
       pickCap:()=>this.pickMode('capitulos'), pickOne:()=>this.pickMode('oneshots'),
-      toLobby:()=>{ this.saveCurrentTable().then(()=>{ this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>{ this._startMemberPolling(); this.saveCurrentTable(); this.go('m_session'); }, closeScene:()=>this.closeScene(),
+      toLobby:()=>{ this.saveCurrentTable().then(()=>{ this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>this.startGameSession(), closeScene:()=>this.closeScene(),
       onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:'Salão de Leilões',acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:'As portas duplas se abrem. O Salão de Leilões respira ouro e ameaça. No palco, sob luz de recorte, o frasco lacrado de sangue aguarda — e cada par de olhos na sala já decidiu quanto está disposto a pagar.'}),
       onSceneNpc:()=>this.openScene({title:'NPC Revelado',sub:'Aurelian Voss',acc:'#c41e3a',surf:'#2e1117',glow:'rgba(196,30,58,.45)',text:'Ele atravessa o salão sem pressa, como quem já é dono de tudo. "Sangue antigo reconhece sangue antigo", diz — e o frio na sua nuca confirma o que você temia.'}),
       oneshotList, chaptersView, selChapter, sessTheme, sessName, centerBorder:'rgba(198,166,100,.18)',
