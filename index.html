@@ -1239,10 +1239,16 @@
         </div>
 
         <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#7e7a70;margin-bottom:12px">Zona de risco</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
         <button onClick="{{ confirmEnd }}" style="display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 16px;background:rgba(196,30,58,.06);border:1px solid rgba(196,30,58,.3);border-radius:8px;cursor:pointer;transition:.2s" style-hover="background:rgba(196,30,58,.12);border-color:rgba(196,30,58,.6)">
           <span style="font-size:17px;color:#c44a5e">⏻</span>
           <span style="flex:1"><span style="display:block;font-size:14px;color:#e08a8a">Encerrar a mesa</span><span style="font-size:12px;color:#9b7077;font-family:'Cormorant Garamond';font-style:italic">Finaliza a sessão de forma definitiva</span></span>
         </button>
+        <button onClick="{{ confirmDelete }}" style="display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 16px;background:rgba(196,30,58,.06);border:1px solid rgba(196,30,58,.3);border-radius:8px;cursor:pointer;transition:.2s" style-hover="background:rgba(196,30,58,.12);border-color:rgba(196,30,58,.6)">
+          <span style="font-size:17px;color:#c44a5e">🗑</span>
+          <span style="flex:1"><span style="display:block;font-size:14px;color:#e08a8a">Excluir mesa</span><span style="font-size:12px;color:#9b7077;font-family:'Cormorant Garamond';font-style:italic">Remove a mesa e os jogadores dela pra sempre, sem recuperação</span></span>
+        </button>
+        </div>
       </sc-if>
 
       <!-- INVITE -->
@@ -1275,6 +1281,19 @@
           <div style="display:flex;gap:10px">
             <button onClick="{{ manageBack }}" style="flex:1;padding:13px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font:500 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Cancelar</button>
             <button onClick="{{ endTable }}" style="flex:1;padding:13px;background:#c41e3a;border:none;border-radius:4px;color:#fff;font:700 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="background:#d6324c">Encerrar</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- CONFIRM DELETE -->
+      <sc-if value="{{ manageConfirmDelete }}">
+        <div style="text-align:center;padding:8px 0 4px">
+          <div style="width:52px;height:52px;border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:24px;color:#c44a5e;border:1px solid rgba(196,30,58,.4);background:rgba(196,30,58,.08)">🗑</div>
+          <div style="font-family:'Cinzel';font-weight:600;font-size:21px;color:#efe8d8;margin-bottom:8px">Excluir a mesa?</div>
+          <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.5;color:#a39e90;margin:0 0 22px">A mesa <span style="color:#e9e3d4">{{ sessionTitle }}</span> e todos os jogadores dela serão removidos permanentemente. Isso não pode ser desfeito.</p>
+          <div style="display:flex;gap:10px">
+            <button onClick="{{ manageBack }}" style="flex:1;padding:13px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font:500 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer">Cancelar</button>
+            <button onClick="{{ deleteTable }}" style="flex:1;padding:13px;background:#c41e3a;border:none;border-radius:4px;color:#fff;font:700 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="background:#d6324c">Excluir</button>
           </div>
         </div>
       </sc-if>
@@ -1346,6 +1365,19 @@
         <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">Histórico</div>
         <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.55;color:#b9b2a2;margin:0">{{ charDetail.bio }}</p>
       </sc-if>
+
+      <div style="margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.07)">
+        <sc-if value="{{ charDeleteConfirmOff }}">
+          <button onClick="{{ toggleCharDeleteConfirm }}" style="width:100%;padding:11px;background:rgba(196,30,58,.06);border:1px solid rgba(196,30,58,.3);border-radius:6px;color:#c44a5e;font-size:12px;letter-spacing:.06em;cursor:pointer" style-hover="background:rgba(196,30,58,.12);border-color:rgba(196,30,58,.6)">Excluir personagem</button>
+        </sc-if>
+        <sc-if value="{{ charDeleteConfirm }}">
+          <p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;text-align:center;margin:0 0 12px">Excluir {{ charDetail.name }} permanentemente? Isso não pode ser desfeito.</p>
+          <div style="display:flex;gap:10px">
+            <button onClick="{{ cancelCharDelete }}" style="flex:1;padding:11px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:6px;color:#cfc7b4;font-size:12px;letter-spacing:.06em;cursor:pointer">Cancelar</button>
+            <button onClick="{{ deleteCharacter }}" style="flex:1;padding:11px;background:#c41e3a;border:none;border-radius:6px;color:#fff;font-size:12px;letter-spacing:.06em;cursor:pointer" style-hover="background:#d6324c">Excluir</button>
+          </div>
+        </sc-if>
+      </div>
     </div>
   </div>
 </div>
@@ -1452,7 +1484,7 @@ class Component extends DCLogic {
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
     forgot:{email:'',sent:false,busy:false,error:''},
-    profileTab:'personagens', tableName:'', wizReturn:'player', selectedChar:null,
+    profileTab:'personagens', tableName:'', wizReturn:'player', selectedChar:null, charDeleteConfirm:false,
     manage:{open:false, view:'menu', saved:false, copied:false}, lobbyCopied:null,
     characters:[],
     tables:[],
@@ -1843,6 +1875,13 @@ class Component extends DCLogic {
   }
   pauseTable(){ this.updateTableStatus('Pausada · retomar depois','Mesa pausada para continuar em outro momento.'); }
   endTable(){ this.updateTableStatus('Encerrada','Mesa encerrada pelo Mestre.'); }
+  async deleteTable(){
+    const nm=this.sessionTitle();
+    const row=this.state.tables.find(t=>t.name===nm);
+    clearInterval(this._ri); clearInterval(this._mpoll); clearInterval(this._tsSaveT);
+    if(this.sb && row && row.id && this.state.auth.loggedIn){ await this.sb.from('tables').delete().eq('id',row.id); }
+    this.setState(st=>({tables:st.tables.filter(t=>t.name!==nm), manage:{...st.manage,open:false,view:'menu'}, screen:'profile', nav:[], profileTab:'mesas'}));
+  }
   pickChapter(i){ this.setState({chapter:i}); }
 
   // ---- lobby ----
@@ -2100,8 +2139,16 @@ class Component extends DCLogic {
   }
 
   // ---- character sheet + photo ----
-  openChar(id){ this.setState({selectedChar:id}); }
-  closeChar(){ this.setState({selectedChar:null}); }
+  openChar(id){ this.setState({selectedChar:id,charDeleteConfirm:false}); }
+  closeChar(){ this.setState({selectedChar:null,charDeleteConfirm:false}); }
+  toggleCharDeleteConfirm(){ this.setState({charDeleteConfirm:true}); }
+  cancelCharDelete(){ this.setState({charDeleteConfirm:false}); }
+  async deleteCharacter(){
+    const id=this.state.selectedChar;
+    if(!id) return;
+    if(this.sb && this.state.auth.loggedIn){ await this.sb.from('characters').delete().eq('id',id); }
+    this.setState(s=>({characters:s.characters.filter(c=>c.id!==id), selectedChar:null, charDeleteConfirm:false}));
+  }
   openPlayerCard(id){ this.setState({playerCardId:id}); }
   closePlayerCard(){ this.setState({playerCardId:null}); }
   onCharPhoto(e){ const f=e.target&&e.target.files&&e.target.files[0]; if(!f) return; const id=this.state.selectedChar; const rd=new FileReader(); rd.onload=()=>this.setCharPhoto(id,rd.result); rd.readAsDataURL(f); }
@@ -2536,9 +2583,9 @@ class Component extends DCLogic {
       // manage table
       sessionTitle, manageOpen:mg.open, stop:(e)=>{ e&&e.stopPropagation&&e.stopPropagation(); },
       openManage:()=>this.openManage(), closeManage:()=>this.closeManage(), manageBack:()=>this.manageSetView('menu'),
-      manageMenu:mg.view==='menu', manageInviteView:mg.view==='invite-player'||mg.view==='invite-spectator', manageConfirmEnd:mg.view==='confirm-end',
-      invitePlayer:()=>this.manageSetView('invite-player'), inviteSpectator:()=>this.manageSetView('invite-spectator'), confirmEnd:()=>this.manageSetView('confirm-end'),
-      saveProgress:()=>this.saveProgress(), pauseTable:()=>this.pauseTable(), endTable:()=>this.endTable(), copyInvite:()=>this.copyInvite(),
+      manageMenu:mg.view==='menu', manageInviteView:mg.view==='invite-player'||mg.view==='invite-spectator', manageConfirmEnd:mg.view==='confirm-end', manageConfirmDelete:mg.view==='confirm-delete',
+      invitePlayer:()=>this.manageSetView('invite-player'), inviteSpectator:()=>this.manageSetView('invite-spectator'), confirmEnd:()=>this.manageSetView('confirm-end'), confirmDelete:()=>this.manageSetView('confirm-delete'),
+      saveProgress:()=>this.saveProgress(), pauseTable:()=>this.pauseTable(), endTable:()=>this.endTable(), deleteTable:()=>this.deleteTable(), copyInvite:()=>this.copyInvite(),
       onCopyCode:()=>this.lobbyCopy('code'), onCopyLink:()=>this.lobbyCopy('link'),
       copyCodeLabel:s.lobbyCopied==='code'?'✓ Copiado':'Copiar código', copyLinkLabel:s.lobbyCopied==='link'?'✓ Copiado':'Copiar link',
       copyCodeBg:s.lobbyCopied==='code'?'rgba(127,174,143,.12)':'transparent', copyCodeCol:s.lobbyCopied==='code'?'#7fae8f':'#cfc7b4',
@@ -2552,6 +2599,7 @@ class Component extends DCLogic {
       copyLabel:mg.copied?'Copiado ✓':'Copiar', copyBg:mg.copied?'rgba(127,174,143,.12)':'transparent', copyCol:mg.copied?'#7fae8f':'#cfc7b4',
       // character sheet
       charOpen:!!selChar, charDetail, closeChar:()=>this.closeChar(), onCharPhoto:(e)=>this.onCharPhoto(e), removeCharPhoto:()=>this.removeCharPhoto(),
+      charDeleteConfirm:s.charDeleteConfirm, charDeleteConfirmOff:!s.charDeleteConfirm, toggleCharDeleteConfirm:()=>this.toggleCharDeleteConfirm(), cancelCharDelete:()=>this.cancelCharDelete(), deleteCharacter:()=>this.deleteCharacter(),
       playerCardOpen, playerCard, closePlayerCard:()=>this.closePlayerCard(),      canBack:s.nav.length>0, breadcrumb:this.crumb(),
       navWide:!s.playerNarrow, navNarrow:s.playerNarrow, showBreadcrumb:!s.playerNarrow,
       topMenuOpen:s.topMenuOpen, toggleTopMenu:()=>this.toggleTopMenu(), closeTopMenu:()=>this.closeTopMenu(),
