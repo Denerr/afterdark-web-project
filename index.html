@@ -1567,15 +1567,15 @@ class Component extends DCLogic {
     if(!tableId||!this.sb) return;
     const poll=async()=>{
       if(!this.sb) return;
-      const [{data},{data:tbl}]=await Promise.all([
+      const [{data},{data:tblStatus}]=await Promise.all([
         this.sb.from('table_members').select('*').eq('table_id',tableId).order('joined_at',{ascending:true}),
-        this.sb.from('tables').select('status').eq('id',tableId).single()
+        this.sb.rpc('get_table_status',{p_id:tableId})
       ]);
       if(data){
         const mapMember=m=>({id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:(m.char_data&&m.char_data.sens)||null,attrs:(m.char_data&&m.char_data.attrs)||{},skills:(m.char_data&&m.char_data.skills)||{},wounds:[],conditions:[],cond:'normal',active:!!(m.char_name)});
         this.setState({players:data.map(mapMember)});
       }
-      if(tbl&&tbl.status==='Em andamento'){
+      if(tblStatus==='Em andamento'){
         clearInterval(this._ppoll);
         this.setState(st=>({screen:'j_panel',nav:[...st.nav,'j_lobby']}));
       }
@@ -1740,7 +1740,7 @@ class Component extends DCLogic {
     // 2. Verifica no Supabase (mestre logado)
     if(this.sb){
       this.setState({joinBusy:true,joinError:''});
-      const {data,error}=await this.sb.from('tables').select('id,name,type,theme').eq('invite_code',code).single();
+      const {data,error}=await this.sb.rpc('get_table_by_invite_code',{p_code:code}).single();
       this.setState({joinBusy:false});
       if(error||!data){ this.setState({joinError:'Código não encontrado. Verifique se o Mestre está conectado e a mesa foi criada.'}); return; }
       this.setState({joinTableId:data.id,joinTableName:data.name,joinTableType:data.type||'One-shot'});
