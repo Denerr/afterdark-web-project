@@ -1974,17 +1974,17 @@ class Component extends DCLogic {
     this._finishPlayerWizard();
   }
   async _finishPlayerWizard(){
+    const s=this.state, w=s.wiz;
+    const attrs={}; (this.ATTRS||[]).forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
+    const charName=w.charName||'Personagem';
+    const charData={name:charName,sens:w.sens||'humano',attrs,skills:{...w.skills},weaknesses:[...(w.weaknesses||[])]};
     try{
-      const s=this.state, w=s.wiz;
-      const attrs={}; (this.ATTRS||[]).forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
-      const charName=w.charName||'Personagem';
-      const charData={name:charName,sens:w.sens||'humano',attrs,skills:{...w.skills},weaknesses:[...(w.weaknesses||[])]};
       if(this.sb && s.memberId){
         await this.sb.from('table_members').update({player_name:w.name||s.auth.name||'Jogador',char_name:charName,char_data:charData,status:'pronto'}).eq('id',s.memberId);
       }
     }catch(e){ console.error('_finishPlayerWizard update error:',e); }
     const tid=this.state.joinTableId;
-    this.setState(st=>({screen:'j_lobby',nav:[...st.nav,'j_wizard']}));
+    this.setState(st=>({screen:'j_lobby',nav:[...st.nav,'j_wizard'],self:{char:charName,nick:'',sens:w.sens||null,attrs,skills:{...w.skills},weaknesses:[...(w.weaknesses||[])],wounds:[],conditions:[],history:w.history||''}}));
     this._startPlayerPolling(tid);
   }
   async _finishCharWizard(){
