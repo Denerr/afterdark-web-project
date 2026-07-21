@@ -1487,7 +1487,7 @@ class Component extends DCLogic {
     scene:{local:'',clima:'',desc:'',npc:'',pistas:[]}
   };
 
-  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; this._initFromUrl(); }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
+  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; const hadCode=this._initFromUrl(); if(!hadCode) this._tryResumeMembership(); }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
     this._pxHandler=(ev)=>{ if(this.state.screen!=='j_wizard'||this.state.wizStep!==2) return; const w=window.innerWidth||1, h=window.innerHeight||1; this._pxN={x:ev.clientX/w-0.5, y:ev.clientY/h-0.5}; if(this._pxRaf) return; this._pxRaf=requestAnimationFrame(()=>{ this._pxRaf=null; const n=this._pxN||{x:0,y:0}; document.querySelectorAll('[data-px]').forEach(el=>{ const d=parseFloat(el.getAttribute('data-px'))||0; el.style.transform=`translate3d(${(-n.x*d*30).toFixed(1)}px, ${(-n.y*d*30).toFixed(1)}px, 0)`; }); }); };
     window.addEventListener('mousemove',this._pxHandler,{passive:true});
   }
@@ -1507,7 +1507,38 @@ class Component extends DCLogic {
   _loadSession(){ try{ const str=localStorage.getItem('afterdark:session'); if(!str) return; this._lastSync=str; this.setState(JSON.parse(str)); }catch(e){} }
   _applyIncoming(str){ if(!str||str===this._lastSync) return; try{ const o=JSON.parse(str); this._lastSync=str; this.setState(o); }catch(e){} }
   _saveSession(){ if(!this._ready) return; try{ const str=JSON.stringify(this._snapshot()); if(str===this._lastSync) return; this._lastSync=str; localStorage.setItem('afterdark:session',str); if(this._bc) this._bc.postMessage({str}); }catch(e){} }
-  componentDidUpdate(){ if(!this._ready) return; clearTimeout(this._saveT); this._saveT=setTimeout(()=>this._saveSession(),400); }
+  // ---- estado da sessão de jogo por mesa (Supabase) ----
+  _blankTableSession(){
+    const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)?JSON.parse(JSON.stringify(window.AfterdarkData.catalog)):{weapons:[],items:[]};
+    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat};
+  }
+  async _loadTableSession(tableId,isOwner){
+    const base=this._blankTableSession();
+    if(!tableId||!this.sb){ this.setState(base); return; }
+    let remote=null;
+    try{
+      if(isOwner){ const {data}=await this.sb.from('tables').select('session_state').eq('id',tableId).single(); remote=data&&data.session_state; }
+      else { const {data}=await this.sb.rpc('get_table_session_state',{p_id:tableId}); remote=data; }
+    }catch(e){}
+    this.setState((remote&&Object.keys(remote).length)?{...base,...remote}:base);
+  }
+  _saveTableSession(tableId){
+    if(!tableId||!this.sb) return;
+    clearTimeout(this._tsSaveT);
+    this._tsSaveT=setTimeout(()=>{
+      const snap={}; this._syncKeys().forEach(k=>{ snap[k]=this.state[k]; });
+      this.sb.from('tables').update({session_state:snap}).eq('id',tableId).then(()=>{});
+    },800);
+  }
+  componentDidUpdate(){
+    if(!this._ready) return;
+    clearTimeout(this._saveT); this._saveT=setTimeout(()=>this._saveSession(),400);
+    if(this.state.screen==='m_session' && this.sb && this.state.auth.loggedIn){
+      const nm=this.sessionTitle();
+      const row=this.state.tables.find(t=>t.name===nm);
+      if(row&&row.id) this._saveTableSession(row.id);
+    }
+  }
   _hydrateData(cb){
     const apply=()=>{
       const D=window.AfterdarkData; if(!D||!D.catalog) return false;
@@ -1535,8 +1566,35 @@ class Component extends DCLogic {
     try{
       const params=new URLSearchParams(window.location.search);
       const code=params.get('code');
-      if(code){ window.history.replaceState({},'',window.location.pathname); try{ localStorage.setItem('afterdark:pendingCode',code.toUpperCase()); }catch(e){} this.setState({joinCode:code.toUpperCase(),role:'jogador'}); this.go('j_join'); }
+      if(code){ window.history.replaceState({},'',window.location.pathname); try{ localStorage.setItem('afterdark:pendingCode',code.toUpperCase()); }catch(e){} this.setState({joinCode:code.toUpperCase(),role:'jogador'}); this.go('j_join'); return true; }
     }catch(e){}
+    return false;
+  }
+  async _tryResumeMembership(){
+    let saved=null;
+    try{ const raw=localStorage.getItem('afterdark:activeMembership'); if(raw) saved=JSON.parse(raw); }catch(e){}
+    if(!saved||!saved.tableId||!saved.memberId||!this.sb) return;
+    try{
+      const [{data:mbr},{data:status}]=await Promise.all([
+        this.sb.from('table_members').select('*').eq('id',saved.memberId).single(),
+        this.sb.rpc('get_table_status',{p_id:saved.tableId})
+      ]);
+      if(!mbr){ localStorage.removeItem('afterdark:activeMembership'); return; }
+      const cd=mbr.char_data||{};
+      this.setState(s=>({
+        joinTableId:saved.tableId, joinTableName:saved.tableName, joinTableType:saved.tableType||'One-shot', memberId:saved.memberId,
+        joinName:mbr.player_name||s.joinName,
+        self:mbr.char_name?{char:mbr.char_name,nick:'',sens:cd.sens||null,attrs:cd.attrs||{},skills:cd.skills||{},weaknesses:cd.weaknesses||[],wounds:[],conditions:[],history:''}:s.self
+      }));
+      if(status==='Em andamento'){
+        await this._loadTableSession(saved.tableId,false);
+        this.setState({screen:'j_panel',nav:[]});
+        this._startJogadorSessionPoll(saved.tableId);
+      } else {
+        this.setState({screen:'j_lobby',nav:[]});
+        this._startPlayerPolling(saved.tableId);
+      }
+    }catch(e){ console.error('resume membership failed:',e); }
   }
   _resumePendingCode(){
     try{
@@ -1577,11 +1635,18 @@ class Component extends DCLogic {
       }
       if(tblStatus==='Em andamento'){
         clearInterval(this._ppoll);
+        await this._loadTableSession(tableId,false);
         this.setState(st=>({screen:'j_panel',nav:[...st.nav,'j_lobby']}));
+        this._startJogadorSessionPoll(tableId);
       }
     };
     poll();
     this._ppoll=setInterval(poll,2000);
+  }
+  _startJogadorSessionPoll(tableId){
+    clearInterval(this._jsPoll);
+    if(!tableId||!this.sb) return;
+    this._jsPoll=setInterval(()=>this._loadTableSession(tableId,false),3000);
   }
   async startGameSession(){
     await this.saveCurrentTable();
@@ -1591,6 +1656,9 @@ class Component extends DCLogic {
     if(this.sb && row && row.id && this.state.auth.loggedIn){
       this.sb.from('tables').update({status:'Em andamento'}).eq('id',row.id).then(()=>{});
       this.setState(st=>({tables:st.tables.map(t=>t.name===nm?{...t,status:'Em andamento'}:t)}));
+      await this._loadTableSession(row.id,true);
+    } else {
+      this.setState(this._blankTableSession());
     }
     this.go('m_session');
   }
@@ -1603,7 +1671,7 @@ class Component extends DCLogic {
     if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
     if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,role:'mestre',target:'m_session'}))});
   }
-  componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
+  componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
   _switchPxBg(key){
     const url=this._NAT_BG[key]||'assets/images/nat-default.png';
@@ -1678,11 +1746,14 @@ class Component extends DCLogic {
     const {error}=await this.sb.auth.resetPasswordForEmail(this.state.forgot.email,{redirectTo:window.location.origin});
     this.setState(s=>({forgot:{...s.forgot,busy:false,sent:!error,error:error?this._authErrorMsg(error):''}}));
   }
-  async logout(){ clearInterval(this._ri); if(this.sb) await this.sb.auth.signOut(); this.setState({auth:{loggedIn:false,name:'',email:'',phone:''},screen:'landing',nav:[],login:{email:'',pass:''},reg:{name:'',email:'',phone:'',pass:'',pass2:''}}); }
+  async logout(){ clearInterval(this._ri); clearInterval(this._jsPoll); clearInterval(this._ppoll); try{ localStorage.removeItem('afterdark:activeMembership'); }catch(e){} if(this.sb) await this.sb.auth.signOut(); this.setState({auth:{loggedIn:false,name:'',email:'',phone:''},screen:'landing',nav:[],login:{email:'',pass:''},reg:{name:'',email:'',phone:'',pass:'',pass2:''}}); }
   setProfileTab(t){ this.setState({profileTab:t}); }
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
-  openTable(t){ this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':null, screen:t.target, nav:['profile']})); }
+  openTable(t){
+    this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':null, screen:t.target, nav:['profile']}));
+    if(t.role==='mestre' && t.id){ this._startMemberPolling(); this._loadTableSession(t.id,true); }
+  }
   _genInviteCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return 'SV-'+Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join(''); }
   saveCurrentTable(){
     const s=this.state; const nm=(s.tableName||'').trim();
@@ -1745,7 +1816,10 @@ class Component extends DCLogic {
       if(error||!data){ this.setState({joinError:'Código não encontrado. Verifique se o Mestre está conectado e a mesa foi criada.'}); return; }
       this.setState({joinTableId:data.id,joinTableName:data.name,joinTableType:data.type||'One-shot'});
       const {data:mbr}=await this.sb.from('table_members').insert({table_id:data.id,player_name:this.state.auth.name||'',user_id:this.state.auth.loggedIn?(await this.sb.auth.getUser()).data?.user?.id:null,status:'conectando'}).select('id').single();
-      if(mbr) this.setState({memberId:mbr.id});
+      if(mbr){
+        this.setState({memberId:mbr.id});
+        try{ localStorage.setItem('afterdark:activeMembership',JSON.stringify({tableId:data.id,memberId:mbr.id,tableName:data.name,tableType:data.type||'One-shot'})); }catch(e){}
+      }
     }
     this.go('j_name');
   }
