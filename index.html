@@ -173,7 +173,7 @@
 
 <!-- ========================= MESTRE · LOBBY ========================= -->
 <sc-if value="{{ isMLobby }}" data-screen-label="Mestre Lobby">
-<dc-import name="MLobby" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" tableCode="{{ tableCode }}" lobbyInviteLink="{{ lobbyInviteLink }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" lobbyNoAuth="{{ lobbyNoAuth }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
+<dc-import name="MLobby" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" startSessionDisabled="{{ startSessionDisabled }}" startSessionBg="{{ startSessionBg }}" startSessionCol="{{ startSessionCol }}" startSessionCursor="{{ startSessionCursor }}" tableCode="{{ tableCode }}" lobbyInviteLink="{{ lobbyInviteLink }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" lobbyNoAuth="{{ lobbyNoAuth }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · SESSÃO (PAINEL) ========================= -->
@@ -869,7 +869,7 @@
 
 <!-- ========================= JOGADOR · LOBBY (aguardando mestre) ========================= -->
 <sc-if value="{{ isJLobby }}" data-screen-label="Jogador Lobby">
-<dc-import name="JLobby" joinTableType="{{ joinTableType }}" joinTableName="{{ joinTableName }}" myCharAccent="{{ myCharAccent }}" myCharInitial="{{ myCharInitial }}" myCharName="{{ myCharName }}" myCharSensLabel="{{ myCharSensLabel }}" lobbyPlayerCount="{{ lobbyPlayerCount }}" noLobbyPlayers="{{ noLobbyPlayers }}" lobbyPlayers="{{ lobbyPlayers }}"/>
+<dc-import name="JLobby" joinTableType="{{ joinTableType }}" joinTableName="{{ joinTableName }}" myCharAccent="{{ myCharAccent }}" myCharInitial="{{ myCharInitial }}" myCharName="{{ myCharName }}" myCharSensLabel="{{ myCharSensLabel }}" lobbyPlayerCount="{{ lobbyPlayerCount }}" noLobbyPlayers="{{ noLobbyPlayers }}" lobbyPlayers="{{ lobbyPlayers }}" leaveTable="{{ leaveTable }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · WIZARD ========================= -->
@@ -1717,7 +1717,11 @@ class Component extends DCLogic {
 
   // ---- nav ----
   go(screen,patch){ this.setState(s=>({nav:[...s.nav,s.screen],screen,...(patch||{})})); }
-  back(){ this.setState(s=> s.nav.length?({screen:s.nav[s.nav.length-1],nav:s.nav.slice(0,-1)}):s); }
+  back(){
+    this.setState(s=> s.nav.length?({screen:s.nav[s.nav.length-1],nav:s.nav.slice(0,-1)}):s, ()=>{
+      if(this.state.screen==='j_lobby' && this.state.joinTableId) this._startPlayerPolling(this.state.joinTableId);
+    });
+  }
   reset(){ clearInterval(this._ri); this.setState({screen:this.state.auth.loggedIn?'profile':'landing',nav:[],role:null,mode:null,oneshot:null,sceneMode:null,roll:null,rolling:false,pRoll:null,wizStep:1}); }
   setHomeVar(v){ this.setState({homeVar:v}); }
   pickRole(r){ if(r==='mestre'){ this.go('m_tablename',{role:r}); } else { this.go('j_join',{role:r}); } }
@@ -1778,7 +1782,20 @@ class Component extends DCLogic {
     const {error}=await this.sb.auth.resetPasswordForEmail(this.state.forgot.email,{redirectTo:window.location.origin});
     this.setState(s=>({forgot:{...s.forgot,busy:false,sent:!error,error:error?this._authErrorMsg(error):''}}));
   }
-  async logout(){ clearInterval(this._ri); clearInterval(this._jsPoll); clearInterval(this._ppoll); try{ localStorage.removeItem('afterdark:activeMembership'); }catch(e){} if(this.sb) await this.sb.auth.signOut(); this.setState({auth:{loggedIn:false,name:'',email:'',phone:''},screen:'landing',nav:[],login:{email:'',pass:''},reg:{name:'',email:'',phone:'',pass:'',pass2:''}}); }
+  async logout(){
+    clearInterval(this._ri); clearInterval(this._jsPoll); clearInterval(this._ppoll); clearInterval(this._mpoll);
+    try{ localStorage.removeItem('afterdark:activeMembership'); }catch(e){}
+    if(this.sb){
+      if(this.state.memberId){ this.sb.from('table_members').delete().eq('id',this.state.memberId).then(()=>{}); }
+      if(this.state.auth.loggedIn && (this.state.screen==='m_session'||this.state.screen==='m_lobby')){
+        const nm=this.sessionTitle();
+        const row=this.state.tables.find(t=>t.name===nm);
+        if(row&&row.id) this.sb.from('tables').update({status:'Pausada · retomar depois'}).eq('id',row.id).then(()=>{});
+      }
+      await this.sb.auth.signOut();
+    }
+    this.setState({auth:{loggedIn:false,name:'',email:'',phone:''},screen:'landing',nav:[],login:{email:'',pass:''},reg:{name:'',email:'',phone:'',pass:'',pass2:''}});
+  }
   setProfileTab(t){ this.setState({profileTab:t}); }
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
@@ -1824,6 +1841,13 @@ class Component extends DCLogic {
     const s=this.state; const nm=this.sessionTitle();
     const t=s.tables.find(t=>t.name===nm);
     return (t&&t.invite_code)||'—';
+  }
+  async leaveTable(){
+    clearInterval(this._ppoll); clearInterval(this._jsPoll);
+    const id=this.state.memberId;
+    if(this.sb && id){ await this.sb.from('table_members').delete().eq('id',id); }
+    try{ localStorage.removeItem('afterdark:activeMembership'); }catch(e){}
+    this.setState({joinTableId:null,joinTableName:'',joinTableType:'',memberId:null,joinCode:'',joinName:'',screen:this.state.auth.loggedIn?'start':'landing',nav:[]});
   }
   async joinByCode(){
     const code=(this.state.joinCode||'').trim().toUpperCase();
@@ -2683,6 +2707,7 @@ class Component extends DCLogic {
       invOwned, noOwned:invOwned.length===0, emptyStuffMsg:s.invDivider==='armas'?'Você não carrega armas ainda.':'Você não carrega itens ainda.',
       invAvailable, noAvailable:invAvailable.length===0, noClues:cluesFoundV.length===0,
       players, readyCount, total:s.players.length, clocksAll, log:s.log, npcs, clues,
+      startSessionDisabled:readyCount===0, startSessionBg:readyCount===0?'#26242c':sessTheme.acc, startSessionCol:readyCount===0?'#6f6b61':'#0b0b10', startSessionCursor:readyCount===0?'not-allowed':'pointer',
       tableCode, lobbyInviteLink:`https://afterdark-rpg.netlify.app/?code=${tableCode}`, lobbyNoAuth:!s.auth.loggedIn,
       tools, ptabs,
       toolRoteiro:s.masterTool==='roteiro', roteiroChoosing:!rt.mode, roteiroIsPadrao:rt.mode==='padrao', roteiroIsProprio:rt.mode==='proprio',
@@ -2737,6 +2762,7 @@ class Component extends DCLogic {
       lobbyPlayers:s.players.map(m=>{ const isMine=m.id===s.memberId; const acc=this.SENS_ACCENT[m.sens]||'#b9a06a'; const statusLabel={pronto:'Pronto',conectando:'Conectando',escolhendo:'Escolhendo',criando:'Criando ficha'}; return { ...m, initial:m.char&&m.char!=='—'?m.char[0].toUpperCase():'?', acc, border:isMine?'rgba(198,166,100,.4)':'rgba(255,255,255,.07)', isMe:isMine, statusLabel:statusLabel[m.status]||m.status, statusCol:m.status==='pronto'?'#7fae8f':'#a39e90' }; }),
       lobbyPlayerCount:s.players.length,
       noLobbyPlayers:s.players.length===0,
+      leaveTable:()=>this.leaveTable(),
       wizStep:s.wizStep, wiz:w, stepDots, stepTitle,
       step1:s.wizStep===1, step2:s.wizStep===2, step3:s.wizStep===3, step4:s.wizStep===4, step5:s.wizStep===5, step6:s.wizStep===6, step7:s.wizStep===7,
       attrView, skillView, skillGroups, weakOpts, sensList, hasSens:!!w.sens,

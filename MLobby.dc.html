@@ -9,8 +9,9 @@
       <h2 style="font-family:'Cinzel';font-weight:700;font-size:32px;margin:0;color:#efe8d8">{{ sessName }}</h2>
       <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:17px;color:#a39e90;margin-top:4px">Modo One-shot · Aguardando o grupo</div>
     </div>
-    <button onClick="{{ startSession }}" style="padding:15px 34px;background: {{ sessTheme.acc }};color:#0b0b10;border:none;border-radius:2px;font:700 12px/1 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer;transition:.25s;box-shadow:0 0 0 1px {{ sessTheme.acc }}" style-hover="filter:brightness(1.18);box-shadow:0 0 30px {{ sessTheme.glow }}">▸ Iniciar RPG</button>
+    <button onClick="{{ startSession }}" disabled="{{ startSessionDisabled }}" style="padding:15px 34px;background: {{ startSessionBg }};color: {{ startSessionCol }};border:none;border-radius:2px;font:700 12px/1 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor: {{ startSessionCursor }};transition:.25s;box-shadow:0 0 0 1px {{ startSessionBg }}" style-hover="filter:brightness(1.18);box-shadow:0 0 30px {{ sessTheme.glow }}">▸ Iniciar RPG</button>
   </div>
+  <sc-if value="{{ startSessionDisabled }}"><p style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8d887c;margin:-18px 0 18px;text-align:right">Aguardando pelo menos um jogador pronto para começar.</p></sc-if>
 
   <div style="display:flex;gap:24px;flex-wrap:wrap">
     <!-- invite -->
