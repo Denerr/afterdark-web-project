@@ -1484,7 +1484,7 @@ class Component extends DCLogic {
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
     forgot:{email:'',sent:false,busy:false,error:''},
-    profileTab:'personagens', tableName:'', wizReturn:'player', selectedChar:null, charDeleteConfirm:false,
+    profileTab:'personagens', tableName:'', wizReturn:'player', selectedChar:null, charDeleteConfirm:false, pendingHardDeleteId:null,
     manage:{open:false, view:'menu', saved:false, copied:false}, lobbyCopied:null,
     characters:[],
     tables:[],
@@ -1701,7 +1701,7 @@ class Component extends DCLogic {
       this.sb.from('tables').select('*').order('created_at',{ascending:true})
     ]);
     if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
-    if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,role:'mestre',target:'m_session'}))});
+    if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,archived:!!r.archived,role:'mestre',target:'m_session'}))});
   }
   componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
@@ -1814,14 +1814,14 @@ class Component extends DCLogic {
     const commit=(entry)=>new Promise(resolve=>this.setState(st=>({tables:[entry,...st.tables]}),resolve));
     if(this.sb && s.auth.loggedIn){
       return this.sb.from('tables').insert(row).select().single().then(({data,error})=>{
-        const entry=(!error&&data)? {id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,invite_code:data.invite_code,role:'mestre',target:'m_session'} : {id:'t'+Date.now(),...row,role:'mestre',target:'m_session'};
+        const entry=(!error&&data)? {id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,invite_code:data.invite_code,archived:false,role:'mestre',target:'m_session'} : {id:'t'+Date.now(),...row,archived:false,role:'mestre',target:'m_session'};
         return commit(entry);
       });
     }
     // Sem conta: código fica só no estado local — salva no localStorage para que
     // o jogador na mesma máquina possa encontrá-lo sem precisar de Supabase.
     try{ localStorage.setItem('afterdark:localTable',JSON.stringify({code:invite_code,name:nm,type:row.type})); }catch(e){}
-    return commit({id:'t'+Date.now(),...row,role:'mestre',target:'m_session'});
+    return commit({id:'t'+Date.now(),...row,archived:false,role:'mestre',target:'m_session'});
   }
 
   // ---- gerenciar mesa ----
@@ -1899,13 +1899,28 @@ class Component extends DCLogic {
   }
   pauseTable(){ this.updateTableStatus('Pausada · retomar depois','Mesa pausada para continuar em outro momento.'); }
   endTable(){ this.updateTableStatus('Encerrada','Mesa encerrada pelo Mestre.'); }
+  async _deleteTableRowById(id){
+    if(this.sb && id && this.state.auth.loggedIn){ await this.sb.from('tables').delete().eq('id',id); }
+    this.setState(st=>({tables:st.tables.filter(t=>t.id!==id)}));
+  }
   async deleteTable(){
     const nm=this.sessionTitle();
     const row=this.state.tables.find(t=>t.name===nm);
     clearInterval(this._ri); clearInterval(this._mpoll); clearInterval(this._tsSaveT);
-    if(this.sb && row && row.id && this.state.auth.loggedIn){ await this.sb.from('tables').delete().eq('id',row.id); }
-    this.setState(st=>({tables:st.tables.filter(t=>t.name!==nm), manage:{...st.manage,open:false,view:'menu'}, screen:'profile', nav:[], profileTab:'mesas'}));
+    if(row) await this._deleteTableRowById(row.id);
+    this.setState(st=>({manage:{...st.manage,open:false,view:'menu'}, screen:'profile', nav:[], profileTab:'mesas'}));
   }
+  archiveTable(t){
+    if(this.sb && t.id && this.state.auth.loggedIn){ this.sb.from('tables').update({archived:true}).eq('id',t.id).then(()=>{}); }
+    this.setState(st=>({tables:st.tables.map(x=>x.id===t.id?{...x,archived:true}:x)}));
+  }
+  restoreTable(t){
+    if(this.sb && t.id && this.state.auth.loggedIn){ this.sb.from('tables').update({archived:false}).eq('id',t.id).then(()=>{}); }
+    this.setState(st=>({tables:st.tables.map(x=>x.id===t.id?{...x,archived:false}:x)}));
+  }
+  askHardDeleteTable(t){ this.setState({pendingHardDeleteId:t.id}); }
+  cancelHardDeleteTable(){ this.setState({pendingHardDeleteId:null}); }
+  async confirmHardDeleteTable(t){ await this._deleteTableRowById(t.id); this.setState({pendingHardDeleteId:null}); }
   pickChapter(i){ this.setState({chapter:i}); }
 
   // ---- lobby ----
@@ -2450,7 +2465,17 @@ class Component extends DCLogic {
     const tIcon={vampire:'♛',demon:'✦',werewolf:'☾',human:'◈'};
     const tAcc={vampire:'#c41e3a',demon:'#d6308a',werewolf:'#7ea6d4',human:'#b9a06a'};
     const tSurf={vampire:'#2e1117',demon:'#2a1230',werewolf:'#16202e',human:'#1a2733'};
-    const tablesView=s.tables.map(t=>{ const isM=t.role==='mestre'; return {...t, icon:tIcon[t.theme]||'◈', acc:tAcc[t.theme]||'#b9a06a', surf:tSurf[t.theme]||'#1a2733', border:'rgba(255,255,255,.08)', roleLabel:isM?'Mestre':'Jogador', roleBg:isM?'rgba(198,163,94,.14)':'rgba(196,30,58,.14)', roleCol:isM?'#e0c179':'#e07a8a', roleBorder:isM?'rgba(198,166,100,.4)':'rgba(196,30,58,.4)', cta:isM?'Continuar':'Entrar', onOpen:()=>this.openTable(t) }; });
+    const tablesView=s.tables.map(t=>{
+      const isM=t.role==='mestre'; const isArchived=!!t.archived; const isPendingDelete=s.pendingHardDeleteId===t.id;
+      return {...t, icon:tIcon[t.theme]||'◈', acc:tAcc[t.theme]||'#b9a06a', surf:tSurf[t.theme]||'#1a2733', border:'rgba(255,255,255,.08)',
+        roleLabel:isM?'Mestre':'Jogador', roleBg:isM?'rgba(198,163,94,.14)':'rgba(196,30,58,.14)', roleCol:isM?'#e0c179':'#e07a8a', roleBorder:isM?'rgba(198,166,100,.4)':'rgba(196,30,58,.4)',
+        cta:isM?'Continuar':'Entrar', onOpen:()=>this.openTable(t),
+        rowOpacity:isArchived?'.55':'1', isArchived,
+        showActive:!isArchived, showArchived:isArchived&&!isPendingDelete, showConfirmDelete:isPendingDelete,
+        onArchive:()=>this.archiveTable(t), onRestore:()=>this.restoreTable(t),
+        onAskHardDelete:()=>this.askHardDeleteTable(t), onCancelHardDelete:()=>this.cancelHardDeleteTable(), onConfirmHardDelete:()=>this.confirmHardDeleteTable(t)
+      };
+    });
     const pPers=s.profileTab==='personagens', pMesas=s.profileTab==='mesas';
     const regValid=this.regValid();
     const emailTouched=s.reg.email.length>0;

@@ -55,16 +55,35 @@
   <sc-if value="{{ profileMesas }}">
     <div style="display:flex;flex-direction:column;gap:14px">
       <sc-for list="{{ tablesView }}" as="t" hint-placeholder-count="3">
-        <div onClick="{{ t.onOpen }}" style="cursor:pointer;display:flex;align-items:center;gap:18px;border-radius:10px;border:1px solid {{ t.border }};border-left:3px solid {{ t.acc }};background:#13121a;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(198,166,100,.5);transform:translateX(2px)">
+        <div style="display:flex;align-items:center;gap:18px;border-radius:10px;border:1px solid {{ t.border }};border-left:3px solid {{ t.acc }};background:#13121a;padding:18px 22px;transition:.25s;opacity: {{ t.rowOpacity }}">
           <div style="width:52px;height:52px;border-radius:8px;flex-shrink:0;background:radial-gradient(120% 120% at 30% 0%, {{ t.surf }}, #0c0a10);border:1px solid {{ t.acc }}55;display:flex;align-items:center;justify-content:center;font-size:20px;color: {{ t.acc }}">{{ t.icon }}</div>
           <div style="flex:1;min-width:0">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px;flex-wrap:wrap">
               <span style="font-family:'Cinzel';font-weight:600;font-size:20px;color:#efe8d8">{{ t.name }}</span>
               <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background: {{ t.roleBg }};color: {{ t.roleCol }};border:1px solid {{ t.roleBorder }}">{{ t.roleLabel }}</span>
+              <sc-if value="{{ t.isArchived }}"><span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:#8d887c;border:1px solid rgba(255,255,255,.14)">Inativa</span></sc-if>
             </div>
             <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90">{{ t.type }} · {{ t.faction }} · {{ t.status }}</div>
           </div>
-          <span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#e0c179;flex-shrink:0">{{ t.cta }} →</span>
+          <sc-if value="{{ t.showActive }}">
+            <div style="display:flex;gap:8px;flex-shrink:0;align-items:center">
+              <span onClick="{{ t.onOpen }}" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#e0c179;cursor:pointer" style-hover="color:#e0c179">{{ t.cta }} →</span>
+              <button onClick="{{ t.onArchive }}" style="padding:7px 12px;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:5px;color:#c44a5e;font-size:11px;letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(196,30,58,.6)">Excluir</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ t.showArchived }}">
+            <div style="display:flex;gap:8px;flex-shrink:0">
+              <button onClick="{{ t.onRestore }}" style="padding:7px 12px;background:transparent;border:1px solid rgba(198,166,100,.35);border-radius:5px;color:#e0c179;font-size:11px;letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.7)">Restaurar</button>
+              <button onClick="{{ t.onAskHardDelete }}" style="padding:7px 12px;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:5px;color:#c44a5e;font-size:11px;letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(196,30,58,.6)">Excluir definitivamente</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ t.showConfirmDelete }}">
+            <div style="display:flex;gap:8px;flex-shrink:0;align-items:center">
+              <span style="font-size:12px;color:#a39e90;font-family:'Cormorant Garamond';font-style:italic">Apagar de vez?</span>
+              <button onClick="{{ t.onCancelHardDelete }}" style="padding:7px 12px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#cfc7b4;font-size:11px;letter-spacing:.06em;cursor:pointer">Cancelar</button>
+              <button onClick="{{ t.onConfirmHardDelete }}" style="padding:7px 12px;background:#c41e3a;border:none;border-radius:5px;color:#fff;font-size:11px;letter-spacing:.06em;cursor:pointer" style-hover="background:#d6324c">Confirmar</button>
+            </div>
+          </sc-if>
         </div>
       </sc-for>
       <div onClick="{{ goStart }}" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border:1.5px dashed rgba(198,166,100,.3);border-radius:10px;color:#cfc7b4;transition:.25s" style-hover="border-color:rgba(224,193,121,.6);color:#e9e3d4">
