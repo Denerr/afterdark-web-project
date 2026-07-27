@@ -131,6 +131,11 @@
 <dc-import name="EsqueciSenha" forgotSent="{{ forgotSent }}" forgotEmail="{{ forgotEmail }}" forgotError="{{ forgotError }}" forgotBusy="{{ forgotBusy }}" forgotBtnLabel="{{ forgotBtnLabel }}" onForgotEmail="{{ onForgotEmail }}" submitForgot="{{ submitForgot }}" goLogin="{{ goLogin }}"/>
 </sc-if>
 
+<!-- ========================= DEFINIR NOVA SENHA (link de recuperacao) ========================= -->
+<sc-if value="{{ isResetPassword }}" data-screen-label="Definir Nova Senha">
+<dc-import name="ResetSenha" resetDone="{{ resetDone }}" resetFormVisible="{{ resetFormVisible }}" resetPass="{{ resetPass }}" onResetPass="{{ onResetPass }}" onResetPass2="{{ onResetPass2 }}" resetError="{{ resetError }}" resetBusy="{{ resetBusy }}" resetBtnLabel="{{ resetBtnLabel }}" submitResetPassword="{{ submitResetPassword }}" goAfterReset="{{ goAfterReset }}"/>
+</sc-if>
+
 <!-- ========================= CONTA NÃO CONECTADA (gate) ========================= -->
 <sc-if value="{{ isConnectGate }}" data-screen-label="Conta nao conectada">
 <dc-import name="ConnectGate" gateWhat="{{ gateWhat }}" goLogin="{{ goLogin }}" goRegister="{{ goRegister }}" goHome="{{ goHome }}"/>
@@ -1484,6 +1489,7 @@ class Component extends DCLogic {
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
     forgot:{email:'',sent:false,busy:false,error:''},
+    resetPass:{pass:'',pass2:''}, resetError:'', resetBusy:false, resetDone:false,
     profileTab:'personagens', tableName:'', wizReturn:'player', selectedChar:null, charDeleteConfirm:false, pendingHardDeleteId:null,
     manage:{open:false, view:'menu', saved:false, copied:false}, lobbyCopied:null,
     characters:[],
@@ -1589,6 +1595,7 @@ class Component extends DCLogic {
         this.setState({auth: session? this._authFromUser(session.user) : {loggedIn:false,name:'',email:'',phone:''}});
         if(event==='SIGNED_IN'){ this._loadUserData(); this._resumePendingCode(); }
         if(event==='SIGNED_OUT') this.setState({characters:[],tables:[]});
+        if(event==='PASSWORD_RECOVERY'){ this.setState({screen:'auth_reset',nav:[],resetDone:false,resetError:'',resetPass:{pass:'',pass2:''}}); }
       });
       return true;
     };
@@ -1782,6 +1789,18 @@ class Component extends DCLogic {
     const {error}=await this.sb.auth.resetPasswordForEmail(this.state.forgot.email,{redirectTo:window.location.origin});
     this.setState(s=>({forgot:{...s.forgot,busy:false,sent:!error,error:error?this._authErrorMsg(error):''}}));
   }
+  setResetPass(k,v){ this.setState(s=>({resetPass:{...s.resetPass,[k]:v},resetError:''})); }
+  async submitResetPassword(){
+    const p=this.state.resetPass;
+    if(!p.pass||p.pass.length<6){ this.setState({resetError:'A senha precisa ter pelo menos 6 caracteres.'}); return; }
+    if(p.pass!==p.pass2){ this.setState({resetError:'As senhas não coincidem.'}); return; }
+    if(!this.sb){ this.setState({resetError:'Serviço indisponível no momento. Tente recarregar a página.'}); return; }
+    this.setState({resetBusy:true,resetError:''});
+    const {error}=await this.sb.auth.updateUser({password:p.pass});
+    if(error){ this.setState({resetBusy:false,resetError:this._authErrorMsg(error)}); return; }
+    this.setState({resetBusy:false,resetDone:true,resetPass:{pass:'',pass2:''}});
+  }
+  goAfterReset(){ this.setState({screen:this.state.auth.loggedIn?'profile':'landing',nav:[]}); }
   async logout(){
     clearInterval(this._ri); clearInterval(this._jsPoll); clearInterval(this._ppoll); clearInterval(this._mpoll);
     try{ localStorage.removeItem('afterdark:activeMembership'); }catch(e){}
@@ -2604,7 +2623,7 @@ class Component extends DCLogic {
       goHome:()=>this.goHome(), goMesas:()=>this.goMesas(), goPersonagens:()=>this.goPersonagens(),
       goLogo:()=>this.goLogo(), goLanding:()=>this.goLanding(), goLogin:()=>this.goLogin(), goRegister:()=>this.goRegister(), goForgot:()=>this.goForgot(), goProfile:()=>this.goProfile(), goStart:()=>this.goStart(), goRoleSelect:()=>this.goRoleSelect(), logout:()=>this.logout(),
       // screens
-      isLanding:screen==='landing', isRegister:screen==='auth_register', isLogin:screen==='auth_login', isForgot:screen==='auth_forgot', isProfile:screen==='profile', isStart:screen==='start', isTableName:screen==='m_tablename',
+      isLanding:screen==='landing', isRegister:screen==='auth_register', isLogin:screen==='auth_login', isForgot:screen==='auth_forgot', isResetPassword:screen==='auth_reset', isProfile:screen==='profile', isStart:screen==='start', isTableName:screen==='m_tablename',
       isRole:screen==='home', isMMode:screen==='m_mode', isMChapters:screen==='m_chapters', isMOneshots:screen==='m_oneshots',
       isMLobby:screen==='m_lobby', isMSession:screen==='m_session',
       isJJoin:screen==='j_join', isJName:screen==='j_name', isJChar:screen==='j_char', isJLobby:screen==='j_lobby', isJWizard:screen==='j_wizard', isJIntro:screen==='j_intro', isJPanel:screen==='j_panel',
@@ -2621,6 +2640,9 @@ class Component extends DCLogic {
       login:s.login, loginError:s.loginError, authBusy:s.authBusy, loginBtnLabel: s.authBusy?'Entrando…':'Entrar →', onLoginEmail:(e)=>this.setLogin('email',e.target.value), onLoginPass:(e)=>this.setLogin('pass',e.target.value), submitLogin:()=>this.submitLogin(),
       // forgot
       forgotEmail:s.forgot.email, forgotSent:s.forgot.sent, forgotBusy:s.forgot.busy, forgotError:s.forgot.error, forgotBtnLabel: s.forgot.busy?'Enviando…':'Enviar link', onForgotEmail:(e)=>this.setState(st=>({forgot:{...st.forgot,email:e.target.value,sent:false,error:''}})), submitForgot:()=>this.submitForgot(),
+      resetDone:s.resetDone, resetFormVisible:!s.resetDone, resetPass:s.resetPass, resetError:s.resetError, resetBusy:s.resetBusy,
+      resetBtnLabel:s.resetBusy?'Salvando…':'Salvar nova senha', onResetPass:(e)=>this.setResetPass('pass',e.target.value), onResetPass2:(e)=>this.setResetPass('pass2',e.target.value),
+      submitResetPassword:()=>this.submitResetPassword(), goAfterReset:()=>this.goAfterReset(),
       // profile
       profilePers:pPers, profileMesas:pMesas, charactersView, tablesView, charCount:s.characters.length, tableCount:s.tables.length,
       onProfilePers:()=>this.setProfileTab('personagens'), onProfileMesas:()=>this.setProfileTab('mesas'),

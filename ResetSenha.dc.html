@@ -1,0 +1,32 @@
+<x-dc>
+<div style="min-height:calc(100vh - 54px);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px 20px;animation:fadeUp .5s ease">
+  <div style="position:absolute;inset:0;background-image:url('assets/images/bg-eclipse.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
+  <div style="position:absolute;inset:0;background:rgba(5,6,12,0.55);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:400px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:16px;padding:34px 30px;box-shadow:0 30px 80px rgba(0,0,0,.6)">
+    <sc-if value="{{ resetDone }}">
+      <div style="text-align:center">
+        <div style="width:52px;height:52px;border:1.5px solid rgba(127,174,143,.5);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:22px;color:#7fae8f">✓</div>
+        <h2 style="font-family:'Cinzel';font-weight:700;font-size:22px;margin:0;color:#efe8d8">Senha atualizada</h2>
+        <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:12px 0 0;line-height:1.5">Sua senha foi redefinida com sucesso.</p>
+        <button onClick="{{ goAfterReset }}" style="width:100%;margin-top:22px;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Continuar →</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ resetFormVisible }}">
+      <h2 style="font-family:'Cinzel';font-weight:700;font-size:23px;margin:0 0 8px;color:#efe8d8;text-align:center">Definir Nova Senha</h2>
+      <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0 0 22px;text-align:center;line-height:1.5">Escolha uma nova senha para sua conta.</p>
+      <div style="display:flex;flex-direction:column;gap:13px;margin-bottom:16px">
+        <div>
+          <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Nova senha</label>
+          <input type="password" value="{{ resetPass.pass }}" onInput="{{ onResetPass }}" placeholder="••••••" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
+        </div>
+        <div>
+          <label style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;display:block;margin-bottom:6px">Confirmar senha</label>
+          <input type="password" value="{{ resetPass.pass2 }}" onInput="{{ onResetPass2 }}" placeholder="••••••" style="width:100%;background:#0d0c11;border:1px solid rgba(255,255,255,.1);border-radius:5px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
+        </div>
+      </div>
+      <sc-if value="{{ resetError }}"><div style="font-size:13px;color:#e08a8a;font-family:'Cormorant Garamond';font-style:italic;margin-bottom:12px">{{ resetError }}</div></sc-if>
+      <button onClick="{{ submitResetPassword }}" disabled="{{ resetBusy }}" style="width:100%;padding:14px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">{{ resetBtnLabel }}</button>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
