@@ -41,6 +41,13 @@
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </helmet>
 
+<sc-if value="{{ hasActionError }}">
+  <div style="position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:95;max-width:420px;width:calc(100% - 28px);background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:8px;padding:13px 16px;box-shadow:0 18px 50px rgba(0,0,0,.6);animation:slideDown .3s ease;display:flex;align-items:center;gap:10px">
+    <span style="font-size:15px;color:#e08a8a;flex-shrink:0">⚠</span>
+    <span style="font-size:13px;color:#e9e3d4;flex:1">{{ actionError }}</span>
+  </div>
+</sc-if>
+
 <sc-if value="{{ grain }}" hint-placeholder-val="{{ true }}">
   <div style="position:fixed;inset:0;pointer-events:none;z-index:60;mix-blend-mode:overlay;opacity:.5;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E&quot;)"></div>
 </sc-if>
@@ -1483,7 +1490,7 @@ class Component extends DCLogic {
   get THEME(){ return (window.AfterdarkData||{}).themes || {}; }
 
   state = {
-    homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil',
+    homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
     joinCode:'', joinName:'', joinBusy:false, joinError:'', joinTableId:null, joinTableName:'', joinTableType:'', memberId:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
@@ -1536,6 +1543,11 @@ class Component extends DCLogic {
   // BroadcastChannel; entre dispositivos diferentes exigiria um backend.
   _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
+  _flashActionError(msg){
+    clearTimeout(this._actionErrT);
+    this.setState({actionError:msg});
+    this._actionErrT=setTimeout(()=>this.setState({actionError:''}),4500);
+  }
   _initSync(){
     try{ this._bc=('BroadcastChannel' in window)? new BroadcastChannel('afterdark:session') : null; }catch(e){ this._bc=null; }
     if(this._bc) this._bc.onmessage=(ev)=>{ if(ev&&ev.data&&ev.data.str) this._applyIncoming(ev.data.str); };
@@ -1688,7 +1700,8 @@ class Component extends DCLogic {
     this._jsPoll=setInterval(()=>this._loadTableSession(tableId,false),3000);
   }
   async startGameSession(){
-    await this.saveCurrentTable();
+    const r=await this.saveCurrentTable();
+    if(!r.ok) return;
     this._startMemberPolling();
     const nm=this.sessionTitle();
     const row=this.state.tables.find(t=>t.name===nm);
@@ -1825,16 +1838,16 @@ class Component extends DCLogic {
   _genInviteCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return 'SV-'+Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join(''); }
   saveCurrentTable(){
     const s=this.state; const nm=(s.tableName||'').trim();
-    if(!nm || s.tables.some(t=>t.name===nm)) return Promise.resolve();
+    if(!nm || s.tables.some(t=>t.name===nm)) return Promise.resolve({ok:true});
     const sel=s.oneshot?this.ONESHOTS[s.oneshot]:null;
     const theme=sel? (s.oneshot==='gota'?'vampire':s.oneshot==='misterios'?'demon':'werewolf') : 'human';
     const invite_code=this._genInviteCode();
     const row={name:nm,type:s.mode==='capitulos'?'Campanha':'One-shot',faction:sel?sel.faction.split(' · ')[0]:'Misto',theme,status:'Aguardando jogadores',invite_code};
-    const commit=(entry)=>new Promise(resolve=>this.setState(st=>({tables:[entry,...st.tables]}),resolve));
+    const commit=(entry)=>new Promise(resolve=>this.setState(st=>({tables:[entry,...st.tables]}),()=>resolve({ok:true,entry})));
     if(this.sb && s.auth.loggedIn){
       return this.sb.from('tables').insert(row).select().single().then(({data,error})=>{
-        const entry=(!error&&data)? {id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,invite_code:data.invite_code,archived:false,role:'mestre',target:'m_session'} : {id:'t'+Date.now(),...row,archived:false,role:'mestre',target:'m_session'};
-        return commit(entry);
+        if(error||!data){ this._flashActionError('Não foi possível salvar a mesa. Verifique sua conexão e tente novamente.'); return {ok:false}; }
+        return commit({id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,invite_code:data.invite_code,archived:false,role:'mestre',target:'m_session'});
       });
     }
     // Sem conta: código fica só no estado local — salva no localStorage para que
@@ -1848,7 +1861,7 @@ class Component extends DCLogic {
   openManage(){ this.setState({manage:{open:true,view:'menu',saved:false,copied:false}}); }
   closeManage(){ this.setState(s=>({manage:{...s.manage,open:false}})); }
   manageSetView(v){ this.setState(s=>({manage:{...s.manage,view:v,copied:false}})); }
-  async saveProgress(){ await this.saveCurrentTable(); this.setState(s=>({manage:{...s.manage,saved:true},log:[{icon:'💾',t:'Mesa',txt:'Progresso da mesa salvo.'},...s.log]})); }
+  async saveProgress(){ const r=await this.saveCurrentTable(); if(!r.ok) return; this.setState(s=>({manage:{...s.manage,saved:true},log:[{icon:'💾',t:'Mesa',txt:'Progresso da mesa salvo.'},...s.log]})); }
   copyInvite(){
     const code=this._currentTableCode();
     const mg=this.state.manage; const isSpec=mg.view==='invite-spectator';
@@ -1864,7 +1877,7 @@ class Component extends DCLogic {
   async leaveTable(){
     clearInterval(this._ppoll); clearInterval(this._jsPoll);
     const id=this.state.memberId;
-    if(this.sb && id){ await this.sb.from('table_members').delete().eq('id',id); }
+    if(this.sb && id){ const {error}=await this.sb.from('table_members').delete().eq('id',id); if(error) this._flashActionError('Não foi possível sair da mesa agora. Tente novamente em instantes.'); }
     try{ localStorage.removeItem('afterdark:activeMembership'); }catch(e){}
     this.setState({joinTableId:null,joinTableName:'',joinTableType:'',memberId:null,joinCode:'',joinName:'',screen:this.state.auth.loggedIn?'start':'landing',nav:[]});
   }
@@ -1905,7 +1918,8 @@ class Component extends DCLogic {
     clearTimeout(this._lcT); this.setState({lobbyCopied:which}); this._lcT=setTimeout(()=>this.setState({lobbyCopied:null}),2000);
   }
   async updateTableStatus(status,label){
-    await this.saveCurrentTable();
+    const r=await this.saveCurrentTable();
+    if(!r.ok) return;
     const nm=this.sessionTitle();
     clearInterval(this._ri);
     const row=this.state.tables.find(t=>t.name===nm);
@@ -1919,23 +1933,35 @@ class Component extends DCLogic {
   pauseTable(){ this.updateTableStatus('Pausada · retomar depois','Mesa pausada para continuar em outro momento.'); }
   endTable(){ this.updateTableStatus('Encerrada','Mesa encerrada pelo Mestre.'); }
   async _deleteTableRowById(id){
-    if(this.sb && id && this.state.auth.loggedIn){ await this.sb.from('tables').delete().eq('id',id); }
+    if(this.sb && id && this.state.auth.loggedIn){
+      const {error}=await this.sb.from('tables').delete().eq('id',id);
+      if(error){ this._flashActionError('Não foi possível excluir a mesa. Tente novamente.'); return false; }
+    }
     this.setState(st=>({tables:st.tables.filter(t=>t.id!==id)}));
+    return true;
   }
   async deleteTable(){
     const nm=this.sessionTitle();
     const row=this.state.tables.find(t=>t.name===nm);
+    if(!row) return;
     clearInterval(this._ri); clearInterval(this._mpoll); clearInterval(this._tsSaveT);
-    if(row) await this._deleteTableRowById(row.id);
+    const ok=await this._deleteTableRowById(row.id);
+    if(!ok) return;
     this.setState(st=>({manage:{...st.manage,open:false,view:'menu'}, screen:'profile', nav:[], profileTab:'mesas'}));
   }
   archiveTable(t){
-    if(this.sb && t.id && this.state.auth.loggedIn){ this.sb.from('tables').update({archived:true}).eq('id',t.id).then(()=>{}); }
+    if(!this.sb || !t.id || !this.state.auth.loggedIn) return;
     this.setState(st=>({tables:st.tables.map(x=>x.id===t.id?{...x,archived:true}:x)}));
+    this.sb.from('tables').update({archived:true}).eq('id',t.id).then(({error})=>{
+      if(error){ this._flashActionError('Não foi possível excluir a mesa. Tente novamente.'); this.setState(st=>({tables:st.tables.map(x=>x.id===t.id?{...x,archived:false}:x)})); }
+    });
   }
   restoreTable(t){
-    if(this.sb && t.id && this.state.auth.loggedIn){ this.sb.from('tables').update({archived:false}).eq('id',t.id).then(()=>{}); }
+    if(!this.sb || !t.id || !this.state.auth.loggedIn) return;
     this.setState(st=>({tables:st.tables.map(x=>x.id===t.id?{...x,archived:false}:x)}));
+    this.sb.from('tables').update({archived:false}).eq('id',t.id).then(({error})=>{
+      if(error){ this._flashActionError('Não foi possível restaurar a mesa. Tente novamente.'); this.setState(st=>({tables:st.tables.map(x=>x.id===t.id?{...x,archived:true}:x)})); }
+    });
   }
   askHardDeleteTable(t){ this.setState({pendingHardDeleteId:t.id}); }
   cancelHardDeleteTable(){ this.setState({pendingHardDeleteId:null}); }
@@ -2174,7 +2200,9 @@ class Component extends DCLogic {
     const chData={name,role:w.personality||(w.sens==='humano'?'Humano Comum':'Sensitivo'),sens:w.sens||'humano',usedIn:null,photo:null,attrs,skills:{...w.skills},weaknesses:[...w.weaknesses],bio:w.history||''};
     if(this.sb && this.state.auth.loggedIn){
       const {data,error}=await this.sb.from('characters').insert({name,data:chData}).select().single();
-      if(!error && data){ this.setState(s=>({characters:[...s.characters,{...data.data,id:data.id}],screen:'profile',nav:[],profileTab:'personagens',wizStep:1})); return; }
+      if(error||!data){ this._flashActionError('Não foi possível salvar o personagem. Verifique sua conexão e tente novamente.'); return; }
+      this.setState(s=>({characters:[...s.characters,{...data.data,id:data.id}],screen:'profile',nav:[],profileTab:'personagens',wizStep:1}));
+      return;
     }
     this.setState(s=>({characters:[...s.characters,{...chData,id:'ch'+Date.now()}],screen:'profile',nav:[],profileTab:'personagens',wizStep:1}));
   }
@@ -2204,7 +2232,10 @@ class Component extends DCLogic {
   async deleteCharacter(){
     const id=this.state.selectedChar;
     if(!id) return;
-    if(this.sb && this.state.auth.loggedIn){ await this.sb.from('characters').delete().eq('id',id); }
+    if(this.sb && this.state.auth.loggedIn){
+      const {error}=await this.sb.from('characters').delete().eq('id',id);
+      if(error){ this._flashActionError('Não foi possível excluir o personagem. Tente novamente.'); return; }
+    }
     this.setState(s=>({characters:s.characters.filter(c=>c.id!==id), selectedChar:null, charDeleteConfirm:false}));
   }
   openPlayerCard(id){ this.setState({playerCardId:id}); }
@@ -2216,7 +2247,9 @@ class Component extends DCLogic {
     if(!this.sb || !this.state.auth.loggedIn) return;
     const ch=this.state.characters.find(c=>c.id===id); if(!ch) return;
     const {id:_id,...data}=ch;
-    this.sb.from('characters').update({data}).eq('id',id).then(()=>{});
+    this.sb.from('characters').update({data}).eq('id',id).then(({error})=>{
+      if(error) this._flashActionError('Não foi possível salvar a foto do personagem.');
+    });
   }
 
   // ---- roteiro (script da missão) ----
@@ -2337,7 +2370,7 @@ class Component extends DCLogic {
     const selChapter=chaptersView[s.chapter]||chaptersView[0];
 
     const oneshotList=Object.values(this.ONESHOTS).map(o=>{ const sd=o.key===s.oneshot; return {...o, selected:sd,
-      onClick:()=>this.pickOneshot(o.key), onCreate:()=>{ this.setState({oneshot:o.key},()=>{ this.saveCurrentTable().then(()=>{ this._startMemberPolling(); this.go('m_lobby'); }); }); },
+      onClick:()=>this.pickOneshot(o.key), onCreate:()=>{ this.setState({oneshot:o.key},()=>{ this.saveCurrentTable().then(r=>{ if(!r.ok) return; this._startMemberPolling(); this.go('m_lobby'); }); }); },
       borderCol:sd?o.acc:'rgba(255,255,255,.1)', shadow:sd?('0 16px 50px rgba(0,0,0,.5), 0 0 40px '+o.glow):'0 12px 30px rgba(0,0,0,.4)',
       btnBg:sd?o.acc:'transparent', btnCol:sd?'#0b0b10':o.acc
     }; });
@@ -2608,7 +2641,7 @@ class Component extends DCLogic {
     const invDividers=[['pistas','Pistas',cluesFoundV.length],['itens','Itens',(s.inventory.items||[]).length],['armas','Armas',(s.inventory.weapons||[]).length]].map(([k,label,count])=>({k,label,count,onClick:()=>this.setInvDivider(k),bg:s.invDivider===k?'#ece3cf':'#221c12',col:s.invDivider===k?'#3a2e1c':'#a08a64',shadow:s.invDivider===k?'0 -2px 8px rgba(0,0,0,.2)':'none'}));
 
     return {
-      grain:(this.props.showGrain!==false),
+      grain:(this.props.showGrain!==false), actionError:s.actionError, hasActionError:!!s.actionError,
       homeA:homeVar==='A', homeB:homeVar==='B',
       homeAbg:homeVar==='A'?'#c6a35e':'transparent', homeAcol:homeVar==='A'?'#0b0b10':'#cfc7b4',
       homeBbg:homeVar==='B'?'#c6a35e':'transparent', homeBcol:homeVar==='B'?'#0b0b10':'#cfc7b4',
@@ -2693,7 +2726,7 @@ class Component extends DCLogic {
       goMestre:()=>this.pickRole('mestre'), goJogador:()=>this.pickRole('jogador'),
       back:()=>this.back(), reset:()=>this.reset(),
       pickCap:()=>this.pickMode('capitulos'), pickOne:()=>this.pickMode('oneshots'),
-      toLobby:()=>{ this.saveCurrentTable().then(()=>{ this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>this.startGameSession(), closeScene:()=>this.closeScene(),
+      toLobby:()=>{ this.saveCurrentTable().then(r=>{ if(!r.ok) return; this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>this.startGameSession(), closeScene:()=>this.closeScene(),
       onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:'Salão de Leilões',acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:'As portas duplas se abrem. O Salão de Leilões respira ouro e ameaça. No palco, sob luz de recorte, o frasco lacrado de sangue aguarda — e cada par de olhos na sala já decidiu quanto está disposto a pagar.'}),
       onSceneNpc:()=>this.openScene({title:'NPC Revelado',sub:'Aurelian Voss',acc:'#c41e3a',surf:'#2e1117',glow:'rgba(196,30,58,.45)',text:'Ele atravessa o salão sem pressa, como quem já é dono de tudo. "Sangue antigo reconhece sangue antigo", diz — e o frio na sua nuca confirma o que você temia.'}),
       oneshotList, chaptersView, selChapter, sessTheme, sessName, centerBorder:'rgba(198,166,100,.18)',
