@@ -206,9 +206,20 @@
       <button onClick="{{ openManage }}" style="display:inline-flex;align-items:center;gap:9px;padding:11px 20px;background:rgba(198,163,94,.1);color:#e0c179;border:1px solid rgba(198,166,100,.4);border-radius:3px;font:600 11px/1 'Archivo';letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.2s" style-hover="background:rgba(198,163,94,.18);border-color:rgba(224,193,121,.7)">⚙ Gerenciar Mesa</button>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:268px 1fr 320px;gap:16px;align-items:start;max-width:1560px;margin:0 auto">
+
+  <!-- mobile section tabs -->
+  <sc-if value="{{ showMSessTabs }}">
+    <div style="display:flex;gap:4px;background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:8px;padding:4px;max-width:1560px;margin:0 auto 14px">
+      <sc-for list="{{ mSessTabs }}" as="t" hint-placeholder-count="3">
+        <button onClick="{{ t.onClick }}" style="flex:1;padding:10px 4px;border:none;border-radius:6px;font:600 11px 'Archivo';letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background: {{ t.bg }};color: {{ t.col }};transition:.2s">{{ t.l }}</button>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <div style="display:grid;grid-template-columns: {{ mSessCols }};gap:16px;align-items:start;max-width:1560px;margin:0 auto">
 
     <!-- LEFT: player cards -->
+    <sc-if value="{{ showPlayersColM }}">
     <div style="display:flex;flex-direction:column;gap:12px">
       <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7e7a70;padding-left:2px">Jogadores</div>
       <sc-for list="{{ players }}" as="p" hint-placeholder-count="4">
@@ -244,8 +255,10 @@
         </sc-if>
       </sc-for>
     </div>
+    </sc-if>
 
     <!-- CENTER: scene / map -->
+    <sc-if value="{{ showCenterColM }}">
     <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
       <div style="position:relative;border-radius:8px;overflow:hidden;border:1px solid {{ centerBorder }};min-height:440px;background:radial-gradient(100% 120% at 50% 0%, {{ stageSurf }}, {{ sessTheme.bg }})">
         <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 30% 10%, {{ stageGlow }}, transparent 65%);opacity:.5"></div>
@@ -357,8 +370,10 @@
         </div>
       </div>
     </div>
+    </sc-if>
 
     <!-- RIGHT: tools -->
+    <sc-if value="{{ showToolsColM }}">
     <div style="background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:7px;padding:0;overflow:hidden">
       <div style="display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.06)">
         <sc-for list="{{ tools }}" as="t" hint-placeholder-count="6">
@@ -860,6 +875,7 @@
         </sc-if>
       </div>
     </div>
+    </sc-if>
   </div>
 </div>
 </sc-if>
@@ -1514,7 +1530,7 @@ class Component extends DCLogic {
     log:[],
     npcs:[],
     clues:[],
-    masterTool:'testes', testMode:'geral',
+    masterTool:'testes', testMode:'geral', masterPanel:'cena',
     roteiro:{mode:null,text:'',done:[]},
     narrativa:{mode:null,text:''},
     woundTarget:'', woundDraft:'', showWoundForm:false, woundLib:[],
@@ -1974,6 +1990,7 @@ class Component extends DCLogic {
 
   // ---- session ----
   setTool(t){ this.setState({masterTool:t}); }
+  setMasterPanel(t){ this.setState({masterPanel:t}); }
   setDraft(k,v){ this.setState(s=>({testDraft:{...s.testDraft,[k]:v}})); }
   advanceClock(id,d,silent){
     this.setState(s=>{
@@ -2591,6 +2608,13 @@ class Component extends DCLogic {
     const tabLabels={mapa:'Mapa',cena:'Cena',ficha:'Ficha',testes:'Testes',npcs:'NPCs',diario:'Diário',inventario:'Inventário'};
     const tabIcons={mapa:'◉',cena:'❖',ficha:'⚇',testes:'⚄',inventario:'🗀',npcs:'☻',diario:'✒'};
     const pNarrow=s.playerNarrow, focus=s.playerFocus;
+    // ---- master session (mestre) responsive layout ----
+    const mSessTab=s.masterPanel;
+    const mSessCols=pNarrow?'minmax(0,1fr)':'268px 1fr 320px';
+    const showPlayersColM=!pNarrow||mSessTab==='jogadores';
+    const showCenterColM=!pNarrow||mSessTab==='cena';
+    const showToolsColM=!pNarrow||mSessTab==='ferramentas';
+    const mSessTabs=[['jogadores','Jogadores'],['cena','Cena'],['ferramentas','Ferramentas']].map(([k,l])=>({k,l,onClick:()=>this.setMasterPanel(k),bg:mSessTab===k?'rgba(198,163,94,.14)':'transparent',col:mSessTab===k?'#e9e3d4':'#8d887c'}));
     const dashCols=pNarrow?'minmax(0,1fr)':'320px minmax(0,1fr) 340px';
     const showFichaCol=!pNarrow||focus==='ficha';
     const showCenterCol=!pNarrow||focus===null;
@@ -2729,6 +2753,7 @@ class Component extends DCLogic {
       toLobby:()=>{ this.saveCurrentTable().then(r=>{ if(!r.ok) return; this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>this.startGameSession(), closeScene:()=>this.closeScene(),
       onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:'Salão de Leilões',acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:'As portas duplas se abrem. O Salão de Leilões respira ouro e ameaça. No palco, sob luz de recorte, o frasco lacrado de sangue aguarda — e cada par de olhos na sala já decidiu quanto está disposto a pagar.'}),
       onSceneNpc:()=>this.openScene({title:'NPC Revelado',sub:'Aurelian Voss',acc:'#c41e3a',surf:'#2e1117',glow:'rgba(196,30,58,.45)',text:'Ele atravessa o salão sem pressa, como quem já é dono de tudo. "Sangue antigo reconhece sangue antigo", diz — e o frio na sua nuca confirma o que você temia.'}),
+      showMSessTabs:pNarrow, mSessCols, showPlayersColM, showCenterColM, showToolsColM, mSessTabs,
       oneshotList, chaptersView, selChapter, sessTheme, sessName, centerBorder:'rgba(198,166,100,.18)',
       // master stage
       stageSurf:sessTheme.surf, stageGlow:sessTheme.glow,
