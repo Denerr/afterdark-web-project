@@ -276,8 +276,8 @@
             <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#cfc7b4;padding:5px 11px;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:rgba(8,8,12,.5)">Alta Vesper</span>
           </div>
           <div style="position:absolute;left:0;right:0;bottom:0;padding:24px 26px;background:linear-gradient(180deg,transparent,rgba(8,8,12,.94))">
-            <div style="font-family:'Cinzel';font-weight:600;font-size:26px;color:#efe8d8;margin-bottom:8px">Salão de Leilões</div>
-            <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.55;color:#cdc6b6;margin:0 0 16px;max-width:620px">Cristais pendem do teto como lâminas. No palco, um frasco lacrado aguarda o próximo lance — e Aurelian Voss observa, sorrindo demais.</p>
+            <div style="font-family:'Cinzel';font-weight:600;font-size:26px;color:#efe8d8;margin-bottom:8px">{{ stageSceneTitle }}</div>
+            <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.55;color:#cdc6b6;margin:0 0 16px;max-width:620px">{{ stageSceneDesc }}</p>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <button onClick="{{ onSceneIntro }}" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#0b0b10;background: {{ sessTheme.acc }};border:none;border-radius:2px;padding:9px 16px;cursor:pointer" style-hover="filter:brightness(1.15)">▸ Modo Cena</button>
               <button onClick="{{ onSceneNpc }}" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cfc7b4;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:2px;padding:9px 16px;cursor:pointer" style-hover="border-color:rgba(255,255,255,.4)">Revelar NPC</button>
@@ -1848,7 +1848,7 @@ class Component extends DCLogic {
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
   openTable(t){
-    this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':null, screen:t.target, nav:['profile']}));
+    this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':t.theme==='werewolf'?'sombras':null, screen:t.target, nav:['profile']}));
     if(t.role==='mestre' && t.id){ this._startMemberPolling(); this._loadTableSession(t.id,true); }
   }
   _genInviteCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return 'SV-'+Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join(''); }
@@ -1873,7 +1873,7 @@ class Component extends DCLogic {
   }
 
   // ---- gerenciar mesa ----
-  sessionTitle(){ const s=this.state; const sel=s.oneshot?this.ONESHOTS[s.oneshot]:null; return (s.tableName&&s.tableName.trim())||(sel&&sel.title)||'A Última Gota'; }
+  sessionTitle(){ const s=this.state; const sel=s.oneshot?this.ONESHOTS[s.oneshot]:null; return (s.tableName&&s.tableName.trim())||(sel&&sel.title)||'Sessão em Saint Vesper'; }
   openManage(){ this.setState({manage:{open:true,view:'menu',saved:false,copied:false}}); }
   closeManage(){ this.setState(s=>({manage:{...s.manage,open:false}})); }
   manageSetView(v){ this.setState(s=>({manage:{...s.manage,view:v,copied:false}})); }
@@ -2315,7 +2315,7 @@ class Component extends DCLogic {
     const screen=s.screen;
     const sel = s.oneshot? this.ONESHOTS[s.oneshot] : null;
     const sessTheme = sel ? {acc:sel.acc,acc2:sel.acc2,glow:sel.glow,surf:sel.surf,bg:sel.bg} : {acc:'#c41e3a',acc2:'#8d1426',glow:'rgba(196,30,58,.42)',surf:'#2e1117',bg:'#16080b'};
-    const sessName = sel? sel.title : 'A Última Gota';
+    const sessName = this.sessionTitle();
 
     const statusLabel={pronto:'Pronto',aguardando:'Aguardando aprovação',criando:'Criando ficha',escolhendo:'Escolhendo personagem',conectando:'Conectando'};
     const condLabel={normal:'Normal',abalado:'Abalado',pressao:'Sob pressão',risco:'Em risco',ferido:'Ferido',fora:'Fora de cena'};
@@ -2751,9 +2751,10 @@ class Component extends DCLogic {
       back:()=>this.back(), reset:()=>this.reset(),
       pickCap:()=>this.pickMode('capitulos'), pickOne:()=>this.pickMode('oneshots'),
       toLobby:()=>{ this.saveCurrentTable().then(r=>{ if(!r.ok) return; this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>this.startGameSession(), closeScene:()=>this.closeScene(),
-      onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:'Salão de Leilões',acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:'As portas duplas se abrem. O Salão de Leilões respira ouro e ameaça. No palco, sob luz de recorte, o frasco lacrado de sangue aguarda — e cada par de olhos na sala já decidiu quanto está disposto a pagar.'}),
-      onSceneNpc:()=>this.openScene({title:'NPC Revelado',sub:'Aurelian Voss',acc:'#c41e3a',surf:'#2e1117',glow:'rgba(196,30,58,.45)',text:'Ele atravessa o salão sem pressa, como quem já é dono de tudo. "Sangue antigo reconhece sangue antigo", diz — e o frio na sua nuca confirma o que você temia.'}),
+      onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:sel?sel.title:sessionTitle,acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:sel?sel.summary:'A cena se revela diante do grupo, e o Mestre conduz a narrativa.'}),
+      onSceneNpc:()=>this.openScene({title:'NPC Revelado',sub:sel?sel.ref:'Figura misteriosa',acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:sel?`${sel.ref} se aproxima, como quem já decidiu o desfecho da noite — sua ligação com ${sel.faction} não é mais segredo.`:'Uma figura observa do canto da sala, atenta a cada movimento do grupo.'}),
       showMSessTabs:pNarrow, mSessCols, showPlayersColM, showCenterColM, showToolsColM, mSessTabs,
+      stageSceneTitle:sel?sel.title:'Cena Atual', stageSceneDesc:sel?sel.summary:'A cena começa a se revelar diante do grupo.',
       oneshotList, chaptersView, selChapter, sessTheme, sessName, centerBorder:'rgba(198,166,100,.18)',
       // master stage
       stageSurf:sessTheme.surf, stageGlow:sessTheme.glow,
