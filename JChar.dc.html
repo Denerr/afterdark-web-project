@@ -3,17 +3,17 @@
   <div style="position:absolute;inset:0;background-image:url('assets/images/bg-arquivo.png');background-size:cover;background-position:center center;background-repeat:no-repeat"></div>
   <div style="position:absolute;inset:0;background:rgba(5,6,12,0.48);pointer-events:none"></div>
   <div style="position:relative;width:100%;max-width:420px">
-    <div style="text-align:center;margin-bottom:24px">
+    <div data-motion="char-title" style="text-align:center;margin-bottom:24px">
       <h2 style="font-family:'Cinzel';font-weight:700;font-size:24px;margin:0;color:#efe8d8">Seu personagem</h2>
       <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#a39e90;margin:6px 0 0">Como você entra em Saint Vesper?</p>
     </div>
     <div style="display:flex;flex-direction:column;gap:12px">
-      <div onClick="{{ toWizard }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:8px;padding:20px 22px;transition:.25s" style-hover="border-color:rgba(224,193,121,.6);box-shadow:0 0 30px rgba(198,163,94,.1)">
+      <div data-motion="char-path" onClick="{{ toWizard }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:8px;padding:20px 22px;transition:.25s" style-hover="border-color:rgba(224,193,121,.6);box-shadow:0 0 30px rgba(198,163,94,.1)">
         <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;margin-bottom:5px">✦ Criar novo personagem</div>
         <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0">Ficha guiada em 7 etapas — do nome às perícias.</p>
       </div>
       <sc-for list="{{ savedCharsForJoin }}" as="sc">
-        <div onClick="{{ sc.onSelect }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(196,30,58,.25);border-radius:8px;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(196,30,58,.6)">
+        <div data-motion="char-path" onClick="{{ sc.onSelect }}" style="cursor:pointer;background:#13121a;border:1px solid rgba(196,30,58,.25);border-radius:8px;padding:18px 22px;transition:.25s" style-hover="border-color:rgba(196,30,58,.6)">
           <div style="font-family:'Cinzel';font-weight:600;font-size:17px;color:#efe8d8;margin-bottom:4px">⚇ {{ sc.name }}</div>
           <p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:0">{{ sc.sensLabel }} — usar esta ficha</p>
         </div>

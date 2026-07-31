@@ -39,6 +39,7 @@
 <script src="src/data/themes.js"></script>
 <script src="src/data/equipment.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 </helmet>
 
 <sc-if value="{{ hasActionError }}">
@@ -1551,6 +1552,44 @@ class Component extends DCLogic {
   componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; const hadCode=this._initFromUrl(); if(!hadCode) this._tryResumeMembership(); }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
     this._pxHandler=(ev)=>{ if(this.state.screen!=='j_wizard'||this.state.wizStep!==2) return; const w=window.innerWidth||1, h=window.innerHeight||1; this._pxN={x:ev.clientX/w-0.5, y:ev.clientY/h-0.5}; if(this._pxRaf) return; this._pxRaf=requestAnimationFrame(()=>{ this._pxRaf=null; const n=this._pxN||{x:0,y:0}; document.querySelectorAll('[data-px]').forEach(el=>{ const d=parseFloat(el.getAttribute('data-px'))||0; el.style.transform=`translate3d(${(-n.x*d*30).toFixed(1)}px, ${(-n.y*d*30).toFixed(1)}px, 0)`; }); }); };
     window.addEventListener('mousemove',this._pxHandler,{passive:true});
+    this._preloadMotionAssets();
+  }
+
+  // ============================================================================
+  // MOTION — animações da criação de personagem (Anime.js), organizado conforme
+  // inst-claudio.md / inst-johnny.md. Fase 1 (preparação segura) implementada
+  // aqui: config geral, reduced-motion e pré-carregamento. Os blocos 4-9
+  // (transições de etapa, tema, parallax encapsulado, ambiente, feedback,
+  // limpeza) chegam nas próximas fases.
+  //
+  // Regra central (não violar): uma propriedade CSS só pode ter UM dono.
+  // Se um elemento já recebe `style="...prop: {{ x }}..."` do template, o
+  // Anime.js NUNCA deve animar essa mesma `prop` nesse elemento — o React vai
+  // reescrever o valor no próximo re-render e a animação vai "brigar" com ele.
+  // Anime.js só deve tocar propriedades que o template deixa livres (como já
+  // acontece hoje com `transform` nos elementos `[data-px]` do parallax).
+  // ============================================================================
+
+  // 2. Preferência de movimento reduzido — toda a lógica de motion deve consultar isto.
+  _prefersReducedMotion(){
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  // 3. Pré-carregamento de assets — evita fundo vazio/atraso ao entrar na Etapa 2.
+  _NAT_IMAGES(){ return ['assets/images/nat-default.png','assets/images/nat-humano.png','assets/images/nat-vampiros.png','assets/images/nat-lobisomens.png','assets/images/nat-demonios.png']; }
+  _preloadImage(url){
+    if(!url) return;
+    this._preloaded=this._preloaded||{};
+    if(this._preloaded[url]) return;
+    this._preloaded[url]=new Image();
+    this._preloaded[url].src=url;
+  }
+  _preloadMotionAssets(){
+    // nat-default entra logo (é o fundo neutro exibido antes de qualquer escolha).
+    this._preloadImage('assets/images/nat-default.png');
+    // os 4 temas de Natureza entram depois, sem competir com o carregamento inicial da página.
+    const idle=window.requestIdleCallback||(cb=>setTimeout(cb,300));
+    idle(()=>{ this._NAT_IMAGES().forEach(url=>this._preloadImage(url)); });
   }
 
   // ---- sessão compartilhada: persistência local + sincronização entre abas/janelas ----
