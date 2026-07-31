@@ -1550,17 +1550,16 @@ class Component extends DCLogic {
   };
 
   componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; const hadCode=this._initFromUrl(); if(!hadCode) this._tryResumeMembership(); }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
-    this._pxHandler=(ev)=>{ if(this.state.screen!=='j_wizard'||this.state.wizStep!==2) return; const w=window.innerWidth||1, h=window.innerHeight||1; this._pxN={x:ev.clientX/w-0.5, y:ev.clientY/h-0.5}; if(this._pxRaf) return; this._pxRaf=requestAnimationFrame(()=>{ this._pxRaf=null; const n=this._pxN||{x:0,y:0}; document.querySelectorAll('[data-px]').forEach(el=>{ const d=parseFloat(el.getAttribute('data-px'))||0; el.style.transform=`translate3d(${(-n.x*d*30).toFixed(1)}px, ${(-n.y*d*30).toFixed(1)}px, 0)`; }); }); };
-    window.addEventListener('mousemove',this._pxHandler,{passive:true});
     this._preloadMotionAssets();
+    this._syncParallax();
   }
 
   // ============================================================================
   // MOTION — animações da criação de personagem (Anime.js), organizado conforme
-  // inst-claudio.md / inst-johnny.md. Fase 1 (preparação segura) implementada
-  // aqui: config geral, reduced-motion e pré-carregamento. Os blocos 4-9
-  // (transições de etapa, tema, parallax encapsulado, ambiente, feedback,
-  // limpeza) chegam nas próximas fases.
+  // inst-claudio.md / inst-johnny.md. Fase 1 (preparação segura) e Fase 2
+  // (parallax encapsulado) implementadas aqui. Os blocos 4, 5, 7, 8, 9
+  // (transições de etapa, tema, ambiente, feedback, limpeza mais ampla)
+  // chegam nas próximas fases.
   //
   // Regra central (não violar): uma propriedade CSS só pode ter UM dono.
   // Se um elemento já recebe `style="...prop: {{ x }}..."` do template, o
@@ -1590,6 +1589,48 @@ class Component extends DCLogic {
     // os 4 temas de Natureza entram depois, sem competir com o carregamento inicial da página.
     const idle=window.requestIdleCallback||(cb=>setTimeout(cb,300));
     idle(()=>{ this._NAT_IMAGES().forEach(url=>this._preloadImage(url)); });
+  }
+
+  // 6. Controle do parallax (encapsulado) — mesma técnica de sempre (escrever
+  // `transform` direto via requestAnimationFrame nos elementos [data-px], que
+  // o template nunca vincula via {{ }}), só que agora com ciclo de vida
+  // próprio em vez de um listener permanente com guarda interna.
+  _isParallaxScreen(){ return this.state.screen==='j_wizard' && this.state.wizStep===2; }
+  _canParallax(){
+    if(this._prefersReducedMotion()) return false;
+    if(window.matchMedia && !window.matchMedia('(pointer: fine)').matches) return false; // sem parallax de toque
+    return true;
+  }
+  _syncParallax(){
+    const should=this._isParallaxScreen()&&this._canParallax();
+    if(should && !this._pxActive) this._parallaxEnable();
+    else if(!should && this._pxActive) this._parallaxDisable();
+  }
+  _parallaxEnable(){
+    if(this._pxActive) return; // impede múltiplos registros
+    this._pxActive=true;
+    this._pxHandler=(ev)=>{
+      const w=window.innerWidth||1, h=window.innerHeight||1;
+      this._pxN={x:ev.clientX/w-0.5, y:ev.clientY/h-0.5};
+      if(this._pxRaf) return;
+      this._pxRaf=requestAnimationFrame(()=>{
+        this._pxRaf=null;
+        const n=this._pxN||{x:0,y:0};
+        document.querySelectorAll('[data-px]').forEach(el=>{
+          const d=parseFloat(el.getAttribute('data-px'))||0;
+          el.style.transform=`translate3d(${(-n.x*d*30).toFixed(1)}px, ${(-n.y*d*30).toFixed(1)}px, 0)`;
+        });
+      });
+    };
+    window.addEventListener('mousemove',this._pxHandler,{passive:true});
+  }
+  _parallaxDisable(){
+    if(!this._pxActive) return;
+    this._pxActive=false;
+    if(this._pxHandler){ window.removeEventListener('mousemove',this._pxHandler); this._pxHandler=null; }
+    if(this._pxRaf){ cancelAnimationFrame(this._pxRaf); this._pxRaf=null; }
+    // "centralizar camadas" ao sair — evita reencontrar a cena deslocada numa próxima entrada.
+    document.querySelectorAll('[data-px]').forEach(el=>{ el.style.transform=''; });
   }
 
   // ---- sessão compartilhada: persistência local + sincronização entre abas/janelas ----
@@ -1636,6 +1677,7 @@ class Component extends DCLogic {
     },800);
   }
   componentDidUpdate(){
+    this._syncParallax();
     if(!this._ready) return;
     clearTimeout(this._saveT); this._saveT=setTimeout(()=>this._saveSession(),400);
     if(this.state.screen==='m_session' && this.sb && this.state.auth.loggedIn){
@@ -1778,7 +1820,7 @@ class Component extends DCLogic {
     if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
     if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,archived:!!r.archived,role:'mestre',target:'m_session'}))});
   }
-  componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); if(this._pxHandler) window.removeEventListener('mousemove',this._pxHandler); }
+  componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); this._parallaxDisable(); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
   _switchPxBg(key){
     const url=this._NAT_BG[key]||'assets/images/nat-default.png';
