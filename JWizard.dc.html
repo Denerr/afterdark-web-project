@@ -3,7 +3,7 @@
   <div data-motion="wizard-step" style="width:100%;max-width: {{ wizMaxW }};transition:max-width .35s ease">
     <!-- stepper -->
     <div style="display:flex;gap:5px;margin-bottom:8px">
-      <sc-for list="{{ stepDots }}" as="s" hint-placeholder-count="7"><div style="flex:1;height:4px;border-radius:2px;background: {{ s.col }}"></div></sc-for>
+      <sc-for list="{{ stepDots }}" as="s" hint-placeholder-count="7"><div style="flex:1;height:4px;border-radius:2px;background: {{ s.col }};transition:background .3s ease"></div></sc-for>
     </div>
     <div data-motion="step-title" style="display:flex;justify-content:space-between;margin-bottom:22px">
       <span style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e">Etapa {{ wizStep }} / 7</span>

@@ -1556,10 +1556,10 @@ class Component extends DCLogic {
 
   // ============================================================================
   // MOTION — animações da criação de personagem (Anime.js), organizado conforme
-  // inst-claudio.md / inst-johnny.md. Fase 1 (preparação segura) e Fase 2
-  // (parallax encapsulado) implementadas aqui. Os blocos 4, 5, 7, 8, 9
-  // (transições de etapa, tema, ambiente, feedback, limpeza mais ampla)
-  // chegam nas próximas fases.
+  // inst-claudio.md / inst-johnny.md. Fase 1 (preparação segura), Fase 2
+  // (parallax encapsulado) e Fase 3 (transições entre etapas) implementadas
+  // aqui. Os blocos 5, 7, 8, 9 (tema da Etapa 2, ambiente, feedback,
+  // limpeza mais ampla) chegam nas próximas fases.
   //
   // Regra central (não violar): uma propriedade CSS só pode ter UM dono.
   // Se um elemento já recebe `style="...prop: {{ x }}..."` do template, o
@@ -1631,6 +1631,36 @@ class Component extends DCLogic {
     if(this._pxRaf){ cancelAnimationFrame(this._pxRaf); this._pxRaf=null; }
     // "centralizar camadas" ao sair — evita reencontrar a cena deslocada numa próxima entrada.
     document.querySelectorAll('[data-px]').forEach(el=>{ el.style.transform=''; });
+  }
+
+  // 4. Controle de transições entre etapas do assistente de personagem.
+  // Ciclo: animar saída da etapa atual → só então trocar wizStep → esperar o
+  // React confirmar o novo DOM (callback do setState) → animar entrada.
+  // Segurança: se o anime.js não tiver carregado, se prefers-reduced-motion
+  // estiver ativo, ou se o elemento não existir, a troca de etapa acontece
+  // direto (o cadastro nunca fica preso esperando uma animação).
+  _wizGoToStep(nextStep,direction){
+    if(this._wizTransitioning) return; // ignora clique duplicado de navegação
+    const outEl=document.querySelector('[data-motion="step-section"]');
+    const commitStep=()=>{
+      if(this._unmounted) return;
+      this.setState({wizStep:nextStep},()=>{
+        if(this._unmounted){ this._wizTransitioning=false; return; }
+        const inEl=document.querySelector('[data-motion="step-section"]');
+        this._wizAnimateIn(inEl,direction,()=>{ this._wizTransitioning=false; });
+      });
+    };
+    if(!outEl||!window.anime||this._prefersReducedMotion()){ commitStep(); return; }
+    this._wizTransitioning=true;
+    const dx=direction==='next'?-24:24;
+    window.anime({targets:outEl,translateX:[0,dx],opacity:[1,0],duration:160,easing:'easeInQuad',complete:commitStep});
+  }
+  _wizAnimateIn(el,direction,done){
+    if(!el||!window.anime||this._prefersReducedMotion()||this._unmounted){ if(done) done(); return; }
+    const dx=direction==='next'?24:-24;
+    el.style.opacity='0';
+    el.style.transform=`translateX(${dx}px)`;
+    window.anime({targets:el,translateX:[dx,0],opacity:[0,1],duration:220,easing:'easeOutQuad',complete:done});
   }
 
   // ---- sessão compartilhada: persistência local + sincronização entre abas/janelas ----
@@ -1820,7 +1850,7 @@ class Component extends DCLogic {
     if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
     if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,archived:!!r.archived,role:'mestre',target:'m_session'}))});
   }
-  componentWillUnmount(){ clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); this._parallaxDisable(); }
+  componentWillUnmount(){ this._unmounted=true; clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); this._parallaxDisable(); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
   _switchPxBg(key){
     const url=this._NAT_BG[key]||'assets/images/nat-default.png';
@@ -2273,7 +2303,7 @@ class Component extends DCLogic {
   incSkill(k){ this.setState(s=>{ const sk={...s.wiz.skills}; const v=sk[k]||0; const used=Object.values(sk).reduce((a,b)=>a+b,0); if(v>=3||used>=24) return s; sk[k]=v+1; return {wiz:{...s.wiz,skills:sk}}; }); }
   decSkill(k){ this.setState(s=>{ const sk={...s.wiz.skills}; if(!sk[k]) return s; sk[k]=sk[k]-1; return {wiz:{...s.wiz,skills:sk}}; }); }
   wizNext(){
-    if(this.state.wizStep<7){ this.setState(s=>({wizStep:s.wizStep+1})); return; }
+    if(this.state.wizStep<7){ this._wizGoToStep(this.state.wizStep+1,'next'); return; }
     if(this.state.wizReturn==='profile'){ this._finishCharWizard(); return; }
     this._finishPlayerWizard();
   }
@@ -2304,7 +2334,10 @@ class Component extends DCLogic {
     }
     this.setState(s=>({characters:[...s.characters,{...chData,id:'ch'+Date.now()}],screen:'profile',nav:[],profileTab:'personagens',wizStep:1}));
   }
-  wizPrev(){ this.setState(s=> s.wizStep<=1? (s.nav.length?{screen:s.nav[s.nav.length-1],nav:s.nav.slice(0,-1)}:s) :{wizStep:s.wizStep-1}); }
+  wizPrev(){
+    if(this.state.wizStep>1){ this._wizGoToStep(this.state.wizStep-1,'prev'); return; }
+    this.setState(s=> s.nav.length?{screen:s.nav[s.nav.length-1],nav:s.nav.slice(0,-1)}:s);
+  }
   setPlayerTab(t){ this.setState({playerTab:t,playerMenuOpen:false}); }
   setCenterTab(t){ this.setState({centerTab:t,playerFocus:null,playerMenuOpen:false}); }
   setPlayerFocus(f){ this.setState({playerFocus:f,playerMenuOpen:false}); }
