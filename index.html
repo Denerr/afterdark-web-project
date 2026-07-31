@@ -903,7 +903,7 @@
 
 <!-- ========================= JOGADOR · WIZARD ========================= -->
 <sc-if value="{{ isJWizard }}" data-screen-label="Jogador Wizard">
-<dc-import name="JWizard" wizMaxW="{{ wizMaxW }}" stepDots="{{ stepDots }}" wizStep="{{ wizStep }}" stepTitle="{{ stepTitle }}" step1="{{ step1 }}" onWizName="{{ onWizName }}" wiz="{{ wiz }}" onWizChar="{{ onWizChar }}" onWizAge="{{ onWizAge }}" onWizOrigin="{{ onWizOrigin }}" onWizAppear="{{ onWizAppear }}" onWizClothes="{{ onWizClothes }}" onWizPers="{{ onWizPers }}" step2="{{ step2 }}" pxBase="{{ pxBase }}" pxImgA="{{ pxImgA }}" pxImgAOp="{{ pxImgAOp }}" pxImgB="{{ pxImgB }}" pxImgBOp="{{ pxImgBOp }}" pxRedOp="{{ pxRedOp }}" pxBlueOp="{{ pxBlueOp }}" pxMagOp="{{ pxMagOp }}" pxSteelOp="{{ pxSteelOp }}" pxColor="{{ pxColor }}" pxGlow="{{ pxGlow }}" embers="{{ embers }}" skyline="{{ skyline }}" wizDesktop="{{ wizDesktop }}" sensList="{{ sensList }}" wizMobile="{{ wizMobile }}" showManifest="{{ showManifest }}" onWizManifest="{{ onWizManifest }}" manifestLabel="{{ manifestLabel }}" step3="{{ step3 }}" weakHeader="{{ weakHeader }}" weakSubtitle="{{ weakSubtitle }}" isHumano="{{ isHumano }}" onWizMarks="{{ onWizMarks }}" isSensitive="{{ isSensitive }}" weakCountColor="{{ weakCountColor }}" weakCount="{{ weakCount }}" weakOpts="{{ weakOpts }}" step4="{{ step4 }}" poolColor="{{ poolColor }}" poolLeft="{{ poolLeft }}" attrView="{{ attrView }}" step5="{{ step5 }}" skillColor="{{ skillColor }}" skillLeft="{{ skillLeft }}" skillGroups="{{ skillGroups }}" step6="{{ step6 }}" onWizHistory="{{ onWizHistory }}" historyPrompts="{{ historyPrompts }}" step7="{{ step7 }}" sumName="{{ sumName }}" sumSensColor="{{ sumSensColor }}" sumSens="{{ sumSens }}" sumPlayerName="{{ sumPlayerName }}" sumAge="{{ sumAge }}" sumOrigin="{{ sumOrigin }}" sumPersonality="{{ sumPersonality }}" sumAppearance="{{ sumAppearance }}" sumClothes="{{ sumClothes }}" sumBonus="{{ sumBonus }}" sumIsHumano="{{ sumIsHumano }}" sumManifest="{{ sumManifest }}" sumAttrs="{{ sumAttrs }}" sumHasSkills="{{ sumHasSkills }}" sumSkills="{{ sumSkills }}" sumHasWeak="{{ sumHasWeak }}" sumWeak="{{ sumWeak }}" sumHasHistory="{{ sumHasHistory }}" sumHistory="{{ sumHistory }}" narrative="{{ narrative }}" wizPrev="{{ wizPrev }}" wizNext="{{ wizNext }}" nextDisabled="{{ nextDisabled }}" nextBg="{{ nextBg }}" nextCol="{{ nextCol }}" nextCursor="{{ nextCursor }}" nextLabel="{{ nextLabel }}"/>
+<dc-import name="JWizard" wizMaxW="{{ wizMaxW }}" stepDots="{{ stepDots }}" wizStep="{{ wizStep }}" stepTitle="{{ stepTitle }}" step1="{{ step1 }}" onWizName="{{ onWizName }}" wiz="{{ wiz }}" onWizChar="{{ onWizChar }}" onWizAge="{{ onWizAge }}" onWizOrigin="{{ onWizOrigin }}" onWizAppear="{{ onWizAppear }}" onWizClothes="{{ onWizClothes }}" onWizPers="{{ onWizPers }}" step2="{{ step2 }}" pxBase="{{ pxBase }}" pxImgA="{{ pxImgA }}" pxImgB="{{ pxImgB }}" pxRedOp="{{ pxRedOp }}" pxBlueOp="{{ pxBlueOp }}" pxMagOp="{{ pxMagOp }}" pxSteelOp="{{ pxSteelOp }}" pxColor="{{ pxColor }}" pxGlow="{{ pxGlow }}" embers="{{ embers }}" skyline="{{ skyline }}" wizDesktop="{{ wizDesktop }}" sensList="{{ sensList }}" wizMobile="{{ wizMobile }}" showManifest="{{ showManifest }}" onWizManifest="{{ onWizManifest }}" manifestLabel="{{ manifestLabel }}" step3="{{ step3 }}" weakHeader="{{ weakHeader }}" weakSubtitle="{{ weakSubtitle }}" isHumano="{{ isHumano }}" onWizMarks="{{ onWizMarks }}" isSensitive="{{ isSensitive }}" weakCountColor="{{ weakCountColor }}" weakCount="{{ weakCount }}" weakOpts="{{ weakOpts }}" step4="{{ step4 }}" poolColor="{{ poolColor }}" poolLeft="{{ poolLeft }}" attrView="{{ attrView }}" step5="{{ step5 }}" skillColor="{{ skillColor }}" skillLeft="{{ skillLeft }}" skillGroups="{{ skillGroups }}" step6="{{ step6 }}" onWizHistory="{{ onWizHistory }}" historyPrompts="{{ historyPrompts }}" step7="{{ step7 }}" sumName="{{ sumName }}" sumSensColor="{{ sumSensColor }}" sumSens="{{ sumSens }}" sumPlayerName="{{ sumPlayerName }}" sumAge="{{ sumAge }}" sumOrigin="{{ sumOrigin }}" sumPersonality="{{ sumPersonality }}" sumAppearance="{{ sumAppearance }}" sumClothes="{{ sumClothes }}" sumBonus="{{ sumBonus }}" sumIsHumano="{{ sumIsHumano }}" sumManifest="{{ sumManifest }}" sumAttrs="{{ sumAttrs }}" sumHasSkills="{{ sumHasSkills }}" sumSkills="{{ sumSkills }}" sumHasWeak="{{ sumHasWeak }}" sumWeak="{{ sumWeak }}" sumHasHistory="{{ sumHasHistory }}" sumHistory="{{ sumHistory }}" narrative="{{ narrative }}" wizPrev="{{ wizPrev }}" wizNext="{{ wizNext }}" nextDisabled="{{ nextDisabled }}" nextBg="{{ nextBg }}" nextCol="{{ nextCol }}" nextCursor="{{ nextCursor }}" nextLabel="{{ nextLabel }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · INTRO ========================= -->
@@ -1557,9 +1557,9 @@ class Component extends DCLogic {
   // ============================================================================
   // MOTION — animações da criação de personagem (Anime.js), organizado conforme
   // inst-claudio.md / inst-johnny.md. Fase 1 (preparação segura), Fase 2
-  // (parallax encapsulado) e Fase 3 (transições entre etapas) implementadas
-  // aqui. Os blocos 5, 7, 8, 9 (tema da Etapa 2, ambiente, feedback,
-  // limpeza mais ampla) chegam nas próximas fases.
+  // (parallax encapsulado), Fase 3 (transições entre etapas) e Fase 4
+  // (crossfade dos slots A/B via Anime.js) implementadas aqui. Os blocos 7,
+  // 8, 9 (ambiente, feedback, limpeza mais ampla) chegam nas próximas fases.
   //
   // Regra central (não violar): uma propriedade CSS só pode ter UM dono.
   // Se um elemento já recebe `style="...prop: {{ x }}..."` do template, o
@@ -1609,6 +1609,7 @@ class Component extends DCLogic {
   _parallaxEnable(){
     if(this._pxActive) return; // impede múltiplos registros
     this._pxActive=true;
+    this._initPxSlots();
     this._pxHandler=(ev)=>{
       const w=window.innerWidth||1, h=window.innerHeight||1;
       this._pxN={x:ev.clientX/w-0.5, y:ev.clientY/h-0.5};
@@ -1631,6 +1632,34 @@ class Component extends DCLogic {
     if(this._pxRaf){ cancelAnimationFrame(this._pxRaf); this._pxRaf=null; }
     // "centralizar camadas" ao sair — evita reencontrar a cena deslocada numa próxima entrada.
     document.querySelectorAll('[data-px]').forEach(el=>{ el.style.transform=''; });
+  }
+
+  // Slots A/B do fundo da Etapa 2 — crossfade coordenado pelo Anime.js.
+  // opacity não tem NENHUM binding {{ }} nesses elementos (ver JWizard.dc.html),
+  // então o Anime.js é o único dono dessa propriedade nos dois slots.
+  _pxSlotEl(letter){ return document.querySelector(`[data-motion="background-slot-${letter}"]`); }
+  _initPxSlots(){
+    const a=this._pxSlotEl('a'), b=this._pxSlotEl('b');
+    const activeIsA=(this.state.pxSlot||'a')==='a';
+    if(a) a.style.opacity=activeIsA?'1':'0';
+    if(b) b.style.opacity=activeIsA?'0':'1';
+  }
+  _crossfadePxSlots(fromLetter,toLetter,url){
+    const fromEl=this._pxSlotEl(fromLetter), toEl=this._pxSlotEl(toLetter);
+    const settle=()=>{
+      if(this._unmounted) return;
+      const fromKey=fromLetter==='a'?'pxImgA':'pxImgB';
+      this.setState({pxSlot:toLetter,[fromKey]:url});
+    };
+    if(!fromEl||!toEl||!window.anime||this._prefersReducedMotion()){
+      if(fromEl) fromEl.style.opacity='0';
+      if(toEl) toEl.style.opacity='1';
+      settle();
+      return;
+    }
+    window.anime.remove([fromEl,toEl]); // cancela crossfade anterior em andamento (trocas rápidas entre cards)
+    window.anime({targets:fromEl,opacity:0,duration:420,easing:'easeInOutQuad'});
+    window.anime({targets:toEl,opacity:1,duration:420,easing:'easeInOutQuad',complete:settle});
   }
 
   // 4. Controle de transições entre etapas do assistente de personagem.
@@ -1854,9 +1883,10 @@ class Component extends DCLogic {
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
   _switchPxBg(key){
     const url=this._NAT_BG[key]||'assets/images/nat-default.png';
-    const slot=this.state.pxSlot;
-    if(slot==='a'){ this.setState({pxImgB:url,pxSlot:'b'}); setTimeout(()=>{ this.setState(s=>s.pxSlot==='b'?{pxImgA:url}:null); },450); }
-    else { this.setState({pxImgA:url,pxSlot:'a'}); setTimeout(()=>{ this.setState(s=>s.pxSlot==='a'?{pxImgB:url}:null); },450); }
+    const fromLetter=this.state.pxSlot==='a'?'a':'b';
+    const toLetter=fromLetter==='a'?'b':'a';
+    const toKey=toLetter==='a'?'pxImgA':'pxImgB';
+    this.setState({[toKey]:url},()=>this._crossfadePxSlots(fromLetter,toLetter,url));
   }
   hoverSens(k){ this._switchPxBg(k); this.setState({sensHover:k}); }
   unhoverSens(k){ if(this.state.sensHover===k){ this._switchPxBg(this.state.wiz.sens||null); this.setState({sensHover:null}); } }
@@ -2532,9 +2562,6 @@ class Component extends DCLogic {
     const pxBase=`radial-gradient(120% 90% at 50% 8%, ${pxDeep}, #08080c 70%)`;
     const pxImgA=s.pxImgA||'assets/images/nat-default.png';
     const pxImgB=s.pxImgB||'assets/images/nat-default.png';
-    const pxSlot=s.pxSlot||'a';
-    const pxImgAOp=pxSlot==='a'?1:0;
-    const pxImgBOp=pxSlot==='b'?1:0;
     if(!this._px){ const rnd=(a,b)=>a+Math.random()*(b-a);
       const embers=Array.from({length:18},()=>({top:rnd(8,82).toFixed(1)+'%',left:rnd(2,96).toFixed(1)+'%',size:rnd(2,5).toFixed(1)+'px',dur:rnd(4.5,9).toFixed(1)+'s',delay:'-'+rnd(0,6).toFixed(1)+'s'}));
       const sky=Array.from({length:24},(_,i)=>({left:(i*4.4).toFixed(1)+'%',width:rnd(3.2,5).toFixed(1)+'%',height:rnd(28,118).toFixed(0)+'px'}));
@@ -2992,7 +3019,7 @@ class Component extends DCLogic {
       manifestLabel:sensInfo&&sensInfo.manifestLabel?sensInfo.manifestLabel:'', showManifest:!!(sensInfo&&sensInfo.manifestLabel),
       pxBase, pxColor, pxGlow, embers, skyline,
       pxRedOp:pxActive==='vampiros'?0.95:0, pxBlueOp:pxActive==='lobisomens'?0.9:0, pxMagOp:pxActive==='demonios'?0.95:0, pxSteelOp:pxActive==='humano'?0.9:0,
-      pxImgA, pxImgB, pxImgAOp, pxImgBOp,
+      pxImgA, pxImgB,
       poolLeft, skillLeft, weakCount:w.weaknesses.length, canNext,
       poolColor:poolLeft===0?'#7fae8f':'#e0c179', skillColor:skillLeft===0?'#7fae8f':'#e0c179', weakCountColor:w.weaknesses.length===3?'#7fae8f':'#d2a23a',
       historyPrompts,
