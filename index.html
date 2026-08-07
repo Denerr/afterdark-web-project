@@ -1549,7 +1549,7 @@ class Component extends DCLogic {
     scene:{local:'',clima:'',desc:'',npc:'',pistas:[]}
   };
 
-  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; const hadCode=this._initFromUrl(); if(!hadCode) this._tryResumeMembership(); }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow();
+  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; const hadCode=this._initFromUrl(); if(!hadCode) this._tryResumeMembership(); }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow(); this._onVis=()=>this._syncMotionVisibility(); document.addEventListener('visibilitychange',this._onVis); this._syncMotionVisibility();
     this._preloadMotionAssets();
     this._syncParallax();
   }
@@ -1576,6 +1576,10 @@ class Component extends DCLogic {
 
   // 3. Pré-carregamento de assets — evita fundo vazio/atraso ao entrar na Etapa 2.
   _NAT_IMAGES(){ return ['assets/images/nat-default.png','assets/images/nat-humano.png','assets/images/nat-vampiros.png','assets/images/nat-lobisomens.png','assets/images/nat-demonios.png']; }
+  // Fase 6: os fundos tem par .webp (~97% menor) gerado a partir do .png original;
+  // o CSS declara os dois via image-set (ver JWizard.dc.html/JChar.dc.html), então
+  // pré-carregamos o .webp — é o que a grande maioria dos navegadores vai exibir.
+  _webp(pngUrl){ return pngUrl.replace(/\.png$/i,'.webp'); }
   _preloadImage(url){
     if(!url) return;
     this._preloaded=this._preloaded||{};
@@ -1585,10 +1589,10 @@ class Component extends DCLogic {
   }
   _preloadMotionAssets(){
     // nat-default entra logo (é o fundo neutro exibido antes de qualquer escolha).
-    this._preloadImage('assets/images/nat-default.png');
+    this._preloadImage(this._webp('assets/images/nat-default.png'));
     // os 4 temas de Natureza entram depois, sem competir com o carregamento inicial da página.
     const idle=window.requestIdleCallback||(cb=>setTimeout(cb,300));
-    idle(()=>{ this._NAT_IMAGES().forEach(url=>this._preloadImage(url)); });
+    idle(()=>{ this._NAT_IMAGES().forEach(url=>this._preloadImage(this._webp(url))); });
   }
 
   // 6. Controle do parallax (encapsulado) — mesma técnica de sempre (escrever
@@ -1597,9 +1601,18 @@ class Component extends DCLogic {
   // próprio em vez de um listener permanente com guarda interna.
   _isParallaxScreen(){ return this.state.screen==='j_wizard' && this.state.wizStep===2; }
   _canParallax(){
+    if(document.hidden) return false; // Fase 6: nao reativa parallax com a aba em background
     if(this._prefersReducedMotion()) return false;
     if(window.matchMedia && !window.matchMedia('(pointer: fine)').matches) return false; // sem parallax de toque
     return true;
+  }
+  // Fase 6: pausa os loops CSS decorativos infinitos (ember, ringPulse) quando a
+  // aba fica oculta, via classe (ver css/styles.css) — nao mexe na propriedade
+  // `animation` que o template ja controla, so na classe do <body>. Tambem
+  // reavalia o parallax (a troca de aba conta como mudanca de "pode animar").
+  _syncMotionVisibility(){
+    document.body.classList.toggle('motion-tab-hidden',document.hidden);
+    this._syncParallax();
   }
   _syncParallax(){
     const should=this._isParallaxScreen()&&this._canParallax();
@@ -1904,7 +1917,7 @@ class Component extends DCLogic {
     if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
     if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,archived:!!r.archived,role:'mestre',target:'m_session'}))});
   }
-  componentWillUnmount(){ this._unmounted=true; clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); this._parallaxDisable(); }
+  componentWillUnmount(){ this._unmounted=true; clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); if(this._onVis) document.removeEventListener('visibilitychange',this._onVis); this._parallaxDisable(); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
   _switchPxBg(key){
     const url=this._NAT_BG[key]||'assets/images/nat-default.png';
@@ -2607,10 +2620,13 @@ class Component extends DCLogic {
     const pxBase=`radial-gradient(120% 90% at 50% 8%, ${pxDeep}, #08080c 70%)`;
     const pxImgA=s.pxImgA||'assets/images/nat-default.png';
     const pxImgB=s.pxImgB||'assets/images/nat-default.png';
-    if(!this._px){ const rnd=(a,b)=>a+Math.random()*(b-a);
-      const embers=Array.from({length:18},()=>({top:rnd(8,82).toFixed(1)+'%',left:rnd(2,96).toFixed(1)+'%',size:rnd(2,5).toFixed(1)+'px',dur:rnd(4.5,9).toFixed(1)+'s',delay:'-'+rnd(0,6).toFixed(1)+'s'}));
-      const sky=Array.from({length:24},(_,i)=>({left:(i*4.4).toFixed(1)+'%',width:rnd(3.2,5).toFixed(1)+'%',height:rnd(28,118).toFixed(0)+'px'}));
-      this._px={embers,sky};
+    const pxImgAWebp=this._webp(pxImgA), pxImgBWebp=this._webp(pxImgB);
+    if(!this._px||this._px.narrow!==s.playerNarrow){ const rnd=(a,b)=>a+Math.random()*(b-a);
+      // Fase 6: menos particulas no mobile (custo de compositing/GPU menor em telas modestas).
+      const emberN=s.playerNarrow?8:18, skyN=s.playerNarrow?12:24, skyStep=4.4*(24/skyN);
+      const embers=Array.from({length:emberN},()=>({top:rnd(8,82).toFixed(1)+'%',left:rnd(2,96).toFixed(1)+'%',size:rnd(2,5).toFixed(1)+'px',dur:rnd(4.5,9).toFixed(1)+'s',delay:'-'+rnd(0,6).toFixed(1)+'s'}));
+      const sky=Array.from({length:skyN},(_,i)=>({left:(i*skyStep).toFixed(1)+'%',width:rnd(3.2,5).toFixed(1)+'%',height:rnd(28,118).toFixed(0)+'px'}));
+      this._px={embers,sky,narrow:s.playerNarrow};
     }
     const embers=this._px.embers.map(e=>({...e}));
     const skyline=this._px.sky.map(b=>({...b}));
@@ -3064,7 +3080,7 @@ class Component extends DCLogic {
       manifestLabel:sensInfo&&sensInfo.manifestLabel?sensInfo.manifestLabel:'', showManifest:!!(sensInfo&&sensInfo.manifestLabel),
       pxBase, pxColor, pxGlow, embers, skyline,
       pxRedOp:pxActive==='vampiros'?0.95:0, pxBlueOp:pxActive==='lobisomens'?0.9:0, pxMagOp:pxActive==='demonios'?0.95:0, pxSteelOp:pxActive==='humano'?0.9:0,
-      pxImgA, pxImgB,
+      pxImgA, pxImgB, pxImgAWebp, pxImgBWebp,
       poolLeft, skillLeft, weakCount:w.weaknesses.length, canNext,
       poolColor:poolLeft===0?'#7fae8f':'#e0c179', skillColor:skillLeft===0?'#7fae8f':'#e0c179', weakCountColor:w.weaknesses.length===3?'#7fae8f':'#d2a23a',
       historyPrompts,

@@ -31,12 +31,13 @@ Essa regra já orientou toda a implementação até aqui e continua valendo para
 | 3 | Transições animadas entre as 7 etapas do wizard | ✅ Commitada |
 | 4 | Crossfade dos fundos da Etapa 2 (Natureza) via Anime.js | ✅ Commitada |
 | 5 | Feedbacks visuais nas etapas 3-7 (fraquezas, atributos, perícias, histórico, resumo) | ✅ Commitada e testada (Playwright) |
-| 6 | Mobile e performance | ⬜ Não iniciada |
+| 6 | Mobile e performance | ✅ Commitada e testada (Playwright) |
 
 ## 5. O que já está commitado (Fases 1-4)
 
 Commits no branch `main` (mais recente primeiro), todos **locais** — o push pro GitHub é feito manualmente pelo usuário, exceto quando ele pede explicitamente (como este arquivo):
 
+- (Fase 6, ver seção 7) — mobile e performance.
 - (Fase 5, ver seção 6) — feedbacks visuais nas etapas 3-7.
 - `e01636b` — Fase 4: crossfade dos fundos da Natureza via Anime.js.
 - `4a9342b` — Fase 3: transições animadas entre as 7 etapas do personagem.
@@ -104,9 +105,45 @@ Script isolado no scratchpad da sessão (não faz parte do repositório): login 
 
 **Login de teste usado**: `afterdark-flow-1783615750480@mailinator.com` / senha `senha123` (conta real no Supabase de produção, já tem personagem/mesas de teste acumulados — o usuário disse que vai limpar isso depois, não é prioridade).
 
-## 7. Fase 6 — não iniciada
+## 7. Fase 6 — CONCLUÍDA e testada
 
-Conteúdo previsto (`inst-johnny.md`, Fase 6): reduzir partículas no mobile, pausar loops invisíveis quando a aba não está ativa, otimizar formato de imagens (WebP/AVIF), testar em dispositivos modestos. Nenhum código escrito ainda.
+Conteúdo previsto (`inst-johnny.md`, Fase 6): reduzir partículas no mobile, pausar loops invisíveis quando a aba não está ativa, otimizar formato de imagens (WebP/AVIF), testar em dispositivos modestos. Os quatro itens foram implementados:
+
+### Partículas reduzidas no mobile
+
+`renderVals()` cacheava os embers/skyline da Etapa 2 uma única vez (`if(!this._px)`), sempre com 18 embers e 24 barras de skyline, mesmo no mobile. Passou a cachear por breakpoint (`this._px.narrow !== s.playerNarrow`), gerando 8 embers e 12 barras no mobile (`s.playerNarrow`, o mesmo flag de `<900px` já usado pelo layout do wizard) e mantendo 18/24 no desktop. O espaçamento das barras de skyline é recalculado proporcionalmente (`skyStep = 4.4 * (24/skyN)`) pra continuar cobrindo a largura toda.
+
+### Loops de animação pausados com a aba oculta
+
+As animações CSS `ember` e `ringPulse` (`infinite`) nos elementos `[data-motion="particle-field"]`/`[data-motion="nature-ring"]` da Etapa 2 continuavam rodando mesmo com a aba em background. Em vez de mexer na propriedade `animation` (que o template já é dono, ver seção 3), a pausa é feita por uma regra CSS separada em `css/styles.css`:
+
+```css
+body.motion-tab-hidden [data-motion="particle-field"] *,
+body.motion-tab-hidden [data-motion="nature-ring"] * { animation-play-state: paused !important; }
+```
+
+`_syncMotionVisibility()` (chamado no mount e a cada `visibilitychange`) alterna a classe `motion-tab-hidden` no `<body>` e re-executa `_syncParallax()`; `_canParallax()` agora também retorna `false` quando `document.hidden`, então o parallax da Etapa 2 não reativa com a aba em background. Listener registrado em `componentDidMount`, removido em `componentWillUnmount`.
+
+### Imagens convertidas pra WebP
+
+Os fundos (`bg-arquivo.png` e os 5 `nat-*.png`) pesavam entre 1.4MB e 1.9MB cada (~10MB somados) — pesado principalmente em mobile. Gerado um `.webp` equivalente pra cada um via Pillow (qualidade 82, mesmo tamanho): resultado ~320KB somados (redução de ~97%), sem perda visível de qualidade.
+
+Como esses fundos são usados tanto em markup estático (`JChar.dc.html`, `JWizard.dc.html`) quanto via valor computado em JS (`pxImgA`/`pxImgB`, os slots A/B do crossfade da Fase 4), a técnica usada foi declarar `background-image` três vezes no mesmo `style` (fallback progressivo, padrão documentado pra `image-set()`):
+
+```
+background-image:url('arquivo.png');
+background-image:-webkit-image-set(url('arquivo.webp') type('image/webp'), url('arquivo.png') type('image/png'));
+background-image:image-set(url('arquivo.webp') type('image/webp'), url('arquivo.png') type('image/png'));
+```
+
+Navegadores que não reconhecem `image-set()`/`-webkit-image-set()` simplesmente ignoram essas declarações (CSS não some a propriedade toda, só descarta o valor inválido) e ficam com o `url(...png)` da primeira declaração — sem quebrar em navegadores antigos. Pra `pxImgA`/`pxImgB` (JS-bound), `renderVals()` computa `pxImgAWebp`/`pxImgBWebp` via `this._webp(url)` (troca `.png` por `.webp`) e passa os dois pro template; nenhuma dessas variáveis mexe em `opacity`/`transform`, que continuam sendo só do Anime.js nesses slots. `_preloadMotionAssets()` também passou a pré-carregar o `.webp` (é o que a maioria dos navegadores vai efetivamente exibir).
+
+### Testes executados (Playwright, headless Chromium)
+
+1. **Mobile (viewport 375×700)**: confirma 8 embers / 12 barras de skyline (em vez de 18/24), e que o `background-image` computado do slot A resolve pra uma URL válida via `image-set` (não fica `none`). Login em mobile passa pelo menu hambúrguer (`☰`), testado à parte.
+2. **Desktop (viewport 1280×800)**: confirma que a contagem cheia (18/24) foi preservada — regressão do comportamento anterior.
+3. **`visibilitychange`**: simula `document.hidden=true` e dispara o evento manualmente (não há API pública do Playwright pra isso) — confirma que a classe `motion-tab-hidden` é adicionada, que `animation-play-state` do `nature-ring` vira `paused`, e que tudo volta ao normal quando a aba "reaparece".
+4. Regressão completa das Fases 1-5 rodada de novo (fluxo feliz, `prefers-reduced-motion`, parallax/crossfade/transições) — todos os testes continuam passando, 0 erros de console.
 
 ## 8. Notas operacionais pra quem continuar
 
