@@ -130,7 +130,7 @@
       <div style="display:flex;flex-direction:column;gap:9px">
         <sc-for list="{{ weakOpts }}" as="w" hint-placeholder-count="6">
           <div onClick="{{ w.onClick }}" style="cursor: {{ w.cursor }};display:flex;align-items:flex-start;gap:12px;padding:13px 15px;background: {{ w.bg }};border:1px solid {{ w.border }};border-radius:6px;transition:.18s;opacity: {{ w.opacity }}">
-            <div style="width:20px;height:20px;border-radius:4px;flex-shrink:0;margin-top:1px;border:1.5px solid {{ w.boxBorder }};background: {{ w.boxBg }};display:flex;align-items:center;justify-content:center;font-size:12px;color:#0b0b10">{{ w.check }}</div>
+            <div data-motion="weak-check" data-weak-text="{{ w.txt }}" style="width:20px;height:20px;border-radius:4px;flex-shrink:0;margin-top:1px;border:1.5px solid {{ w.boxBorder }};background: {{ w.boxBg }};display:flex;align-items:center;justify-content:center;font-size:12px;color:#0b0b10">{{ w.check }}</div>
             <div style="flex:1">
               <div style="font-size:15px;color: {{ w.txtCol }};font-weight:500;margin-bottom:3px">{{ w.txt }}</div>
               <div style="font-family:'Cormorant Garamond';font-size:14px;line-height:1.4;color:#9b9588">{{ w.desc }}</div>
@@ -152,7 +152,7 @@
           <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;background:#0f0e13;border:1px solid rgba(255,255,255,.08);border-radius:6px">
             <div style="flex:1"><span style="font-size:15px;color:#e9e3d4">{{ a.label }}</span><sc-if value="{{ a.isBonus }}"><span style="font-size:11px;color:#c6a35e;margin-left:8px;font-family:'Space Mono';padding:2px 7px;border:1px solid rgba(198,166,100,.35);border-radius:10px">+{{ a.bonus }} Natureza</span></sc-if></div>
             <button onClick="{{ a.onDec }}" style="width:30px;height:30px;border-radius:4px;background:#1a1820;border:1px solid rgba(255,255,255,.12);color:#cfc7b4;font-size:17px;cursor:pointer;opacity: {{ a.decOpacity }}">−</button>
-            <div style="width:36px;text-align:center;font-family:'Space Mono';font-weight:700;font-size:20px;color: {{ a.valColor }}">{{ a.eff }}</div>
+            <div data-motion="attr-value" data-attr-key="{{ a.key }}" style="width:36px;text-align:center;font-family:'Space Mono';font-weight:700;font-size:20px;color: {{ a.valColor }}">{{ a.eff }}</div>
             <button onClick="{{ a.onInc }}" style="width:30px;height:30px;border-radius:4px;background:#1a1820;border:1px solid rgba(198,166,100,.4);color:#e0c179;font-size:17px;cursor: {{ a.incCursor }};opacity: {{ a.incOpacity }}">+</button>
           </div>
         </sc-for>
@@ -174,7 +174,7 @@
                 <div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background: {{ a.bg }};border:1px solid {{ a.border }};border-radius:5px">
                   <span style="flex:1;font-size:13px;color: {{ a.txtCol }}">{{ a.label }}</span>
                   <button onClick="{{ a.onDec }}" style="width:24px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer">−</button>
-                  <span style="width:24px;text-align:center;font-family:'Space Mono';font-weight:700;font-size:15px;color: {{ a.valCol }}">{{ a.disp }}</span>
+                  <span data-motion="skill-value" data-skill-key="{{ a.key }}" style="width:24px;text-align:center;font-family:'Space Mono';font-weight:700;font-size:15px;color: {{ a.valCol }}">{{ a.disp }}</span>
                   <button onClick="{{ a.onInc }}" style="width:24px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(198,166,100,.35);color:#e0c179;font-size:14px;cursor:pointer">+</button>
                 </div>
               </sc-for>
@@ -192,7 +192,7 @@
       <p style="font-family:'Cormorant Garamond';font-size:16px;color:#a39e90;margin:0 0 14px">A história do seu personagem. Deixe as perguntas te guiarem.</p>
       <textarea onInput="{{ onWizHistory }}" value="{{ wiz.history }}" placeholder="Escreva livremente..." style="width:100%;min-height:130px;background:#0e0d12;border:1px solid rgba(198,166,100,.25);border-radius:5px;padding:14px;font-family:'Cormorant Garamond';font-size:17px;line-height:1.5;color:#e9e3d4;outline:none;resize:vertical"></textarea>
       <div style="display:flex;flex-direction:column;gap:7px;margin-top:14px">
-        <sc-for list="{{ historyPrompts }}" as="h" hint-placeholder-count="4"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#8d887c;padding-left:14px;border-left:2px solid rgba(198,166,100,.3)">{{ h.q }}</div></sc-for>
+        <sc-for list="{{ historyPrompts }}" as="h" hint-placeholder-count="4"><div data-motion="history-prompt" style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#8d887c;padding-left:14px;border-left:2px solid rgba(198,166,100,.3)">{{ h.q }}</div></sc-for>
       </div>
     </div>
     </sc-if>
@@ -203,7 +203,7 @@
       <h2 style="font-family:'Cinzel';font-weight:600;font-size:24px;margin:0 0 14px;color:#efe8d8">Resumo Final</h2>
       <div style="display:flex;flex-direction:column;gap:14px">
         <!-- Identidade -->
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
+        <div data-motion="summary-card" style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
           <div style="font-family:'Cinzel';font-weight:600;font-size:22px;color:#efe8d8">{{ sumName }}</div>
           <div style="font-size:13px;color: {{ sumSensColor }};margin-bottom:14px">{{ sumSens }}</div>
           <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Identidade</div>
@@ -217,7 +217,7 @@
           </div>
         </div>
         <!-- Natureza -->
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
+        <div data-motion="summary-card" style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
           <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Natureza</div>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
             <span style="font-family:'Cinzel';font-weight:600;font-size:17px;color: {{ sumSensColor }}">{{ sumSens }}</span>
@@ -227,7 +227,7 @@
           <sc-if value="{{ showManifest }}"><div style="font-family:'Cormorant Garamond';font-size:15px;color:#cdc6b6">Manifestação: {{ sumManifest }}</div></sc-if>
         </div>
         <!-- Atributos -->
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
+        <div data-motion="summary-card" style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
           <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:12px">Atributos</div>
           <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between">
             <sc-for list="{{ sumAttrs }}" as="a" hint-placeholder-count="6"><div style="text-align:center;flex:1;min-width:58px;background:#13121a;border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:9px 4px"><div style="font-family:'Space Mono';font-weight:700;font-size:18px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div></div></sc-for>
@@ -235,7 +235,7 @@
         </div>
         <!-- Perícias -->
         <sc-if value="{{ sumHasSkills }}">
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
+        <div data-motion="summary-card" style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
           <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Perícias treinadas</div>
           <div style="display:flex;gap:7px;flex-wrap:wrap">
             <sc-for list="{{ sumSkills }}" as="a" hint-placeholder-count="4"><span style="font-size:12px;color:#cdc6b6;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px">{{ a.label }} <span style="font-family:'Space Mono';color:#e0c179">+{{ a.val }}</span></span></sc-for>
@@ -244,7 +244,7 @@
         </sc-if>
         <!-- Fraquezas -->
         <sc-if value="{{ sumHasWeak }}">
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
+        <div data-motion="summary-card" style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
           <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Fraquezas</div>
           <div style="display:flex;flex-direction:column;gap:8px">
             <sc-for list="{{ sumWeak }}" as="w" hint-placeholder-count="3"><div><div style="font-size:14px;color:#e9e3d4;font-weight:500">{{ w.txt }}</div><div style="font-family:'Cormorant Garamond';font-size:14px;color:#9b9588;line-height:1.4">{{ w.desc }}</div></div></sc-for>
@@ -253,13 +253,13 @@
         </sc-if>
         <!-- Histórico -->
         <sc-if value="{{ sumHasHistory }}">
-        <div style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
+        <div data-motion="summary-card" style="background:#0f0e13;border:1px solid rgba(198,166,100,.22);border-radius:8px;padding:20px">
           <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Histórico</div>
           <p style="font-family:'Cormorant Garamond';font-size:16px;line-height:1.55;color:#cdc6b6;margin:0">{{ sumHistory }}</p>
         </div>
         </sc-if>
         <!-- Resumo Narrativo -->
-        <div style="background:linear-gradient(180deg,rgba(34,28,20,.5),#0f0e13);border:1px solid rgba(198,166,100,.3);border-radius:8px;padding:20px">
+        <div data-motion="summary-card" style="background:linear-gradient(180deg,rgba(34,28,20,.5),#0f0e13);border:1px solid rgba(198,166,100,.3);border-radius:8px;padding:20px">
           <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e;margin-bottom:10px">Resumo Narrativo</div>
           <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:17px;line-height:1.6;color:#d8d1c2;margin:0">{{ narrative }}</p>
         </div>

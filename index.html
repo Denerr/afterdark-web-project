@@ -1676,7 +1676,7 @@ class Component extends DCLogic {
       this.setState({wizStep:nextStep},()=>{
         if(this._unmounted){ this._wizTransitioning=false; return; }
         const inEl=document.querySelector('[data-motion="step-section"]');
-        this._wizAnimateIn(inEl,direction,()=>{ this._wizTransitioning=false; });
+        this._wizAnimateIn(inEl,direction,()=>{ this._wizTransitioning=false; this._wizStepEntranceExtras(nextStep); });
       });
     };
     if(!outEl||!window.anime||this._prefersReducedMotion()){ commitStep(); return; }
@@ -1690,6 +1690,31 @@ class Component extends DCLogic {
     el.style.opacity='0';
     el.style.transform=`translateX(${dx}px)`;
     window.anime({targets:el,translateX:[dx,0],opacity:[0,1],duration:220,easing:'easeOutQuad',complete:done});
+  }
+
+  // 8. Feedbacks visuais nas etapas 3-7 (Fase 5). _bumpEl pulsa um elemento
+  // (confirmação de marcar fraqueza / mudar atributo-perícia); _staggerReveal
+  // cascateia opacity+translateY num grupo de elementos (revelação de conteúdo
+  // interno de uma etapa, depois que a etapa em si já entrou via _wizAnimateIn).
+  _bumpEl(el){
+    if(!el||!window.anime||this._prefersReducedMotion()||this._unmounted) return;
+    window.anime.remove(el);
+    window.anime({targets:el,scale:[1.32,1],duration:240,easing:'easeOutBack'});
+  }
+  _findMotionEl(motionType,keyAttr,keyVal){
+    const els=document.querySelectorAll(`[data-motion="${motionType}"]`);
+    for(const el of els){ if(el.getAttribute(keyAttr)===keyVal) return el; }
+    return null;
+  }
+  _staggerReveal(selector){
+    if(this._unmounted||this._prefersReducedMotion()||!window.anime) return;
+    const els=document.querySelectorAll(selector);
+    if(!els.length) return;
+    window.anime({targets:els,opacity:[0,1],translateY:[10,0],duration:320,delay:window.anime.stagger(70),easing:'easeOutQuad'});
+  }
+  _wizStepEntranceExtras(step){
+    if(step===6) this._staggerReveal('[data-motion="history-prompt"]');
+    if(step===7) this._staggerReveal('[data-motion="summary-card"]');
   }
 
   // ---- sessão compartilhada: persistência local + sincronização entre abas/janelas ----
@@ -2327,11 +2352,31 @@ class Component extends DCLogic {
   bonusKeysFor(sens){ return sens&&this.SENS[sens]?(this.SENS[sens].bonusKeys||[]):[]; }
   bonusForAttr(sens,k){ return this.bonusKeysFor(sens).filter(x=>x===k).length; }
   pickSens(k){ this.setState(s=>({wiz:{...s.wiz,sens:k,weaknesses:[]}})); }
-  toggleWeak(w){ this.setState(s=>{ const cur=s.wiz.weaknesses; const has=cur.includes(w); if(has) return {wiz:{...s.wiz,weaknesses:cur.filter(x=>x!==w)}}; if(cur.length>=3) return s; return {wiz:{...s.wiz,weaknesses:[...cur,w]}}; }); }
-  incAttr(k){ this.setState(s=>{ const base={...s.wiz.attrs}; const eff=(base[k]||1)+this.bonusForAttr(s.wiz.sens,k); const used=Object.values(base).reduce((a,b)=>a+b,0)-6; if(eff>=3||used>=3) return s; base[k]=(base[k]||1)+1; return {wiz:{...s.wiz,attrs:base}}; }); }
-  decAttr(k){ this.setState(s=>{ const base={...s.wiz.attrs}; if((base[k]||1)<=1) return s; base[k]=base[k]-1; return {wiz:{...s.wiz,attrs:base}}; }); }
-  incSkill(k){ this.setState(s=>{ const sk={...s.wiz.skills}; const v=sk[k]||0; const used=Object.values(sk).reduce((a,b)=>a+b,0); if(v>=3||used>=24) return s; sk[k]=v+1; return {wiz:{...s.wiz,skills:sk}}; }); }
-  decSkill(k){ this.setState(s=>{ const sk={...s.wiz.skills}; if(!sk[k]) return s; sk[k]=sk[k]-1; return {wiz:{...s.wiz,skills:sk}}; }); }
+  toggleWeak(w){
+    let blocked=false;
+    this.setState(s=>{ const cur=s.wiz.weaknesses; const has=cur.includes(w); if(has) return {wiz:{...s.wiz,weaknesses:cur.filter(x=>x!==w)}}; if(cur.length>=3){ blocked=true; return s; } return {wiz:{...s.wiz,weaknesses:[...cur,w]}}; },
+      ()=>{ if(!blocked) this._bumpEl(this._findMotionEl('weak-check','data-weak-text',w)); });
+  }
+  incAttr(k){
+    let blocked=false;
+    this.setState(s=>{ const base={...s.wiz.attrs}; const eff=(base[k]||1)+this.bonusForAttr(s.wiz.sens,k); const used=Object.values(base).reduce((a,b)=>a+b,0)-6; if(eff>=3||used>=3){ blocked=true; return s; } base[k]=(base[k]||1)+1; return {wiz:{...s.wiz,attrs:base}}; },
+      ()=>{ if(!blocked) this._bumpEl(this._findMotionEl('attr-value','data-attr-key',k)); });
+  }
+  decAttr(k){
+    let blocked=false;
+    this.setState(s=>{ const base={...s.wiz.attrs}; if((base[k]||1)<=1){ blocked=true; return s; } base[k]=base[k]-1; return {wiz:{...s.wiz,attrs:base}}; },
+      ()=>{ if(!blocked) this._bumpEl(this._findMotionEl('attr-value','data-attr-key',k)); });
+  }
+  incSkill(k){
+    let blocked=false;
+    this.setState(s=>{ const sk={...s.wiz.skills}; const v=sk[k]||0; const used=Object.values(sk).reduce((a,b)=>a+b,0); if(v>=3||used>=24){ blocked=true; return s; } sk[k]=v+1; return {wiz:{...s.wiz,skills:sk}}; },
+      ()=>{ if(!blocked) this._bumpEl(this._findMotionEl('skill-value','data-skill-key',k)); });
+  }
+  decSkill(k){
+    let blocked=false;
+    this.setState(s=>{ const sk={...s.wiz.skills}; if(!sk[k]){ blocked=true; return s; } sk[k]=sk[k]-1; return {wiz:{...s.wiz,skills:sk}}; },
+      ()=>{ if(!blocked) this._bumpEl(this._findMotionEl('skill-value','data-skill-key',k)); });
+  }
   wizNext(){
     if(this.state.wizStep<7){ this._wizGoToStep(this.state.wizStep+1,'next'); return; }
     if(this.state.wizReturn==='profile'){ this._finishCharWizard(); return; }

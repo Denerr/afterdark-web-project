@@ -30,13 +30,14 @@ Essa regra já orientou toda a implementação até aqui e continua valendo para
 | 2 | Encapsular o parallax existente (listener com ciclo de vida próprio) | ✅ Commitada |
 | 3 | Transições animadas entre as 7 etapas do wizard | ✅ Commitada |
 | 4 | Crossfade dos fundos da Etapa 2 (Natureza) via Anime.js | ✅ Commitada |
-| 5 | Feedbacks visuais nas etapas 3-7 (fraquezas, atributos, perícias, histórico, resumo) | 🔶 Código escrito, **NÃO commitado, NÃO testado** — ver seção 6 |
+| 5 | Feedbacks visuais nas etapas 3-7 (fraquezas, atributos, perícias, histórico, resumo) | ✅ Commitada e testada (Playwright) |
 | 6 | Mobile e performance | ⬜ Não iniciada |
 
 ## 5. O que já está commitado (Fases 1-4)
 
 Commits no branch `main` (mais recente primeiro), todos **locais** — o push pro GitHub é feito manualmente pelo usuário, exceto quando ele pede explicitamente (como este arquivo):
 
+- (Fase 5, ver seção 6) — feedbacks visuais nas etapas 3-7.
 - `e01636b` — Fase 4: crossfade dos fundos da Natureza via Anime.js.
 - `4a9342b` — Fase 3: transições animadas entre as 7 etapas do personagem.
 - `1375157` — Fase 2: encapsula o listener de parallax da Etapa 2.
@@ -53,9 +54,9 @@ Resumo funcional do que já existe e funciona (testado com Playwright, 0 erros d
 - **Hooks `data-motion` já presentes no HTML** (marcadores estáveis, sem lógica de animação própria — servem de alvo pro JS): `wizard-step`, `step-title`, `step-section` (um por etapa), `nature-card` (4x, Etapa 2), `background-slot-a`/`background-slot-b`, `nature-ring`, `particle-field`, `char-title`, `char-path` (na tela `JChar.dc.html`).
 - `componentWillUnmount` marca `this._unmounted=true`; todos os callbacks de animação checam essa flag antes de chamar `setState` (evita erro de setState em componente desmontado).
 
-## 6. Fase 5 — EM ANDAMENTO, código escrito mas não commitado nem testado
+## 6. Fase 5 — CONCLUÍDA e testada
 
-**Isto é o mais importante pra quem continuar**: as mudanças abaixo já estão no working tree (`git status` mostra `index.html` e `JWizard.dc.html` modificados), passaram no `node --check` (sintaxe válida) e no check de balanceamento de tags (`<div>`/`</div>` e `<sc-if>`/`</sc-if>` batendo), mas **nunca foram abertas num navegador** — nenhum teste Playwright rodou sobre elas ainda.
+O código descrito abaixo (que uma sessão anterior tinha escrito só no working tree, nunca commitado, e por isso não sobreviveu à troca de sessão/máquina) foi reescrito do zero seguindo esta mesma especificação, validado com `node --check`, checado quanto ao balanceamento de tags, e testado num navegador real via Playwright (fluxo completo de criação de personagem, incluindo os bumps de fraqueza/atributo/perícia, o stagger das Etapas 6/7, o comportamento com `prefers-reduced-motion`, e regressão das Fases 1-4). Todos os testes passaram, 0 erros de console.
 
 ### O que foi adicionado (`index.html`)
 
@@ -93,14 +94,15 @@ Apenas atributos `data-motion`/`data-*-key` novos, sem nenhuma mudança de layou
 
 Confirmado (antes de qualquer teste em navegador) que nenhum desses elementos tem `opacity`/`transform` vindo de `{{ }}` no template — todos estão livres para o Anime.js, respeitando a regra central da seção 3.
 
-### O que falta pra fechar a Fase 5 (próximos passos imediatos)
+### Testes executados (Playwright, headless Chromium)
 
-1. Subir o servidor local (`python -m http.server 8765` na raiz do projeto) e rodar os testes Playwright já existentes no scratchpad da sessão anterior (`regression-full.js`, `test-wizard-motion.js`, `test-parallax-controller.js`, `test-step-transitions.js`, `test-nature-crossfade.js`) pra garantir que nada quebrou.
-2. Escrever e rodar um teste novo especificamente pra Fase 5: confirmar que clicar +/- em atributo/perícia gera um pulso visível (`transform:scale` variando) só quando a ação não é bloqueada; confirmar que marcar uma fraqueza pulsa o check; confirmar que entrar na Etapa 6 revela as perguntas em cascata (opacity 0→1 escalonado) e o mesmo pra Etapa 7 com os cards do resumo; confirmar que com `prefers-reduced-motion` tudo continua funcional (só sem animar).
-3. Rodar a regressão geral de novo.
-4. Só depois de tudo passar: `git add index.html JWizard.dc.html` e commitar (mensagem no mesmo estilo das Fases 1-4, explicando o que foi testado).
+Script isolado no scratchpad da sessão (não faz parte do repositório): login → criação de personagem → Etapas 1-7.
 
-**Login de teste usado em toda a sessão**: `afterdark-flow-1783615750480@mailinator.com` / senha `senha123` (conta real no Supabase de produção, já tem personagem/mesas de teste acumulados — o usuário disse que vai limpar isso depois, não é prioridade).
+1. **Fluxo feliz completo**: seleciona natureza não-humana, marca 3 fraquezas (confirma bump/`scale` em cada uma, e confirma que a 4ª tentativa — bloqueada — NÃO dispara bump), distribui os 3 pontos de atributo (confirma bump a cada incremento válido), distribui os pontos de perícia até liberar o botão Continuar, preenche o histórico, chega na Etapa 6 (confirma stagger reveal das perguntas-guia) e na Etapa 7 (confirma os 7 cards do resumo e o stagger reveal deles). 0 erros de console.
+2. **`prefers-reduced-motion: reduce`**: marcar uma fraqueza atualiza o estado (checkbox reflete a escolha) sem nenhuma chamada ao `anime.js` — a ação continua funcional, só sem animar.
+3. **Regressão Fases 1-4**: parallax ainda reage a `mousemove` na Etapa 2, crossfade entre naturezas não gera erro, e a transição de ida/volta entre etapas (Continuar/Voltar) funciona.
+
+**Login de teste usado**: `afterdark-flow-1783615750480@mailinator.com` / senha `senha123` (conta real no Supabase de produção, já tem personagem/mesas de teste acumulados — o usuário disse que vai limpar isso depois, não é prioridade).
 
 ## 7. Fase 6 — não iniciada
 
