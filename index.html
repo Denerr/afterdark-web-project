@@ -938,15 +938,15 @@
         <div style="display:flex;align-items:flex-start;gap:13px">
           <div style="width:38px;height:38px;border-radius:50%;flex-shrink:0;background:rgba(198,163,94,.14);border:1px solid rgba(198,166,100,.5);display:flex;align-items:center;justify-content:center;font-size:18px;color:#e0c179;animation:glowPulse 2s ease-in-out infinite">⚄</div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e;margin-bottom:3px">O Mestre solicitou um teste</div>
+            <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color: {{ notifTitleCol }};margin-bottom:3px">{{ notifTitle }}</div>
             <div style="font-size:14px;color:#efe8d8;font-weight:500">{{ pending.label }}</div>
             <div style="font-family:'Space Mono';font-size:11px;color:#8d887c;margin-top:2px">DIF {{ pending.difficulty }}</div>
           </div>
         </div>
-        <div style="display:flex;gap:8px;margin-top:12px">
+        <sc-if value="{{ notifActive }}"><div style="display:flex;gap:8px;margin-top:12px">
           <button onClick="{{ openTestFromNotif }}" style="flex:1;padding:10px;background:#c6a35e;color:#0b0b10;border:none;border-radius:5px;font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Abrir teste</button>
           <button onClick="{{ dismissNotif }}" style="padding:10px 14px;background:transparent;color:#8d887c;border:1px solid rgba(255,255,255,.12);border-radius:5px;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="color:#cfc7b4">Depois</button>
-        </div>
+        </div></sc-if>
       </div>
     </sc-if>
 
@@ -1552,7 +1552,7 @@ class Component extends DCLogic {
     libDraft:{kind:'weapons',name:'',bonus:1,dano:2,alcance:'Corpo a corpo',ruido:'Médio',desc:''},
     inventory:{ items:['i2'], weapons:['w1'] },
     invDivider:'pistas',
-    sceneView:'cena', activeNpc:null, playerMenuOpen:false, topMenuOpen:false, testNotif:false,
+    sceneView:'cena', activeNpc:null, playerMenuOpen:false, topMenuOpen:false, testNotif:false, notifCancelled:false,
     log:[],
     npcs:[],
     clues:[],
@@ -2440,8 +2440,10 @@ class Component extends DCLogic {
     }));
     if(this._isFailGrade(res.grade)){ setTimeout(()=>this.advanceClock('c1',1),400); }
   }
-  dismissNotif(){ this.setState({testNotif:false}); }
-  openTestFromNotif(){ this.setState({testNotif:false,playerFocus:'testes',playerMenuOpen:false}); }
+  dismissNotif(){ clearTimeout(this._notifT); this.setState({testNotif:false,notifCancelled:false}); }
+  // Notificação "Teste cancelado": aparece mesmo se a anterior já foi fechada e some sozinha.
+  _notifyCancelled(){ clearTimeout(this._notifT); this.setState({testNotif:true,notifCancelled:true}); this._notifT=setTimeout(()=>this.setState({testNotif:false,notifCancelled:false}),4500); }
+  openTestFromNotif(){ clearTimeout(this._notifT); this.setState({testNotif:false,notifCancelled:false,playerFocus:'testes',playerMenuOpen:false}); }
 
   // ---- player menu (FAB) ----
   togglePlayerMenu(){ this.setState(s=>({playerMenuOpen:!s.playerMenuOpen})); }
@@ -2574,6 +2576,7 @@ class Component extends DCLogic {
     // Uma rolagem por solicitação: sem teste pendente, com rolagem em curso ou já rolado, não rola de novo.
     if(!pt||!pt.id||pt.status!=='pendente'||s.pRolling||s.pRoll||this._pRollLock===pt.id) return;
     this._pRollLock=pt.id;
+    if(s.testNotif){ clearTimeout(this._notifT); this.setState({testNotif:false,notifCancelled:false}); }
     const attrs=s.self.attrs||{}, skills=s.self.skills||{};
     if(pt.mode==='combate'){ const av=(attrs[pt.attrKey]||1), b=(skills[pt.skillKey]||0), wp=pt.weaponBonus||0; this.doRoll({mode:'combate',bonus:av+b+wp,difficulty:pt.difficulty,label:pt.label,atkAttr:av,atkSkill:b,weaponBonus:wp,atkAttrLabel:this.attrLabel(pt.attrKey),atkSkillLabel:this.skillLabel(pt.skillKey),weaponName:pt.weaponName,danoBase:pt.danoBase||0,targetId:pt.to,requestId:pt.id},'pRoll'); }
     else { const av=(attrs[pt.attrKey]||1); const b=(skills[pt.skillKey]||0); this.doRoll({mode:'geral',attrVal:av,bonus:b,difficulty:pt.difficulty,label:pt.label,requestId:pt.id},'pRoll'); }
@@ -2600,7 +2603,7 @@ class Component extends DCLogic {
     }catch(e){}
     this._sendingReq=null;
     if(ok||cancelled) this._clearStoredResult(reqId);
-    if(ok){ this._resultShownAt=Date.now(); this.setState(st=>({pSend:{reqId,state:'sent',msg:''},pending:st.pending&&st.pending.id===reqId?{...st.pending,status:'respondido'}:st.pending})); return; }
+    if(ok){ this._resultShownAt=Date.now(); this.setState(st=>({testNotif:st.notifCancelled?st.testNotif:false,pSend:{reqId,state:'sent',msg:''},pending:st.pending&&st.pending.id===reqId?{...st.pending,status:'respondido'}:st.pending})); return; }
     if(cancelled){ this.setState(st=>({pSend:{reqId,state:'cancelled',msg:'O Mestre cancelou este teste.'},pending:st.pending&&st.pending.id===reqId?{...st.pending,status:'cancelado'}:st.pending})); return; }
     this.setState({pSend:{reqId,state:'error',msg:'Não foi possível enviar o resultado ao Mestre. Ele continua salvo aqui.'}});
   }
@@ -2611,26 +2614,30 @@ class Component extends DCLogic {
     const pend=list.filter(r=>r.status==='pendente').sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at)));
     const curSrv=cur&&cur.id?list.find(r=>r.id===cur.id):null;
     const patch={pendingCount:pend.length};
+    let cancelledNow=false;
     if(curSrv&&curSrv.status!==cur.status){
       patch.pending={...cur,status:curSrv.status};
       // a resposta chegou ao banco mesmo que a confirmação tenha se perdido na rede
       if(curSrv.status==='respondido'&&s.pSend&&s.pSend.reqId===cur.id&&s.pSend.state!=='sent'){ patch.pSend={reqId:cur.id,state:'sent',msg:''}; this._clearStoredResult(cur.id); }
-      if(curSrv.status==='cancelado'){ patch.pSend={reqId:cur.id,state:'cancelled',msg:'O Mestre cancelou este teste.'}; this._clearStoredResult(cur.id); }
+      if(curSrv.status==='respondido'&&s.testNotif&&!s.notifCancelled){ patch.testNotif=false; }
+      if(curSrv.status==='cancelado'){ patch.pSend={reqId:cur.id,state:'cancelled',msg:'O Mestre cancelou este teste.'}; this._clearStoredResult(cur.id); cancelledNow=true; this._cancelShownAt=Date.now(); }
     }
     const curStatus=(patch.pending||cur||{}).status;
     const unsent=cur&&cur.id&&curStatus==='pendente'&&(s.pRolling||s.pRoll);
     // resultado recém-enviado fica visível alguns segundos antes de abrir o próximo teste da fila
-    const justAnswered=curStatus==='respondido'&&this._resultShownAt&&(Date.now()-this._resultShownAt)<6000;
+    const justAnswered=(curStatus==='respondido'&&this._resultShownAt&&(Date.now()-this._resultShownAt)<6000)
+      ||(curStatus==='cancelado'&&this._cancelShownAt&&(Date.now()-this._cancelShownAt)<4500);
     if(!unsent&&!justAnswered&&pend.length&&(!cur||!cur.id||curStatus!=='pendente')){
       const next=pend[0];
       const stored=this._storedResult(next.id);
-      Object.assign(patch,{pending:this._reqToPending(next),pRoll:stored,pRollTemp:null,pRolling:false,pSend:stored?{reqId:next.id,state:'error',msg:'Resultado ainda não confirmado pelo Mestre.'}:null,testNotif:true});
+      Object.assign(patch,{pending:this._reqToPending(next),pRoll:stored,pRollTemp:null,pRolling:false,pSend:stored?{reqId:next.id,state:'error',msg:'Resultado ainda não confirmado pelo Mestre.'}:null,testNotif:true,notifCancelled:false}); clearTimeout(this._notifT);
     } else if(!cur&&!pend.length){
       // sem pendências: mostra a última solicitação já resolvida (histórico do próprio jogador)
       const last=list.filter(r=>r.status!=='pendente').sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))[0];
       if(last) Object.assign(patch,{pending:this._reqToPending(last),pRoll:last.status==='respondido'?last.result:null,pSend:last.status==='respondido'?{reqId:last.id,state:'sent',msg:''}:null});
     }
     this.setState(patch);
+    if(cancelledNow) this._notifyCancelled();
     // resultado guardado (F5/queda de rede) é reenviado automaticamente
     const ps=patch.pSend!==undefined?patch.pSend:s.pSend, pr=patch.pRoll!==undefined?patch.pRoll:s.pRoll, pt=patch.pending||cur;
     if(pt&&pt.status==='pendente'&&pr&&ps&&ps.state==='error'&&ps.reqId===pt.id&&!this._sendingReq){ this._submitPlayerResult(pt.id,pr); }
@@ -3315,7 +3322,7 @@ class Component extends DCLogic {
       sendTestBg:(this._sendTestBlock()||s.testSending)?'#26242c':'#c6a35e', sendTestCol:(this._sendTestBlock()||s.testSending)?'#6f6b61':'#0b0b10', sendTestCursor:(this._sendTestBlock()||s.testSending)?'not-allowed':'pointer',
       sentReqsView, hasSentReqs:sentReqsView.length>0, rollFrom:s.rollFrom, hasRollFrom:!!s.rollFrom,
       // player notification + menu
-      testNotif:s.testNotif, openTestFromNotif:()=>this.openTestFromNotif(), dismissNotif:()=>this.dismissNotif(),
+      testNotif:s.testNotif, notifActive:!s.notifCancelled, notifTitle:s.notifCancelled?'Teste cancelado pelo Mestre':'O Mestre solicitou um teste', notifTitleCol:s.notifCancelled?'#8d887c':'#c6a35e', openTestFromNotif:()=>this.openTestFromNotif(), dismissNotif:()=>this.dismissNotif(),
       playerMenuOpen:s.playerMenuOpen, togglePlayerMenu:()=>this.togglePlayerMenu(), closePlayerMenu:()=>this.closePlayerMenu(),
       playerMenu, fabIcon:s.playerMenuOpen?'✕':'☰', pendingDot, activeTabLabel:tabLabels[s.playerTab]||'Mesa',
       playerMapPins, pendingFormula,

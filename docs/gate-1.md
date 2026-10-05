@@ -42,6 +42,11 @@ Testes SQL: 51/51 asserções; migração idempotente (executada duas vezes).
    Aprovado / Aguardando aprovação / Ficha pendente.
 3. Resultado do jogador sumia em ~3 s quando havia outro teste na fila → fica visível
    ~6 s antes de abrir o próximo.
+4. (Observação da revisão) Notificação do jogador ficava na tela após o teste ser
+   cancelado ou executado → cancelado: vira "Teste cancelado pelo Mestre", sem botões, e
+   some em ~4,5 s (o próximo da fila só abre depois); executado: some ao rolar e quando a
+   resposta é confirmada. Validado no navegador: cancelamento simples, rolagem com a
+   notificação aberta e cancelamento com outro teste na fila.
 
 ## Limitações conhecidas (escopo dos próximos pontos)
 - Leituras antigas ainda abertas (`members_select_all`, `get_table_session_state`) → Ponto 2.
