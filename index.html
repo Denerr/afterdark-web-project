@@ -914,7 +914,7 @@
 
 <!-- ========================= JOGADOR · LOBBY (aguardando mestre) ========================= -->
 <sc-if value="{{ isJLobby }}" data-screen-label="Jogador Lobby">
-<dc-import name="JLobby" joinTableType="{{ joinTableType }}" joinTableName="{{ joinTableName }}" myCharAccent="{{ myCharAccent }}" myCharInitial="{{ myCharInitial }}" myCharName="{{ myCharName }}" myCharSensLabel="{{ myCharSensLabel }}" lobbyPlayerCount="{{ lobbyPlayerCount }}" noLobbyPlayers="{{ noLobbyPlayers }}" lobbyPlayers="{{ lobbyPlayers }}" leaveTable="{{ leaveTable }}"/>
+<dc-import name="JLobby" joinTableType="{{ joinTableType }}" joinTableName="{{ joinTableName }}" myCharAccent="{{ myCharAccent }}" myCharInitial="{{ myCharInitial }}" myCharName="{{ myCharName }}" myCharSensLabel="{{ myCharSensLabel }}" lobbyPlayerCount="{{ lobbyPlayerCount }}" noLobbyPlayers="{{ noLobbyPlayers }}" lobbyPlayers="{{ lobbyPlayers }}" mySheetLabel="{{ mySheetLabel }}" mySheetCol="{{ mySheetCol }}" leaveTable="{{ leaveTable }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · WIZARD ========================= -->
@@ -2096,7 +2096,8 @@ class Component extends DCLogic {
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
   openTable(t){
-    this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':t.theme==='werewolf'?'sombras':null, screen:t.target, nav:['profile']}));
+    const notStarted=t.role==='mestre'&&t.status==='Aguardando jogadores';
+    this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':t.theme==='werewolf'?'sombras':null, screen:notStarted?'m_lobby':t.target, nav:['profile']}));
     if(t.role==='mestre' && t.id){ this._startMemberPolling(); this._loadTableSession(t.id,true); }
   }
   _genInviteCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return 'SV-'+Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join(''); }
@@ -2599,7 +2600,7 @@ class Component extends DCLogic {
     }catch(e){}
     this._sendingReq=null;
     if(ok||cancelled) this._clearStoredResult(reqId);
-    if(ok){ this.setState(st=>({pSend:{reqId,state:'sent',msg:''},pending:st.pending&&st.pending.id===reqId?{...st.pending,status:'respondido'}:st.pending})); return; }
+    if(ok){ this._resultShownAt=Date.now(); this.setState(st=>({pSend:{reqId,state:'sent',msg:''},pending:st.pending&&st.pending.id===reqId?{...st.pending,status:'respondido'}:st.pending})); return; }
     if(cancelled){ this.setState(st=>({pSend:{reqId,state:'cancelled',msg:'O Mestre cancelou este teste.'},pending:st.pending&&st.pending.id===reqId?{...st.pending,status:'cancelado'}:st.pending})); return; }
     this.setState({pSend:{reqId,state:'error',msg:'Não foi possível enviar o resultado ao Mestre. Ele continua salvo aqui.'}});
   }
@@ -2618,7 +2619,9 @@ class Component extends DCLogic {
     }
     const curStatus=(patch.pending||cur||{}).status;
     const unsent=cur&&cur.id&&curStatus==='pendente'&&(s.pRolling||s.pRoll);
-    if(!unsent&&pend.length&&(!cur||!cur.id||curStatus!=='pendente')){
+    // resultado recém-enviado fica visível alguns segundos antes de abrir o próximo teste da fila
+    const justAnswered=curStatus==='respondido'&&this._resultShownAt&&(Date.now()-this._resultShownAt)<6000;
+    if(!unsent&&!justAnswered&&pend.length&&(!cur||!cur.id||curStatus!=='pendente')){
       const next=pend[0];
       const stored=this._storedResult(next.id);
       Object.assign(patch,{pending:this._reqToPending(next),pRoll:stored,pRollTemp:null,pRolling:false,pSend:stored?{reqId:next.id,state:'error',msg:'Resultado ainda não confirmado pelo Mestre.'}:null,testNotif:true});
@@ -3384,6 +3387,7 @@ class Component extends DCLogic {
       savedCharsForJoin:s.characters.map(c=>({name:c.name,sensLabel:this.SENS[c.sens]?this.SENS[c.sens].label:'Sensitivo',onSelect:()=>this._selectSavedChar(c)})),
       noSavedChars:s.characters.length===0,
       // player lobby
+      mySheetLabel:s.selfApproved?'✓ Aprovado':(s.selfSheetReady?'Aguardando aprovação':'Ficha pendente'), mySheetCol:s.selfApproved?'#7fae8f':'#d2a23a',
       myCharName:s.self.char||'Personagem', myCharInitial:(s.self.char||'?')[0].toUpperCase(),
       myCharAccent:this.SENS_ACCENT[s.self.sens]||'#c6a35e',
       myCharSensLabel:s.self.sens&&this.SENS[s.self.sens]?this.SENS[s.self.sens].label:'Sensitivo',
