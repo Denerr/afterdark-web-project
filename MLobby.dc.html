@@ -11,7 +11,7 @@
     </div>
     <button onClick="{{ startSession }}" disabled="{{ startSessionDisabled }}" style="padding:15px 34px;background: {{ startSessionBg }};color: {{ startSessionCol }};border:none;border-radius:2px;font:700 12px/1 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor: {{ startSessionCursor }};transition:.25s;box-shadow:0 0 0 1px {{ startSessionBg }}" style-hover="filter:brightness(1.18);box-shadow:0 0 30px {{ sessTheme.glow }}">▸ Iniciar RPG</button>
   </div>
-  <sc-if value="{{ startSessionDisabled }}"><p style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8d887c;margin:-18px 0 18px;text-align:right">Aguardando pelo menos um jogador pronto para começar.</p></sc-if>
+  <sc-if value="{{ startBlockReason }}"><p style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8d887c;margin:-18px 0 18px;text-align:right">{{ startBlockReason }}</p></sc-if>
 
   <div style="display:flex;gap:24px;flex-wrap:wrap">
     <!-- invite -->
@@ -44,7 +44,7 @@
     <div style="flex:2;min-width:340px;background:rgba(20,18,24,.65);border:1px solid rgba(198,166,100,.2);border-radius:6px;padding:26px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
         <div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c">Jogadores conectados</div>
-        <div style="font-family:'Space Mono';font-size:13px;color:#e0c179">{{ readyCount }} prontos · {{ total }}/8</div>
+        <div style="font-family:'Space Mono';font-size:13px;color:#e0c179">{{ readyCount }} aprovados · {{ total }}/8</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px">
         <sc-for list="{{ players }}" as="p">
@@ -54,7 +54,8 @@
               <div style="font-size:15px;color:#e9e3d4;font-weight:500">{{ p.char }} <span style="color:#7e7a70;font-style:italic;font-family:'Cormorant Garamond';font-size:15px">· {{ p.player }}</span></div>
               <div style="font-size:12px;color: {{ p.cColor }};letter-spacing:.04em">{{ p.sLabel }}</div>
             </div>
-            <sc-if value="{{ p.ready }}"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7fae8f;padding:5px 12px;border:1px solid rgba(127,174,143,.4);border-radius:20px">✓ Pronto</span></sc-if>
+            <sc-if value="{{ p.ready }}"><span style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#7fae8f;padding:5px 12px;border:1px solid rgba(127,174,143,.4);border-radius:20px">✓ Aprovado</span></sc-if>
+            <sc-if value="{{ p.canRemove }}"><button onClick="{{ p.onRemove }}" style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8d887c;padding:5px 10px;border:1px solid rgba(255,255,255,.1);border-radius:20px;background:transparent;cursor:pointer" style-hover="color:#e08a8a;border-color:rgba(224,138,138,.5)">{{ p.removeLabel }}</button></sc-if>
             <sc-if value="{{ p.notReady }}"><button onClick="{{ p.onApprove }}" style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#cfc7b4;padding:6px 13px;border:1px solid rgba(198,166,100,.35);border-radius:20px;background:transparent;cursor:pointer" style-hover="border-color:rgba(198,166,100,.7)">Aprovar</button></sc-if>
           </div>
         </sc-for>
