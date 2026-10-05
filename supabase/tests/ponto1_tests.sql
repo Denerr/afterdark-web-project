@@ -1,3 +1,14 @@
+-- Testes SQL do Ponto 1 (Postgres local via Docker; nao toca no Supabase real).
+--   export MSYS_NO_PATHCONV=1   # só no Git Bash do Windows
+--   docker run -d --name adpg -e POSTGRES_PASSWORD=pg postgres:15
+--   cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql migration_table_members.sql \
+--       migration_session_state.sql migration_rls_hardening.sql migration_leave_table.sql \
+--       migration_archive_table.sql migration_profiles.sql migration_requests_consequences.sql > /tmp/all.sql
+--   docker cp /tmp/all.sql adpg:/tmp/all.sql && docker cp tests/ponto1_tests.sql adpg:/tmp/t.sql
+--   docker exec adpg psql -U postgres -q -f /tmp/all.sql
+--   docker exec adpg psql -U postgres -q -f /tmp/t.sql | grep -E "PASSOU|FALHOU|TODOS"
+--   docker rm -f adpg
+-- Esperado: 51 linhas PASSOU e 'TODOS OS TESTES SQL PASSARAM'.
 \set ON_ERROR_STOP 1
 -- Helpers (security invoker: rodam com o papel corrente)
 create schema t;
