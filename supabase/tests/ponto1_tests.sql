@@ -3,12 +3,18 @@
 --   docker run -d --name adpg -e POSTGRES_PASSWORD=pg postgres:15
 --   cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql migration_table_members.sql \
 --       migration_session_state.sql migration_rls_hardening.sql migration_leave_table.sql \
---       migration_archive_table.sql migration_profiles.sql migration_requests_consequences.sql > /tmp/all.sql
+--       migration_archive_table.sql migration_profiles.sql migration_requests_consequences.sql \
+--       migration_rls_p2.sql > /tmp/all.sql
 --   docker cp /tmp/all.sql adpg:/tmp/all.sql && docker cp tests/ponto1_tests.sql adpg:/tmp/t.sql
 --   docker exec adpg psql -U postgres -q -f /tmp/all.sql
 --   docker exec adpg psql -U postgres -q -f /tmp/t.sql | grep -E "PASSOU|FALHOU|TODOS"
 --   docker rm -f adpg
--- Esperado: 51 linhas PASSOU e 'TODOS OS TESTES SQL PASSARAM'.
+-- Rodar numa base limpa (cada arquivo de teste cria o schema t).
+-- Esperado: 52 linhas PASSOU e 'TODOS OS TESTES SQL PASSARAM'.
+--
+-- Nota: com o Ponto 2 aplicado, as tentativas de acesso direto a table_members por
+-- anon morrem em "permission denied" (grant revogado) em vez de "campo reservado"
+-- (trigger). O bloqueio é o mesmo ou mais forte; os testes afirmam o resultado.
 \set ON_ERROR_STOP 1
 -- Helpers (security invoker: rodam com o papel corrente)
 create schema t;
@@ -55,18 +61,28 @@ select t.fails(format($$select public.player_get_state(%L,'x')$$, t.v('ma')), 't
 select t.fails(format($$select public.player_get_state(%L,%L)$$, t.v('ma'), t.v('tb')), 'token de B não abre A', 'not_authorized');
 select t.ok((public.player_get_state(t.v('ma')::uuid, t.v('ta'))->'member'->>'id') = t.v('ma'), 'A lê o próprio estado');
 
--- Proteção de campos reservados por acesso direto (políticas antigas ainda permissivas)
-select t.fails(format($$update public.table_members set status='pronto' where id=%L$$, t.v('ma')), 'anon não se marca pronto direto', 'reservado');
-select t.fails(format($$update public.table_members set wounds='[]'::jsonb||'{"lvl":"x"}'::jsonb where id=%L$$, t.v('mb')), 'anon não altera ferimentos', 'reservado');
-select t.fails(format($$update public.table_members set approved_at=now() where id=%L$$, t.v('ma')), 'anon não se aprova', 'reservado');
-insert into public.table_members(table_id, player_name, status, approved_at, sheet_ready, wounds) values (t.v('tid')::uuid,'Intruso','pronto',now(),true,'[{"lvl":"x"}]') returning id as mi \gset
-select t.ok((select status='conectando' and approved_at is null and not sheet_ready and wounds='[]'::jsonb from public.table_members where id=:'mi'), 'insert direto não injeta aprovação/consequências');
+-- Proteção de campos reservados por acesso direto.
+-- No Ponto 1 estas tentativas chegavam ao trigger _ad_members_guard e morriam com
+-- "campo reservado". A partir do Ponto 2 o anon não tem nem grant em table_members,
+-- então o banco barra antes, com "permission denied" — bloqueio mais forte, mensagem
+-- diferente. O que se verifica aqui é o resultado (bloqueado), não o mecanismo.
+select t.fails(format($$update public.table_members set status='pronto' where id=%L$$, t.v('ma')), 'anon não se marca pronto direto', 'reservado|permission denied');
+select t.fails(format($$update public.table_members set wounds='[]'::jsonb||'{"lvl":"x"}'::jsonb where id=%L$$, t.v('mb')), 'anon não altera ferimentos', 'reservado|permission denied');
+select t.fails(format($$update public.table_members set approved_at=now() where id=%L$$, t.v('ma')), 'anon não se aprova', 'reservado|permission denied');
+select t.fails(format($$insert into public.table_members(table_id, player_name, status, approved_at, sheet_ready) values (%L,'Intruso','pronto',now(),true)$$, t.v('tid')), 'anon não insere membro direto', 'reservado|permission denied|violates row-level');
+-- Jogador que entrou mas não concluiu ficha, pelo caminho real (join_table_by_code):
+-- a partir do Ponto 2 não existe insert direto em table_members nem para o dono.
+-- Serve para exercitar a guarda de início de sessão mais abaixo.
+select member_id as mi from public.join_table_by_code('SV-TEST','Sem Ficha') \gset
+reset role; select t.ok((select char_name is null and not sheet_ready and approved_at is null from public.table_members where id=:'mi'), 'quem acabou de entrar não tem ficha, prontidão nem aprovação');
+set role anon; select set_config('request.jwt.claim.sub','',false);
 
 -- Fichas: A e B concluem
 select t.fails(format($$select public.player_submit_sheet(%L,%L,'Ana','Kara','{}'::jsonb)$$, t.v('ma'), t.v('tb')), 'B não grava ficha de A', 'not_authorized');
 select public.player_submit_sheet(:'ma', :'ta', 'Ana', 'Kara', '{"attrs":{"mente":3},"skills":{"analise":2}}');
 select public.player_submit_sheet(:'mb', :'tb', 'Bia', 'Rook', '{"attrs":{"corpo":2}}');
-select t.ok((select status='aguardando' and sheet_ready and approved_at is null from public.table_members where id=:'ma'), 'ficha concluída != aprovada');
+reset role; select t.ok((select status='aguardando' and sheet_ready and approved_at is null from public.table_members where id=:'ma'), 'ficha concluída != aprovada');
+set role anon; select set_config('request.jwt.claim.sub','',false);
 
 -- Funções de mestre negadas a anon e a outro usuário logado
 select t.fails(format($$select public.master_set_approval(%L,true)$$, t.v('ma')), 'anon não aprova', 'permission denied');
@@ -139,9 +155,12 @@ select t.ok((select wounds='[]'::jsonb and conditions='[]'::jsonb from public.ta
 -- Jogador logado: autorizado por auth.uid() sem token; outro logado não
 select set_config('request.jwt.claim.sub','22222222-2222-2222-2222-222222222222',false);
 select member_id as ml from public.join_table_by_code('SV-TEST','Leo') \gset
-select t.ok((select user_id from public.table_members where id=:'ml')='22222222-2222-2222-2222-222222222222', 'user_id vem do auth.uid() (não do cliente)');
-select t.ok((public.player_get_state(:'ml', null)->'member'->>'id')=:'ml', 'logado lê o próprio estado sem token');
 select set_config('t.ml', :'ml', false);
+-- Leitura de verificação como superusuário: a partir do Ponto 2 nem o jogador
+-- logado lê table_members direto — só o dono da mesa. Ele usa player_get_state.
+reset role; select t.ok((select user_id from public.table_members where id=:'ml')='22222222-2222-2222-2222-222222222222', 'user_id vem do auth.uid() (não do cliente)');
+set role authenticated; select set_config('request.jwt.claim.sub','22222222-2222-2222-2222-222222222222',false);
+select t.ok((public.player_get_state(:'ml', null)->'member'->>'id')=:'ml', 'logado lê o próprio estado sem token');
 select set_config('request.jwt.claim.sub','33333333-3333-3333-3333-333333333333',false);
 select t.fails(format($$select public.player_get_state(%L,null)$$, t.v('ml')), 'outro logado não lê', 'not_authorized');
 
