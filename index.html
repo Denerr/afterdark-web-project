@@ -3637,7 +3637,9 @@ class Component extends DCLogic {
     const sensInfo=w.sens?this.SENS[w.sens]:null;
     const attrView=this.ATTRS.map(a=>{ const base=w.attrs[a.key]||1; const bonus=this.bonusForAttr(w.sens,a.key); const eff=base+bonus; return {...a, base, eff, bonus, isBonus:bonus>0, atMax:eff>=3, onInc:()=>this.incAttr(a.key), onDec:()=>this.decAttr(a.key), valColor:eff>1?'#e0c179':'#cfc7b4', incOpacity:eff>=3||this.poolLeft()<=0?'0.35':'1', incCursor:eff>=3||this.poolLeft()<=0?'not-allowed':'pointer', decOpacity:base<=1?'0.35':'1' }; });
     const skillView=this.SKILLS.map(a=>{ const val=w.skills[a.key]||0; const tr=val>0; return {...a, val, disp:'+'+val, onInc:()=>this.incSkill(a.key), onDec:()=>this.decSkill(a.key), bg:tr?'#16140f':'#0f0e13', border:tr?'rgba(198,166,100,.3)':'rgba(255,255,255,.07)', txtCol:tr?'#e9e3d4':'#8d887c', valCol:tr?'#e0c179':'#5a564e' }; });
-    const skillGroups=this.ATTRS.map(at=>({ key:at.key, attrLabel:at.label, skills:skillView.filter(s2=>s2.attr===at.key) })).filter(g=>g.skills.length>0);
+    // intro e desc vem do catalogo (src/data/attributes.js), fonte unica desses textos.
+    const skillGroups=this.ATTRS.map(at=>({ key:at.key, attrLabel:at.label, intro:at.intro||'', hasIntro:!!at.intro,
+      skills:skillView.filter(s2=>s2.attr===at.key).map(sk=>({...sk, hasDesc:!!sk.desc})) })).filter(g=>g.skills.length>0);
     const wacc=sensInfo?sensInfo.accent:'#c6a35e';
     const isHumano=w.sens==='humano';
     const weakOpts=(w.sens&&!isHumano)?this.WEAK[w.sens].map(x=>{ const on=w.weaknesses.includes(x.t); const full=w.weaknesses.length>=3&&!on; return {txt:x.t, desc:x.d, on, dim:full, onClick:()=>this.toggleWeak(x.t), bg:on?'#1a0e12':'#0f0e13', border:on?wacc:'rgba(255,255,255,.08)', boxBorder:on?wacc:'rgba(255,255,255,.2)', boxBg:on?wacc:'transparent', check:on?'✓':'', txtCol:on?'#efe8d8':'#cdc6b6', opacity:full?'0.42':'1', cursor:full?'default':'pointer' }; }):[];
