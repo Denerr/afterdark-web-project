@@ -975,33 +975,44 @@
       </div>
     </sc-if>
 
-    <!-- PERSISTENT CHARACTER HEADER (sempre visível) -->
-    <div style="display:flex;align-items:center;gap:16px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:14px 18px;margin-bottom:16px;flex-wrap:wrap">
-      <div style="width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:24px;color:#efe8d8;background: {{ selfAvatarBg }};border:2px solid #c41e3a;box-shadow:0 0 18px rgba(196,30,58,.25)">{{ selfAvatarInitial }}</div>
-      <div style="min-width:0">
-        <div style="font-family:'Cinzel';font-weight:700;font-size:22px;color:#efe8d8;line-height:1.1">{{ self.char }}</div>
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:5px">
-          <span style="font-size:13px;color:#a39e90">Sensibilidade: <span style="color: {{ selfSens.accent }}">{{ selfSens.label }}</span></span>
-          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.04em;color: {{ healthColor }};padding:4px 11px;border:1px solid {{ healthColor }}55;border-radius:20px">♥ Saúde: {{ healthLabel }}</span>
-        </div>
-        <sc-if value="{{ selfHasStress }}">
-          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px">
-            <sc-for list="{{ selfStress }}" as="b" hint-placeholder-count="1">
-              <div style="min-width:130px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-                  <span style="font-size:10px;letter-spacing:.04em;color:#9b9588">⚠ {{ b.name }}</span>
-                  <span style="font-family:'Space Mono';font-size:10px;color: {{ b.col }}">{{ b.label }}</span>
-                </div>
-                <div style="display:flex;gap:3px">
-                  <sc-for list="{{ b.segs }}" as="sg" hint-placeholder-count="4"><div style="width:18px;height:8px;border-radius:2px;background: {{ sg.col }}"></div></sc-for>
-                </div>
-              </div>
-            </sc-for>
+    <!-- RESUMO DO PERSONAGEM (sempre visível): nome, saúde/condições, estresse próprio, -->
+    <!-- atributos essenciais e acesso à ficha completa e aos materiais conhecidos. -->
+    <div style="display:flex;align-items:center;gap:16px 22px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:14px 18px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:16px;min-width:0;flex:1 1 320px">
+        <div style="width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:24px;color:#efe8d8;background: {{ selfAvatarBg }};border:2px solid #c41e3a;box-shadow:0 0 18px rgba(196,30,58,.25)">{{ selfAvatarInitial }}</div>
+        <div style="min-width:0">
+          <div style="font-family:'Cinzel';font-weight:700;font-size:22px;color:#efe8d8;line-height:1.15;overflow-wrap:anywhere">{{ self.char }}</div>
+          <div style="font-size:13px;color:#a39e90;margin-top:4px">Sensibilidade: <span style="color: {{ selfSens.accent }}">{{ selfSens.label }}</span></div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px">
+            <sc-for list="{{ selfConditions }}" as="c" hint-placeholder-count="2"><span style="font-size:12px;color: {{ c.col }};padding:4px 10px;border:1px solid {{ c.col }}55;border-radius:20px">{{ c.icon }} {{ c.label }}</span></sc-for>
           </div>
-        </sc-if>
+          <sc-if value="{{ selfHasStress }}">
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px">
+              <sc-for list="{{ selfStress }}" as="b" hint-placeholder-count="1">
+                <div style="min-width:130px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px">
+                    <span style="font-size:10px;letter-spacing:.04em;color:#9b9588">⚠ {{ b.name }}</span>
+                    <span style="font-family:'Space Mono';font-size:10px;color: {{ b.col }}">{{ b.label }}</span>
+                  </div>
+                  <div style="display:flex;gap:3px">
+                    <sc-for list="{{ b.segs }}" as="sg" hint-placeholder-count="4"><div style="width:18px;height:8px;border-radius:2px;background: {{ sg.col }}"></div></sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
       </div>
-      <div style="flex:1"></div>
-      <sc-if value="{{ pendingDot }}"><span onClick="{{ openTestFromNotif }}" style="cursor:pointer;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#e0c179;padding:6px 12px;border:1px solid rgba(224,193,121,.4);border-radius:14px;animation:glowPulse 2s ease-in-out infinite">⚄ teste pendente</span></sc-if>
+      <div style="display:grid;grid-template-columns:repeat(6,minmax(46px,1fr));gap:6px;flex:0 1 380px;min-width:0">
+        <sc-for list="{{ selfAttr }}" as="a" hint-placeholder-count="6"><div style="text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:7px 2px"><div style="font-family:'Space Mono';font-weight:700;font-size:16px;color:#e0c179">{{ a.val }}</div><div style="font-size:9px;color:#8d887c;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.label }}</div></div></sc-for>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
+        <sc-if value="{{ pendingDot }}"><button onClick="{{ openTestFromNotif }}" style="cursor:pointer;background:transparent;font:500 10px 'Archivo';letter-spacing:.1em;text-transform:uppercase;color:#e0c179;padding:9px 12px;border:1px solid rgba(224,193,121,.4);border-radius:14px;animation:glowPulse 2s ease-in-out infinite">⚄ teste pendente</button></sc-if>
+        <button onClick="{{ openFicha }}" style="padding:9px 13px;background:rgba(198,163,94,.1);border:1px solid rgba(198,166,100,.4);border-radius:7px;color:#e0c179;font:600 11px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="background:rgba(198,163,94,.18)">⚇ Ficha completa</button>
+        <button onClick="{{ openNpcs }}" style="padding:9px 12px;background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#cfc7b4;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">☻ NPCs</button>
+        <button onClick="{{ openPistas }}" style="padding:9px 12px;background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#cfc7b4;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">◷ Pistas</button>
+        <button onClick="{{ openInv }}" style="padding:9px 12px;background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#cfc7b4;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">🗀 Inventário</button>
+      </div>
     </div>
 
     <!-- mobile back bar -->
@@ -1011,29 +1022,6 @@
 
     <!-- DASHBOARD GRID -->
     <div style="display:grid;grid-template-columns: {{ dashCols }};gap:16px;align-items:start">
-
-      <!-- LEFT: FICHA -->
-      <sc-if value="{{ showFichaCol }}">
-        <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:20px">
-          <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e;margin-bottom:16px">⚇ Ficha do Personagem</div>
-          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Atributos</div>
-          <div style="display:flex;gap:8px;justify-content:space-between;margin-bottom:18px">
-            <sc-for list="{{ selfAttr }}" as="a" hint-placeholder-count="5"><div style="text-align:center;flex:1;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:9px 2px"><div style="font-family:'Space Mono';font-weight:700;font-size:18px;color:#e0c179">{{ a.val }}</div><div style="font-size:9px;color:#8d887c;margin-top:2px">{{ a.label }}</div></div></sc-for>
-          </div>
-          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Perícias treinadas</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px">
-            <sc-for list="{{ selfSkill }}" as="a" hint-placeholder-count="5"><span style="font-size:12px;color:#cdc6b6;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px">{{ a.label }} <span style="font-family:'Space Mono';color:#e0c179">+{{ a.val }}</span></span></sc-for>
-          </div>
-          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">Fraquezas</div>
-          <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:18px">
-            <sc-for list="{{ selfWeak }}" as="w" hint-placeholder-count="3"><div style="font-family:'Cormorant Garamond';font-size:16px;color:#cdc6b6">— {{ w.txt }}</div></sc-for>
-          </div>
-          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">Estado</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <sc-for list="{{ selfConditions }}" as="c" hint-placeholder-count="2"><span style="font-size:12px;color: {{ c.col }};padding:5px 11px;border:1px solid {{ c.col }}55;border-radius:20px">{{ c.icon }} {{ c.label }}</span></sc-for>
-          </div>
-        </div>
-      </sc-if>
 
       <!-- CENTER: MAPA / CENA tabs -->
       <sc-if value="{{ showCenterCol }}">
@@ -1110,9 +1098,16 @@
         </div>
       </sc-if>
 
-      <!-- RIGHT: TESTES + DIÁRIO -->
+      <!-- RIGHT: abas Testes / Grupo / Diário (no celular, a área vem do menu) -->
       <sc-if value="{{ showRightCol }}">
-        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+        <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+          <sc-if value="{{ showSideTabs }}">
+            <div role="tablist" style="display:flex;gap:4px;background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:10px;padding:5px">
+              <sc-for list="{{ sideTabs }}" as="t" hint-placeholder-count="3">
+                <button role="tab" aria-selected="{{ t.sel }}" onClick="{{ t.onClick }}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 6px;border:none;border-radius:7px;font:600 11px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer;background: {{ t.bg }};color: {{ t.col }};transition:.2s">{{ t.icon }} {{ t.l }}<sc-if value="{{ t.badge }}"><span style="font-family:'Space Mono';font-size:10px;letter-spacing:0;color:#0b0b10;background:#e0c179;border-radius:10px;padding:1px 6px;animation:glowPulse 2s ease-in-out infinite">{{ t.badgeText }}</span></sc-if></button>
+              </sc-for>
+            </div>
+          </sc-if>
           <!-- TESTES box -->
           <sc-if value="{{ showTestesBox }}">
             <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:18px">
@@ -1155,7 +1150,7 @@
               <div style="display:flex;flex-direction:column;gap:8px">
                 <sc-for list="{{ testHistory }}" as="h" hint-placeholder-count="3">
                   <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-left:3px solid {{ h.col }};border-radius:5px">
-                    <div style="flex:1;min-width:0"><div style="font-size:12px;color:#cdc6b6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.label }}</div></div>
+                    <div style="flex:1;min-width:0"><div title="{{ h.full }}" style="font-size:12px;color:#cdc6b6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ h.label }}</div></div>
                     <span style="font-size:11px;font-family:'Space Mono';color: {{ h.col }}">{{ h.grade }}</span>
                   </div>
                 </sc-for>
@@ -1180,7 +1175,7 @@
           <!-- GRUPO: participantes da mesa e seus status compartilhados. -->
           <!-- Somente consulta: nenhum controle de aprovar, remover ou alterar. -->
           <sc-if value="{{ showGrupoBox }}">
-            <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:18px;margin-top:16px">
+            <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:18px">
               <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e;margin-bottom:14px">⚭ Grupo</div>
               <sc-if value="{{ hasGroupCards }}">
                 <div style="display:flex;flex-direction:column;gap:10px">
@@ -1243,6 +1238,49 @@
       </sc-if>
     </div>
   </div>
+
+  <!-- FICHA COMPLETA: painel próprio, só com os dados do próprio personagem. -->
+  <sc-if value="{{ fichaOpen }}">
+    <div onClick="{{ backToMap }}" style="position:fixed;inset:0;z-index:78;display:flex;justify-content:flex-end;background:rgba(6,6,10,.7);backdrop-filter:blur(3px);animation:fadeIn .25s ease">
+      <div onClick="{{ stop }}" role="dialog" aria-label="Ficha completa" style="width:100%;max-width:480px;height:100%;overflow-y:auto;background:#13121a;border-left:1px solid rgba(198,166,100,.25);box-shadow:-30px 0 80px rgba(0,0,0,.6);animation:fadeIn .25s ease">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;background:#13121a;z-index:2">
+          <div style="min-width:0">
+            <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e">⚇ Ficha do Personagem</div>
+            <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;overflow-wrap:anywhere">{{ self.char }}</div>
+          </div>
+          <button onClick="{{ backToMap }}" aria-label="Fechar ficha" style="flex-shrink:0;padding:9px 14px;border-radius:7px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#cfc7b4;font:500 12px 'Archivo';cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">✕ Fechar</button>
+        </div>
+        <div style="padding:18px 20px 28px">
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Atributos</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
+            <sc-for list="{{ selfAttr }}" as="a" hint-placeholder-count="6"><div style="text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:9px 2px"><div style="font-family:'Space Mono';font-weight:700;font-size:18px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div></div></sc-for>
+          </div>
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Perícias treinadas</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px">
+            <sc-for list="{{ selfSkill }}" as="a" hint-placeholder-count="5"><span style="font-size:12px;color:#cdc6b6;padding:5px 11px;border:1px solid rgba(198,166,100,.3);border-radius:20px">{{ a.label }} <span style="font-family:'Space Mono';color:#e0c179">+{{ a.val }}</span></span></sc-for>
+            <sc-if value="{{ noSelfSkill }}"><span style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#7e7a70">Nenhuma perícia treinada.</span></sc-if>
+          </div>
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">Fraquezas</div>
+          <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:20px">
+            <sc-for list="{{ selfWeak }}" as="w" hint-placeholder-count="3"><div style="font-family:'Cormorant Garamond';font-size:16px;color:#cdc6b6">— {{ w.txt }}</div></sc-for>
+            <sc-if value="{{ noSelfWeak }}"><span style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#7e7a70">Nenhuma fraqueza registrada.</span></sc-if>
+          </div>
+          <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">Estado</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+            <sc-for list="{{ selfConditions }}" as="c" hint-placeholder-count="2"><span style="font-size:12px;color: {{ c.col }};padding:5px 11px;border:1px solid {{ c.col }}55;border-radius:20px">{{ c.icon }} {{ c.label }}</span></sc-for>
+          </div>
+          <sc-if value="{{ hasSelfIdentity }}">
+            <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Identidade</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ selfIdentity }}" as="f" hint-placeholder-count="4">
+                <div><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c;margin-bottom:2px">{{ f.l }}</div><div style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.45;color:#cdc6b6;white-space:pre-wrap;overflow-wrap:anywhere">{{ f.v }}</div></div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
 
   <!-- NPCs / Inventário overlay -->
   <sc-if value="{{ overlayOpen }}">
@@ -1682,7 +1720,7 @@ class Component extends DCLogic {
     sceneMode:null,
     wizStep:1, sensHover:null, pxImgA:'assets/images/nat-default.png', pxImgB:'assets/images/nat-default.png', pxSlot:'a',
     wiz:{name:'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''},
-    playerTab:'mapa', centerTab:'mapa', playerFocus:null, playerNarrow:false,
+    playerTab:'mapa', centerTab:'mapa', playerFocus:null, playerNarrow:false, sideTab:'testes',
     pending:null,
     pRoll:null, pRolling:false, pRollTemp:null, pSend:null, pendingCount:0, selfApproved:false, selfSheetReady:false,
     self:{char:'',nick:'',sens:null,attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},weaknesses:[],wounds:[],conditions:[],history:''},
@@ -2936,7 +2974,7 @@ class Component extends DCLogic {
   dismissNotif(){ clearTimeout(this._notifT); this.setState({testNotif:false,notifCancelled:false}); }
   // Notificação "Teste cancelado": aparece mesmo se a anterior já foi fechada e some sozinha.
   _notifyCancelled(){ clearTimeout(this._notifT); this.setState({testNotif:true,notifCancelled:true}); this._notifT=setTimeout(()=>this.setState({testNotif:false,notifCancelled:false}),4500); }
-  openTestFromNotif(){ clearTimeout(this._notifT); this.setState({testNotif:false,notifCancelled:false,playerFocus:'testes',playerMenuOpen:false}); }
+  openTestFromNotif(){ clearTimeout(this._notifT); this.setState({testNotif:false,notifCancelled:false}); this.openPlayerArea('testes'); }
 
   // ---- player menu (FAB) ----
   togglePlayerMenu(){ this.setState(s=>({playerMenuOpen:!s.playerMenuOpen})); }
@@ -3245,6 +3283,18 @@ class Component extends DCLogic {
   setPlayerTab(t){ this.setState({playerTab:t,playerMenuOpen:false}); }
   setCenterTab(t){ this.setState({centerTab:t,playerFocus:null,playerMenuOpen:false}); }
   setPlayerFocus(f){ this.setState({playerFocus:f,playerMenuOpen:false}); }
+  // Abas da lateral (Testes/Grupo/Diário). Trocar de aba não mexe no teste em andamento:
+  // rolagem, resultado e envio vivem no estado, não no bloco exibido.
+  setSideTab(t){ this.setState({sideTab:t,playerMenuOpen:false}); }
+  // Abre uma área do painel do jogador a partir do menu, do resumo ou de uma notificação.
+  // Desktop: Testes/Grupo/Diário são abas da lateral. Celular: viram foco de tela inteira.
+  openPlayerArea(k){
+    if(k==='mapa'||k==='cena') return this.setCenterTab(k);
+    if(k==='pistas') return this.setState({playerFocus:'inventario',invDivider:'pistas',playerMenuOpen:false});
+    if((k==='testes'||k==='grupo'||k==='diario')&&!this.state.playerNarrow) return this.setState({sideTab:k,playerFocus:null,playerMenuOpen:false});
+    if(k==='testes'||k==='grupo'||k==='diario') return this.setState({sideTab:k,playerFocus:k,playerMenuOpen:false});
+    this.setPlayerFocus(k);
+  }
   // Resumo público de um colega. Guardado por ID do membro, não pelo objeto: o
   // polling troca a lista de membros a cada ciclo e o resumo aberto continua aberto.
   toggleGroupCard(id){ this.setState(s=>({groupOpenId:s.groupOpenId===id?null:id})); }
@@ -3667,19 +3717,26 @@ class Component extends DCLogic {
     const showCenterColM=!pNarrow||mSessTab==='cena';
     const showToolsColM=!pNarrow||mSessTab==='ferramentas';
     const mSessTabs=[['jogadores','Jogadores'],['cena','Cena'],['ferramentas','Ferramentas']].map(([k,l])=>({k,l,onClick:()=>this.setMasterPanel(k),bg:mSessTab===k?'rgba(198,163,94,.14)':'transparent',col:mSessTab===k?'#e9e3d4':'#8d887c'}));
-    const dashCols=pNarrow?'minmax(0,1fr)':'320px minmax(0,1fr) 340px';
-    const showFichaCol=!pNarrow||focus==='ficha';
-    const showCenterCol=!pNarrow||focus===null;
-    const showRightCol=!pNarrow||focus==='testes'||focus==='diario'||focus==='grupo';
-    const showTestesBox=!pNarrow||focus==='testes';
-    const showDiarioBox=!pNarrow||focus==='diario';
-    const showGrupoBox=!pNarrow||focus==='grupo';
+    // Etapa UI 1: a ficha saiu do grid (resumo no cabeçalho + painel próprio), então o
+    // mapa ocupa o espaço que antes era da coluna fixa de 320 px.
+    const dashCols=pNarrow?'minmax(0,1fr)':'minmax(0,1fr) minmax(300px,360px)';
+    const overlayFocus=focus==='ficha'||focus==='npcs'||focus==='inventario';
+    const sideKeys=['testes','grupo','diario'];
+    const sideActive=pNarrow?(sideKeys.includes(focus)?focus:null):(s.sideTab||'testes');
+    const showCenterCol=!pNarrow||!focus||overlayFocus;
+    const showRightCol=!pNarrow||sideKeys.includes(focus);
+    const showSideTabs=!pNarrow;
+    const showTestesBox=sideActive==='testes';
+    const showDiarioBox=sideActive==='diario';
+    const showGrupoBox=sideActive==='grupo';
     const centerIsMapa=s.centerTab==='mapa';
+    const fichaOpen=focus==='ficha';
     const overlayNpcs=focus==='npcs', overlayInv=focus==='inventario', overlayOpen=overlayNpcs||overlayInv;
-    const mobileFocusBar=pNarrow&&(focus==='ficha'||focus==='testes'||focus==='diario');
-    const menuKeys=pNarrow?['mapa','cena','ficha','grupo','testes','diario','npcs','inventario']:['mapa','cena','grupo','npcs','inventario'];
-    const activeMenu=(k)=>{ if(k==='mapa') return s.centerTab==='mapa'&&!focus; if(k==='cena') return s.centerTab==='cena'&&!focus; return focus===k; };
-    const playerMenu=menuKeys.map(k=>({k,l:tabLabels[k],icon:tabIcons[k],onClick:(k==='mapa'||k==='cena')?(()=>this.setCenterTab(k)):(()=>this.setPlayerFocus(k)),bg:activeMenu(k)?'rgba(198,163,94,.1)':'transparent',col:activeMenu(k)?'#efe8d8':'#cfc7b4',iconCol:activeMenu(k)?'#e0c179':'#8d887c',badge:(k==='testes'&&s.testNotif),badgeText:'novo'}));
+    const mobileFocusBar=pNarrow&&(focus==='testes'||focus==='diario');
+    const menuKeys=['mapa','cena','ficha','testes','grupo','diario','npcs','inventario'];
+    const activeMenu=(k)=>{ if(k==='mapa') return s.centerTab==='mapa'&&!focus; if(k==='cena') return s.centerTab==='cena'&&!focus;
+      if(!pNarrow&&sideKeys.includes(k)) return !focus&&s.sideTab===k; return focus===k; };
+    const playerMenu=menuKeys.map(k=>({k,l:tabLabels[k],icon:tabIcons[k],onClick:()=>this.openPlayerArea(k),bg:activeMenu(k)?'rgba(198,163,94,.1)':'transparent',col:activeMenu(k)?'#efe8d8':'#cfc7b4',iconCol:activeMenu(k)?'#e0c179':'#8d887c',badge:(k==='testes'&&s.testNotif),badgeText:'novo'}));
     // Relógios do jogador: o banco (player_get_session) já filtra; este filtro é a
     // segunda barreira, para o cliente nunca pintar algo que não deveria ter recebido.
     const reduz=this._prefersReducedMotion();
@@ -3744,13 +3801,23 @@ class Component extends DCLogic {
       return {id:r.id, who:pp?pp.char:((r.params&&r.params.toName)||'Jogador'), label:(r.params&&r.params.label)||'Teste', kindIcon:r.kind==='combate'?'⚔':'⚄',
         statusLabel:r.status==='respondido'&&res.grade?`${res.grade} · ${Number(res.total)||0} vs ${Number(res.diff)||0}`:st.l, statusCol:st.c,
         isPending:r.status==='pendente', onCancel:()=>this.cancelRequest(r.id)}; });
-    const testHistory=s.log.filter(e=>e.t==='Teste'||e.t==='Combate').slice(0,4).map(e=>{ const m=e.txt.match(/^(.*?) — (.*?) \(/); return {label:m?m[1]:e.txt, grade:m?m[2]:'—', col:histCol(m?m[2]:'')}; });
+    // O próprio nome é redundante no painel do jogador; o texto inteiro fica no title.
+    const selfPrefix=selfV.char?selfV.char+' · ':'';
+    const testHistory=s.log.filter(e=>e.t==='Teste'||e.t==='Combate').slice(0,4).map(e=>{ const m=e.txt.match(/^(.*?) — (.*?) \(/); const full=m?m[1]:e.txt; return {label:(selfPrefix&&full.startsWith(selfPrefix))?full.slice(selfPrefix.length):full, full:e.txt, grade:m?m[2]:'—', col:histCol(m?m[2]:'')}; });
     const pt=s.pending;
     const pendingFormula=pt ? (pt.mode==='combate' ? `Ataque · 1d10 + atributo + perícia · DEF ${pt.difficulty}` : `${this.attrLabel(pt.attrKey)} (${selfV.attrs?selfV.attrs[pt.attrKey]||1:1}d20) + ${this.skillLabel(pt.skillKey)} · DIF ${pt.difficulty}`) : '';
     const ptPending=!!(pt&&pt.status==='pendente');
     const pendingDot=ptPending&&!s.pRoll&&!s.pRolling;
     const ps=s.pSend&&pt&&s.pSend.reqId===pt.id?s.pSend:null;
     const extraQueue=Math.max(0,(s.pendingCount||0)-(ptPending?1:0));
+    // Abas da lateral: o teste pendente aparece como selo na aba Testes, sem trocar de aba.
+    const pendingTotal=ptPending?Math.max(1,s.pendingCount||0):0;
+    const sideTabs=[['testes','Testes','⚄'],['grupo','Grupo','⚭'],['diario','Diário','✒']].map(([k,l,icon])=>({k,l,icon,sel:(s.sideTab||'testes')===k?'true':'false',
+      onClick:()=>this.setSideTab(k), bg:(s.sideTab||'testes')===k?'#c6a35e':'transparent', col:(s.sideTab||'testes')===k?'#0b0b10':'#cfc7b4',
+      badge:k==='testes'&&pendingTotal>0, badgeText:String(pendingTotal)}));
+    const selfIdentity=[['Natureza',(selfSens&&selfSens.label)||''],['Idade',selfV.age],['Origem',selfV.origin],['Aparência',selfV.appearance],['Roupas',selfV.clothes],
+      ['Personalidade',selfV.personality],['Manifestação',selfV.manifest],['Marcas e limitações',selfV.marks],['Histórico',selfV.history]]
+      .filter(([,v])=>v&&String(v).trim()).map(([l,v])=>({l,v:String(v)}));
     const pendingHeader=!pt?'Nenhum teste solicitado':pt.status==='cancelado'?'Teste cancelado pelo Mestre':pt.status==='respondido'?'Último teste solicitado':('Solicitado pelo Mestre'+(extraQueue?` · +${extraQueue} na fila`:''));
 
     // inventory
@@ -3918,7 +3985,9 @@ class Component extends DCLogic {
       saveChipRetry:(s.saveStatus==='error'||s.saveStatus==='offline')&&!!s.activeTableId&&this._loadedFor===s.activeTableId, retrySave:()=>this.retrySave(),
       groupCards, hasGroupCards:groupCards.length>0, noGroupCards:groupCards.length===0, showGrupoBox, closeGroupCard:()=>this.closeGroupCard(),
       // dashboard
-      dashCols, showFichaCol, showCenterCol, showRightCol, showTestesBox, showDiarioBox,
+      dashCols, showCenterCol, showRightCol, showTestesBox, showDiarioBox, showSideTabs, sideTabs,
+      fichaOpen, selfIdentity, hasSelfIdentity:selfIdentity.length>0, noSelfSkill:selfSkill.length===0, noSelfWeak:selfWeak.length===0,
+      openFicha:()=>this.openPlayerArea('ficha'), openNpcs:()=>this.openPlayerArea('npcs'), openPistas:()=>this.openPlayerArea('pistas'), openInv:()=>this.openPlayerArea('inventario'),
       centerIsMapa, centerIsCena:!centerIsMapa,
       mapaTabBg:centerIsMapa?'#c6a35e':'transparent', mapaTabCol:centerIsMapa?'#0b0b10':'#cfc7b4',
       cenaTabBg:centerIsMapa?'transparent':'#c6a35e', cenaTabCol:centerIsMapa?'#cfc7b4':'#0b0b10',
