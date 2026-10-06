@@ -129,3 +129,22 @@ alvo confirmado, validação no banco preservada (nenhuma regra ou fórmula de R
 nenhuma mudança de cor ou background.
 
 **Sem migração nesta etapa.** O alvo viaja no `params` do pedido, que já é jsonb livre.
+
+## Correção posterior (06/10/2026) — barra de grupos espremida
+
+**Defeito apontado pelo autor:** com a coluna de ferramentas estreita, os nomes dos grupos
+transbordavam e ficavam uns por cima dos outros. A causa era o `flex:1;min-width:20%` dos
+botões, que forçava os 5 numa linha só. A coluna tem **298–318 px em todas as larguras de
+desktop**, então o defeito aparecia de 900 px para cima e no celular (≤ 390 px); só a faixa
+de 600–899 px escapava.
+
+**Por que o teste desta etapa não pegou:** ele mediu corte horizontal da *página*, não se o
+texto de cada *botão* cabia nele.
+
+**Correção:** cada botão passou a ter a largura do próprio texto (`flex:1 1 auto;
+white-space:nowrap`), e a fileira quebra em 2 linhas quando não cabe. Medido botão a botão
+em 16 larguras (1920 a 360 px): nenhum texto cortado, nenhuma sobreposição, 44 px de altura.
+São 2 linhas onde a coluna é estreita e 1 onde há espaço. As pílulas do segundo nível
+também foram conferidas. A mesma medição, rodada no código anterior, acusou 13 das 16
+larguras com problema.
+

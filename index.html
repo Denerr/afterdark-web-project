@@ -385,10 +385,11 @@
     <!-- RIGHT: tools -->
     <sc-if value="{{ showToolsColM }}">
     <div style="background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:7px;padding:0;overflow:hidden">
-      <!-- NIVEL 1: grupos de tarefa -->
+      <!-- NIVEL 1: grupos de tarefa. Cada botao tem a largura do proprio texto (nowrap) e a
+           fileira quebra em 2 linhas quando a coluna e estreita, em vez de espremer o texto. -->
       <div style="display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.06)">
         <sc-for list="{{ toolGroups }}" as="g" hint-placeholder-count="5">
-          <button onClick="{{ g.onClick }}" style="flex:1;min-width:20%;padding:11px 4px;background: {{ g.bg }};border:none;border-bottom:2px solid {{ g.under }};color: {{ g.col }};font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;min-height:44px">{{ g.l }}</button>
+          <button onClick="{{ g.onClick }}" style="flex:1 1 auto;white-space:nowrap;padding:11px 12px;background: {{ g.bg }};border:none;border-bottom:2px solid {{ g.under }};color: {{ g.col }};font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;min-height:44px">{{ g.l }}</button>
         </sc-for>
       </div>
       <!-- NIVEL 2: ferramentas do grupo ativo (some quando o grupo tem uma so) -->
