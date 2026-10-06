@@ -17,7 +17,8 @@ As migrações são **incrementais e dependentes de ordem**. Algumas corrigem po
  8. migration_profiles.sql
  9. migration_requests_consequences.sql     <- Ponto 1
 10. migration_rls_p2.sql                    <- Ponto 2
-11. migration_player_projection.sql         <- relógios/estresse/grupo (último)
+11. migration_player_projection.sql         <- relógios/estresse/grupo
+12. migration_session_persistence.sql       <- Ponto 3 (último)
 ```
 
 Todas são idempotentes: rodar de novo não duplica objeto.
@@ -37,7 +38,7 @@ cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql \
     migration_rls_hardening.sql migration_leave_table.sql \
     migration_archive_table.sql migration_profiles.sql \
     migration_requests_consequences.sql migration_rls_p2.sql \
-    migration_player_projection.sql > /tmp/all.sql
+    migration_player_projection.sql migration_session_persistence.sql > /tmp/all.sql
 
 docker cp /tmp/all.sql adpg:/tmp/all.sql
 docker exec adpg psql -U postgres -q -f /tmp/all.sql
@@ -50,6 +51,14 @@ docker exec adpg psql -U postgres -q -f /tmp/all.sql
 Rodar apenas o que ainda não passou. Para um banco que já tinha até o Ponto 1, rodar `migration_rls_p2.sql` e depois
 `migration_player_projection.sql`. Para um banco que já está no Ponto 2, basta
 `migration_player_projection.sql`.
+
+Para um banco que já tem a `migration_player_projection.sql`, basta
+`migration_session_persistence.sql` (Ponto 3). Ela só **adiciona** colunas
+(`tables.session_version`, `tables.master_notes`, `profiles.master_library`), um trigger
+de versão e três funções do Mestre; não altera policy nem grant. A ordem entre deploy e
+migração é livre **nesse sentido**: o cliente antigo continua funcionando depois dela.
+Mas o cliente do Ponto 3 chama `master_get_session`/`master_save_session`, então
+**aplique a migração antes (ou junto) do deploy** — sem ela o Mestre não carrega a mesa.
 
 `migration_player_projection.sql` só substitui duas funções (`player_get_session` e
 `player_get_lobby`): não altera tabela, policy nem grant. O cliente publicado funciona
@@ -81,8 +90,16 @@ Esperado: nenhuma linha.
 
 ## Testes
 
+Atalho (a partir da raiz do repositório, com Docker rodando):
+
 ```bash
-for suite in ponto1_tests ponto2_tests ponto2b_tests; do
+bash supabase/tests/run_all.sh
+```
+
+Ou manualmente:
+
+```bash
+for suite in ponto1_tests ponto2_tests ponto2b_tests ponto3_tests; do
   docker rm -f adpg >/dev/null 2>&1
   docker run -d --name adpg -e POSTGRES_PASSWORD=pg postgres:15 >/dev/null
   until docker exec adpg pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
@@ -96,7 +113,8 @@ done
 docker rm -f adpg
 ```
 
-Esperado: **52** no Ponto 1, **73** no Ponto 2 e **24** no 2B (relógios/estresse).
+Esperado: **52** no Ponto 1, **73** no Ponto 2, **24** no 2B (relógios/estresse) e
+**32** no Ponto 3.
 
 Cada arquivo cria o schema `t`, então **cada suíte precisa de uma base recém-criada** — rodar duas na mesma base falha na segunda. Recriar o container entre elas.
 

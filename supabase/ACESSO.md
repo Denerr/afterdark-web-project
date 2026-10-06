@@ -18,12 +18,12 @@ Jogador autenticado e visitante têm exatamente os mesmos direitos — a diferen
 
 | Tabela | Dono / Mestre | Jogador | Não vinculado |
 |---|---|---|---|
-| `tables` | CRUD das próprias | — | — |
+| `tables` | CRUD das próprias (inclui `master_notes` e `session_version`) | — | — |
 | `table_members` | select / update / delete da própria mesa | — | — |
 | `table_requests` | select / update da própria mesa | — | — |
 | `table_member_secrets` | — | — | — |
 | `characters` | CRUD dos próprios (por `owner_id`) | idem | — |
-| `profiles` | só o próprio | só o próprio | — |
+| `profiles` | só o próprio (inclui `master_library`) | só o próprio | — |
 
 Nenhuma tabela tem policy de `insert` para `table_members` ou `table_requests`: entrar na mesa e criar solicitação acontecem **só por função**. `table_member_secrets` não tem policy nenhuma e está revogada de `anon` e `authenticated` — é inacessível pela API.
 
@@ -46,6 +46,18 @@ Nenhuma tabela tem policy de `insert` para `table_members` ou `table_requests`: 
 
 `master_create_request`, `master_ack_request`, `master_cancel_request`, `master_member_consequence`, `master_set_approval`, `master_start_session`. Concedidas só a `authenticated`.
 
+Ponto 3 (`migration_session_persistence.sql`):
+
+| Função | Devolve / faz |
+|---|---|
+| `master_get_session(table_id)` | `session_state`, `master_notes`, `session_version` e status, numa leitura. |
+| `master_save_session(table_id, estado, notas, versão_base)` | Grava só se `session_version = versão_base`; senão devolve `{conflict:true}` sem gravar. `notas = null` preserva as notas. |
+| `master_set_status(table_id, status)` | Só `Pausada · retomar depois` ou `Encerrada`. Retomar passa por `master_start_session` (guarda de aprovação). |
+
+O trigger `_ad_tables_version` avança `session_version` em **qualquer** escrita de
+`session_state`/`master_notes`, inclusive por um cliente antigo que grave direto — assim
+a escrita dele é detectada como conflito pelo cliente novo, e não sobrescrita.
+
 ### Auxiliares fechadas
 
 `_ad_hash`, `_ad_member_ok`, `_ad_is_owner`, `_ad_member_table`, `_ad_members_guard` — revogadas de `public`, `anon` e `authenticated`.
@@ -62,6 +74,7 @@ O `session_state` é um JSON único escrito pelo Mestre. O jogador **nunca** rec
 | `stressBars` | Por visibilidade, não por titularidade — ver a tabela abaixo. O `clockId` é **removido** quando aponta para um relógio que o destinatário não pode ver. |
 | `log` | Só entradas com `vis = 'todos'` ou `vis = <próprio member_id>`. |
 | `scene`, `inventory`, `library` | Íntegros — são o conteúdo público da mesa. |
+| `master_notes` (roteiro, narrativa, marcações) | **Nada.** Fica em coluna própria de `tables`; nenhuma função de jogador lê essa coluna. |
 
 ### Visibilidade no log
 

@@ -186,7 +186,7 @@
 
 <!-- ========================= MESTRE · LOBBY ========================= -->
 <sc-if value="{{ isMLobby }}" data-screen-label="Mestre Lobby">
-<dc-import name="MLobby" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" startSessionDisabled="{{ startSessionDisabled }}" startBlockReason="{{ startBlockReason }}" startSessionBg="{{ startSessionBg }}" startSessionCol="{{ startSessionCol }}" startSessionCursor="{{ startSessionCursor }}" tableCode="{{ tableCode }}" lobbyInviteLink="{{ lobbyInviteLink }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" lobbyNoAuth="{{ lobbyNoAuth }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
+<dc-import name="MLobby" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" startSessionDisabled="{{ startSessionDisabled }}" startBlockReason="{{ startBlockReason }}" startSessionLabel="{{ startSessionLabel }}" startSessionBg="{{ startSessionBg }}" startSessionCol="{{ startSessionCol }}" startSessionCursor="{{ startSessionCursor }}" tableCode="{{ tableCode }}" lobbyInviteLink="{{ lobbyInviteLink }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" lobbyNoAuth="{{ lobbyNoAuth }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · SESSÃO (PAINEL) ========================= -->
@@ -203,6 +203,8 @@
     </div>
     <div style="flex:1"></div>
     <div style="display:flex;align-items:center;gap:8px">
+      <sc-if value="{{ saveChipShow }}"><span title="{{ saveChipTitle }}" style="font-size:11px;letter-spacing:.06em;color: {{ saveChipCol }};padding:5px 12px;border:1px solid {{ saveChipCol }}55;border-radius:20px;white-space:nowrap">{{ saveChipLabel }}</span></sc-if>
+      <sc-if value="{{ saveChipRetry }}"><button onClick="{{ retrySave }}" style="font-size:11px;letter-spacing:.06em;color:#e0c179;padding:5px 12px;border:1px solid rgba(224,193,121,.5);border-radius:20px;background:transparent;cursor:pointer">Tentar de novo</button></sc-if>
       <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7fae8f;padding:5px 12px;border:1px solid rgba(127,174,143,.3);border-radius:20px">● Ao vivo</span>
       <button onClick="{{ openManage }}" style="display:inline-flex;align-items:center;gap:9px;padding:11px 20px;background:rgba(198,163,94,.1);color:#e0c179;border:1px solid rgba(198,166,100,.4);border-radius:3px;font:600 11px/1 'Archivo';letter-spacing:.14em;text-transform:uppercase;cursor:pointer;transition:.2s" style-hover="background:rgba(198,163,94,.18);border-color:rgba(224,193,121,.7)">⚙ Gerenciar Mesa</button>
     </div>
@@ -918,6 +920,21 @@
 <!-- ========================= JOGADOR · ESCOLHER PERSONAGEM ========================= -->
 <sc-if value="{{ isJChar }}" data-screen-label="Jogador Personagem">
 <dc-import name="JChar" toWizard="{{ toWizard }}" savedCharsForJoin="{{ savedCharsForJoin }}" noSavedChars="{{ noSavedChars }}"/>
+</sc-if>
+
+<!-- ========================= JOGADOR · MESA PAUSADA / ENCERRADA / INDISPONÍVEL ========================= -->
+<sc-if value="{{ playerOverlay }}">
+  <div style="position:fixed;inset:0;z-index:90;background:rgba(5,6,12,.78);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .3s ease">
+    <div style="max-width:420px;width:100%;background:linear-gradient(180deg,#1c1810,#13121a);border:1px solid rgba(198,166,100,.4);border-radius:12px;padding:26px 24px;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.6)">
+      <div style="font-size:26px;color:#e0c179;margin-bottom:10px">{{ overlayIcon }}</div>
+      <div style="font-family:'Cinzel';font-weight:700;font-size:20px;color:#efe8d8;margin-bottom:8px">{{ overlayTitle }}</div>
+      <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.45;color:#cdc6b6;margin:0 0 18px">{{ overlayText }}</p>
+      <sc-if value="{{ overlayCanExit }}"><button onClick="{{ exitEndedTable }}" style="padding:12px 26px;background:#c6a35e;color:#0b0b10;border:none;border-radius:5px;font:700 11px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Sair</button></sc-if>
+    </div>
+  </div>
+</sc-if>
+<sc-if value="{{ playerConnBanner }}">
+  <div style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:80;padding:8px 16px;border-radius:20px;background:#13121a;border:1px solid {{ playerConnCol }}66;color: {{ playerConnCol }};font-size:12px;letter-spacing:.04em;box-shadow:0 10px 30px rgba(0,0,0,.5);animation:fadeIn .3s ease">{{ playerConnLabel }}</div>
 </sc-if>
 
 <!-- ========================= JOGADOR · LOBBY (aguardando mestre) ========================= -->
@@ -1641,6 +1658,7 @@ class Component extends DCLogic {
     players:[],
     clocks:[],
     sessionStale:false, clockBump:{}, groupOpenId:null,
+    activeTableId:null, saveStatus:'idle', saveError:'', reconnected:false, statusBusy:false, tableStatus:null, tableGone:false, accountLib:null,
     clockDraft:{name:'',seg:8,type:'Investigação',scope:'mesa',playerId:'',visMode:'todos'}, showClockForm:false,
     stressBars:[],
     stressDraft:{playerId:'',name:'',max:4,clockId:'',vis:'titular'}, showStressForm:false,
@@ -1671,7 +1689,7 @@ class Component extends DCLogic {
     scene:{local:'',clima:'',desc:'',npc:'',pistas:[]}
   };
 
-  componentDidMount(){ this._initSync(); this._hydrateData(()=>{ this._loadSession(); this._ready=true; const hadCode=this._initFromUrl(); if(!hadCode) this._tryResumeMembership(); }); this.loadRoteiro(); this.loadNarrativa(); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow(); this._onVis=()=>this._syncMotionVisibility(); document.addEventListener('visibilitychange',this._onVis); this._syncMotionVisibility();
+  componentDidMount(){ this._versions={}; this._savedStr={}; this._initSync(); this._hydrateData(()=>{ this._ready=true; const hadCode=this._initFromUrl(); if(!hadCode) this._tryResumeMembership(); }); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onPageHide=()=>this._saveOnPageHide(); window.addEventListener('pagehide',this._onPageHide); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow(); this._onVis=()=>this._syncMotionVisibility(); document.addEventListener('visibilitychange',this._onVis); this._syncMotionVisibility();
     this._preloadMotionAssets();
     this._syncParallax();
   }
@@ -1852,10 +1870,11 @@ class Component extends DCLogic {
     if(step===7) this._staggerReveal('[data-motion="summary-card"]');
   }
 
-  // ---- sessão compartilhada: persistência local + sincronização entre abas/janelas ----
-  // Sem servidor: os dados da mesa vivem no navegador. Abas/janelas do MESMO navegador
-  // (ex.: Mestre numa aba, Jogador noutra) ficam sincronizadas em tempo real via
-  // BroadcastChannel; entre dispositivos diferentes exigiria um backend.
+  // ---- sessão compartilhada local (só mesa SEM conta) ----
+  // Mesa no Supabase ou vínculo de jogador: o banco é a única fonte de verdade, e este
+  // cache/BroadcastChannel NÃO aplica nem grava nada (antes eram globais e uma mesa ou
+  // aba sobrescrevia a outra). Fica apenas para a mesa local de quem joga sem conta,
+  // com chave e canal separados por mesa.
   _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
   _flashActionError(msg){
@@ -1863,15 +1882,26 @@ class Component extends DCLogic {
     this.setState({actionError:msg});
     this._actionErrT=setTimeout(()=>this.setState({actionError:''}),4500);
   }
+  _isLocalTableId(id){ return typeof id==='string' && /^t\d+$/.test(id); }
+  _isRemoteCtx(){ const s=this.state; return !!(s.memberId || (s.activeTableId && !this._isLocalTableId(s.activeTableId))); }
+  _localKey(){ const s=this.state; return 'afterdark:session:local:'+(s.activeTableId||s.joinTableName||'mesa'); }
   _initSync(){
-    try{ this._bc=('BroadcastChannel' in window)? new BroadcastChannel('afterdark:session') : null; }catch(e){ this._bc=null; }
-    if(this._bc) this._bc.onmessage=(ev)=>{ if(ev&&ev.data&&ev.data.str) this._applyIncoming(ev.data.str); };
-    this._onStorage=(ev)=>{ if(ev&&ev.key==='afterdark:session'&&ev.newValue) this._applyIncoming(ev.newValue); };
+    this._onStorage=(ev)=>{ if(ev&&ev.key&&ev.key===this._localKey()&&ev.newValue) this._applyIncoming(ev.newValue); };
     window.addEventListener('storage',this._onStorage);
   }
-  _loadSession(){ try{ const str=localStorage.getItem('afterdark:session'); if(!str) return; this._lastSync=str; this.setState(JSON.parse(str)); }catch(e){} }
-  _applyIncoming(str){ if(!str||str===this._lastSync) return; try{ const o=JSON.parse(str); this._lastSync=str; this.setState(o); }catch(e){} }
-  _saveSession(){ if(!this._ready) return; try{ const str=JSON.stringify(this._snapshot()); if(str===this._lastSync) return; this._lastSync=str; localStorage.setItem('afterdark:session',str); if(this._bc) this._bc.postMessage({str}); }catch(e){} }
+  _localChannel(){
+    if(this._isRemoteCtx()) return null;
+    const name=this._localKey();
+    if(this._bcName!==name){
+      try{ if(this._bc) this._bc.close(); }catch(e){}
+      try{ this._bc=('BroadcastChannel' in window)? new BroadcastChannel(name) : null; }catch(e){ this._bc=null; }
+      this._bcName=name;
+      if(this._bc) this._bc.onmessage=(ev)=>{ if(ev&&ev.data&&ev.data.str) this._applyIncoming(ev.data.str); };
+    }
+    return this._bc;
+  }
+  _applyIncoming(str){ if(this._isRemoteCtx()||!str||str===this._lastSync) return; try{ const o=JSON.parse(str); this._lastSync=str; this.setState(o); }catch(e){} }
+  _saveSession(){ if(!this._ready||this._isRemoteCtx()) return; try{ const str=JSON.stringify(this._snapshot()); if(str===this._lastSync) return; this._lastSync=str; localStorage.setItem(this._localKey(),str); const bc=this._localChannel(); if(bc) bc.postMessage({str}); }catch(e){} }
   // ---- estado da sessão de jogo por mesa (Supabase) ----
   _blankTableSession(){
     const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)?JSON.parse(JSON.stringify(window.AfterdarkData.catalog)):{weapons:[],items:[]};
@@ -1882,11 +1912,13 @@ class Component extends DCLogic {
     if(!tableId||!this.sb){ this.setState(base); return; }
     const {memberId,memberToken}=this.state;
     if(!isOwner&&!memberId) return;
-    let remote=null, failed=false;
+    let remote=null, failed=false, notes=null, version=0, gone=false;
     try{
       if(isOwner){
-        const {data,error}=await this.sb.from('tables').select('session_state').eq('id',tableId).single();
-        if(error) failed=true; else remote=data&&data.session_state;
+        // Estado + notas privadas + versão numa leitura só (a versão é a base do próximo salvamento).
+        const {data,error}=await this.sb.rpc('master_get_session',{p_table_id:tableId});
+        if(error){ failed=true; gone=/not_authorized/.test(error.message||''); }
+        else { remote=data&&data.state; notes=(data&&data.notes)||{}; version=Number(data&&data.version)||0; }
       } else {
         // Jogador recebe o estado JÁ FILTRADO pelo banco (relógios ocultos, NPCs
         // não revelados, pistas ocultas e log do mestre não chegam ao navegador).
@@ -1895,33 +1927,140 @@ class Component extends DCLogic {
       }
     }catch(e){ failed=true; }
     // Resposta atrasada de outra mesa/vínculo (troca rápida de contexto): descarta.
-    const sameCtx=isOwner?(((this._activeTableRow()||{}).id)===tableId):(this.state.memberId===memberId);
+    const sameCtx=isOwner?(this.state.activeTableId===tableId):(this.state.memberId===memberId);
     if(!sameCtx) return;
+    if(isOwner&&failed){
+      // Sem leitura confirmada, nada é salvo nesta mesa (não grava estado errado nela).
+      // Tenta de novo sozinho enquanto ela continuar ativa.
+      if(gone){ this.setState({saveStatus:'error',saveError:'Esta mesa não está mais disponível.'}); return; }
+      if(this._loadedFor!==tableId) this.setState({saveStatus:'offline',saveError:'Não foi possível carregar a mesa. Tentando de novo…'});
+      clearTimeout(this._loadRetryT);
+      this._loadRetryT=setTimeout(()=>{ if(this.state.activeTableId===tableId&&this._loadedFor!==tableId) this._loadTableSession(tableId,true); },4000);
+      return;
+    }
     // Falha de leitura NÃO apaga o que já estava na tela: preserva o último estado
     // válido e sinaliza que a atualização está indisponível. Estado vazio só entra
     // quando o banco confirma que a mesa realmente não tem estado.
     if(failed){ if(!this.state.sessionStale) this.setState({sessionStale:true}); return; }
     const next=(remote&&Object.keys(remote).length)?{...base,...remote}:base;
-    if(!isOwner) next.clockBump=this._clockBumps(this.state.clocks,next.clocks);
-    this.setState({...next,sessionStale:false});
+    if(!isOwner){
+      next.clockBump=this._clockBumps(this.state.clocks,next.clocks);
+      if(this.state.sessionStale) this._flashReconnected();
+      this.setState({...next,sessionStale:false});
+      return;
+    }
+    // Mestre: biblioteca da conta mesclada + notas privadas da mesa. A referência "já
+    // salvo" é o que veio do banco, então abrir a mesa não dispara gravação à toa; se a
+    // mescla trouxe itens novos da conta, só essa diferença é gravada.
+    const savedRef=JSON.stringify({state:this._pickSync(next),notes:this._notesFromRemote(notes,false)});
+    next.library=this._mergeLibrary(next.library,this.state.accountLib);
+    Object.assign(next,this._notesFromRemote(notes,true));
+    this._versions[tableId]=version;
+    this.setState({...next,sessionStale:false,saveStatus:'saved',saveError:''},()=>{
+      if(this.state.activeTableId!==tableId) return;
+      this._loadedFor=tableId;
+      this._savedStr[tableId]=savedRef;
+      this._scheduleSave();
+    });
   }
-  _saveTableSession(tableId){
-    if(!tableId||!this.sb) return;
+  _pickSync(o){ const r={}; this._syncKeys().forEach(k=>{ r[k]=o[k]; }); return r; }
+  // Roteiro e narrativa vêm das notas privadas da mesa. Notas antigas (chave global do
+  // navegador, anteriores ao Ponto 3) são adotadas uma vez pela primeira mesa aberta
+  // sem notas, e a chave global é apagada.
+  _notesFromRemote(notes,adoptLegacy){
+    const n=notes||{};
+    let rot=n.roteiro, nar=n.narrativa;
+    if(adoptLegacy&&!rot&&!nar){
+      try{
+        const r=JSON.parse(localStorage.getItem('afterdark_roteiro')||'null'), q=JSON.parse(localStorage.getItem('afterdark_narrativa')||'null');
+        if(r||q){ rot=r; nar=q; localStorage.removeItem('afterdark_roteiro'); localStorage.removeItem('afterdark_narrativa'); }
+      }catch(e){}
+    }
+    rot=rot||{}; nar=nar||{};
+    return {roteiro:{mode:rot.mode||null,text:rot.text||'',done:Array.isArray(rot.done)?rot.done:[]},narrativa:{mode:nar.mode||null,text:nar.text||''}};
+  }
+  _flashReconnected(){ clearTimeout(this._reconT); this.setState({reconnected:true}); this._reconT=setTimeout(()=>this.setState({reconnected:false}),3000); }
+  // ---- salvamento da mesa do Mestre (Ponto 3) ----
+  // Só grava quando o conteúdo persistente muda (compara com o último texto salvo), só na
+  // mesa ativa e só depois que ela foi carregada. Espera curta para agrupar digitação,
+  // com teto de 4 s para não adiar para sempre. Versão otimista contra duas abas.
+  _notesPayload(){ const s=this.state; return {roteiro:s.roteiro,narrativa:s.narrativa}; }
+  _sessionPayload(){ return {state:this._snapshot(),notes:this._notesPayload()}; }
+  _canSaveRemote(tid){ return !!(tid&&!this._isLocalTableId(tid)&&this.sb&&this.state.auth.loggedIn); }
+  _scheduleSave(){
+    const tid=this.state.activeTableId;
+    if(!this._canSaveRemote(tid)||this._loadedFor!==tid) return;
+    const str=JSON.stringify(this._sessionPayload());
+    if(str===this._savedStr[tid]){ this._dirtySince=0; return; }
+    if(!this._dirtySince) this._dirtySince=Date.now();
+    if(this.state.saveStatus==='saved'||this.state.saveStatus==='idle') this.setState({saveStatus:'pending'});
+    if(this._savingP||this._retryT) return; // a gravação em curso/agendada pega o estado mais novo
     clearTimeout(this._tsSaveT);
-    this._tsSaveT=setTimeout(()=>{
-      const snap={}; this._syncKeys().forEach(k=>{ snap[k]=this.state[k]; });
-      this.sb.from('tables').update({session_state:snap}).eq('id',tableId).then(()=>{});
-    },800);
+    const wait=Math.max(0,Math.min(800,4000-(Date.now()-this._dirtySince)));
+    this._tsSaveT=setTimeout(()=>{ this._tsSaveT=null; this._flushSave(tid); },wait);
+  }
+  // Grava agora e devolve {ok}. Usado também antes de pausar, encerrar, trocar de mesa e sair.
+  async _flushSave(tid){
+    tid=tid||this.state.activeTableId;
+    if(!this._canSaveRemote(tid)) return {ok:true};
+    while(this._savingP){ try{ await this._savingP; }catch(e){} }
+    if(this.state.activeTableId!==tid||this._loadedFor!==tid) return {ok:true}; // o que está na tela não é desta mesa
+    clearTimeout(this._tsSaveT); this._tsSaveT=null; clearTimeout(this._retryT); this._retryT=null;
+    const payload=this._sessionPayload(), str=JSON.stringify(payload);
+    if(str===this._savedStr[tid]){ this._dirtySince=0; if(this.state.saveStatus!=='saved') this.setState({saveStatus:'saved',saveError:''}); return {ok:true}; }
+    this.setState({saveStatus:'saving'});
+    let data=null,error=null;
+    const run=(async()=>{ try{ ({data,error}=await this.sb.rpc('master_save_session',{p_table_id:tid,p_state:payload.state,p_notes:payload.notes,p_base_version:this._versions[tid]||0})); }catch(e){ error=e; } })();
+    this._savingP=run; await run; this._savingP=null;
+    if(!error&&data&&data.ok){
+      this._versions[tid]=Number(data.version)||0; this._savedStr[tid]=str; this._dirtySince=0; this._retryN=0;
+      if(this.state.activeTableId===tid){ this.setState({saveStatus:'saved',saveError:''}); this._scheduleSave(); }
+      return {ok:true};
+    }
+    if(!error&&data&&data.conflict){
+      // Outra aba (ou dispositivo) gravou depois da nossa leitura: não sobrescreve.
+      this._loadedFor=null;
+      await this._loadTableSession(tid,true);
+      this._flashActionError('Essa mesa foi alterada em outra aba, recarregamos a versão mais recente.');
+      return {ok:this._loadedFor===tid,conflict:true};
+    }
+    const m=(error&&error.message)||'';
+    if(/not_authorized|table_not_found/.test(m)){
+      this.setState({saveStatus:'error',saveError:'Esta mesa não está mais disponível. As alterações não puderam ser salvas.'});
+      return {ok:false,fatal:true};
+    }
+    // Falha temporária: mantém tudo na tela e tenta de novo com espera crescente.
+    this._retryN=(this._retryN||0)+1;
+    const delay=Math.min(30000,2000*Math.pow(2,this._retryN-1));
+    const offline=(typeof navigator!=='undefined'&&navigator.onLine===false)||/fetch|network/i.test(m);
+    this.setState({saveStatus:offline?'offline':'error',saveError:offline?'Sem conexão. As alterações continuam aqui e serão salvas quando a conexão voltar.':'Falha ao salvar. Tentando de novo…'});
+    this._retryT=setTimeout(()=>{ this._retryT=null; if(this.state.activeTableId===tid) this._flushSave(tid); },delay);
+    return {ok:false};
+  }
+  retrySave(){ this._retryN=0; clearTimeout(this._retryT); this._retryT=null; this._flushSave(this.state.activeTableId); }
+  // Fechamento da aba: tentativa extra, sem depender dela (ações explícitas já gravam antes).
+  _saveOnPageHide(){
+    try{
+      const tid=this.state.activeTableId;
+      if(!this._canSaveRemote(tid)||this._loadedFor!==tid||!this._accessToken) return;
+      const payload=this._sessionPayload(), str=JSON.stringify(payload);
+      if(str===this._savedStr[tid]) return;
+      const body=JSON.stringify({p_table_id:tid,p_state:payload.state,p_notes:payload.notes,p_base_version:this._versions[tid]||0});
+      if(body.length>60000) return; // limite do keepalive
+      fetch(Component.SUPABASE_URL+'/rest/v1/rpc/master_save_session',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',apikey:Component.SUPABASE_KEY,Authorization:'Bearer '+this._accessToken},body});
+    }catch(e){}
+  }
+  // Para todos os pollings e timers de contexto (sair, trocar de mesa, logout).
+  _stopAllPolling(){
+    [this._mpoll,this._ppoll,this._jsPoll,this._ri,this._pi].forEach(t=>clearInterval(t));
+    [this._tsSaveT,this._retryT,this._loadRetryT,this._notifT].forEach(t=>clearTimeout(t));
+    this._tsSaveT=this._retryT=this._loadRetryT=null; this._loadedFor=null; this._dirtySince=0;
   }
   componentDidUpdate(){
     this._syncParallax();
     if(!this._ready) return;
-    clearTimeout(this._saveT); this._saveT=setTimeout(()=>this._saveSession(),400);
-    if(this.state.screen==='m_session' && this.sb && this.state.auth.loggedIn){
-      const nm=this.sessionTitle();
-      const row=this.state.tables.find(t=>t.name===nm);
-      if(row&&row.id) this._saveTableSession(row.id);
-    }
+    if(!this._isRemoteCtx()){ clearTimeout(this._saveT); this._saveT=setTimeout(()=>this._saveSession(),400); }
+    this._scheduleSave();
   }
   _hydrateData(cb){
     const apply=()=>{
@@ -1936,8 +2075,9 @@ class Component extends DCLogic {
     const setup=()=>{
       if(!window.supabase) return false;
       const sb=this.sb;
-      sb.auth.getSession().then(({data})=>{ if(data&&data.session){ this.setState({auth:this._authFromUser(data.session.user)}); this._loadUserData(); } });
+      sb.auth.getSession().then(({data})=>{ if(data&&data.session){ this._accessToken=data.session.access_token; this.setState({auth:this._authFromUser(data.session.user)}); this._loadUserData(); } });
       sb.auth.onAuthStateChange((event,session)=>{
+        this._accessToken=session?session.access_token:null;
         this.setState({auth: session? this._authFromUser(session.user) : {loggedIn:false,name:'',email:'',phone:''}});
         if(event==='SIGNED_IN'){ this._loadUserData(); this._resumePendingCode(); }
         if(event==='SIGNED_OUT') this.setState({characters:[],tables:[]});
@@ -1955,9 +2095,52 @@ class Component extends DCLogic {
     }catch(e){}
     return false;
   }
+  // Vínculos do jogador ficam num mapa por mesa; a aba lembra (sessionStorage) de qual
+  // mesa ela é. Assim duas mesas abertas em abas do mesmo navegador não trocam de
+  // vínculo no F5. 'afterdark:activeMembership' segue como "último usado" (aba nova).
+  _readMemberships(){ try{ return JSON.parse(localStorage.getItem('afterdark:memberships')||'{}')||{}; }catch(e){ return {}; } }
+  _rememberMembership(m){
+    try{
+      const all=this._readMemberships(); all[m.tableId]=m;
+      localStorage.setItem('afterdark:memberships',JSON.stringify(all));
+      localStorage.setItem('afterdark:activeMembership',JSON.stringify(m));
+      sessionStorage.setItem('afterdark:tabTable',m.tableId);
+    }catch(e){}
+  }
+  _forgetMembership(tableId){
+    try{
+      const all=this._readMemberships();
+      if(tableId){ delete all[tableId]; localStorage.setItem('afterdark:memberships',JSON.stringify(all)); }
+      const last=JSON.parse(localStorage.getItem('afterdark:activeMembership')||'null');
+      if(!tableId||(last&&last.tableId===tableId)) localStorage.removeItem('afterdark:activeMembership');
+      sessionStorage.removeItem('afterdark:tabTable');
+    }catch(e){}
+  }
+  // Mapeamento único ficha <-> vínculo da mesa <-> self (wizard, ficha do Perfil e retomada).
+  _charDataFromWizard(w,attrs,charName){
+    return {name:charName,sens:w.sens||'humano',attrs,skills:{...w.skills},weaknesses:[...(w.weaknesses||[])],
+      age:w.age||'',origin:w.origin||'',appearance:w.appearance||'',clothes:w.clothes||'',personality:w.personality||'',
+      manifest:w.manifest||'',marks:w.marks||'',history:w.history||''};
+  }
+  _charDataFromProfile(c){
+    return {name:c.name,sens:c.sens||'humano',attrs:c.attrs||{},skills:c.skills||{},weaknesses:c.weaknesses||[],
+      age:c.age||'',origin:c.origin||'',appearance:c.appearance||'',clothes:c.clothes||'',personality:c.personality||c.role||'',
+      manifest:c.manifest||'',marks:c.marks||'',history:c.history||c.bio||''};
+  }
+  _selfFromMember(mbr,prev){
+    const cd=(mbr&&mbr.char_data)||{};
+    if(!mbr||!mbr.char_name) return prev;
+    return {...(prev||{}),char:mbr.char_name,nick:(prev&&prev.nick)||'',sens:cd.sens||null,attrs:cd.attrs||{},skills:cd.skills||{},weaknesses:cd.weaknesses||[],
+      age:cd.age||'',origin:cd.origin||'',appearance:cd.appearance||'',clothes:cd.clothes||'',personality:cd.personality||'',manifest:cd.manifest||'',marks:cd.marks||'',
+      history:cd.history||'',wounds:Array.isArray(mbr.wounds)?mbr.wounds:[],conditions:Array.isArray(mbr.conditions)?mbr.conditions:[]};
+  }
   async _tryResumeMembership(){
     let saved=null;
-    try{ const raw=localStorage.getItem('afterdark:activeMembership'); if(raw) saved=JSON.parse(raw); }catch(e){}
+    try{
+      const tab=sessionStorage.getItem('afterdark:tabTable');
+      if(tab) saved=this._readMemberships()[tab]||null;
+      if(!saved){ const raw=localStorage.getItem('afterdark:activeMembership'); if(raw) saved=JSON.parse(raw); }
+    }catch(e){}
     if(!saved||!saved.tableId||!saved.memberId||!this.sb) return;
     try{
       // player_get_state valida token (ou auth.uid()) e já devolve o status da mesa.
@@ -1965,15 +2148,20 @@ class Component extends DCLogic {
       // ramo de erro abaixo — o jogador precisa entrar de novo pelo código.
       const {data,error}=await this.sb.rpc('player_get_state',{p_member_id:saved.memberId,p_token:saved.token||null});
       const mbr=data&&data.member;
-      if(error||!mbr||!mbr.id){ localStorage.removeItem('afterdark:activeMembership'); return; }
+      if(error||!mbr||!mbr.id){
+        // Só descarta o vínculo quando o banco RECUSA (vínculo inválido/removido). Falha de
+        // rede mantém o vínculo para a próxima tentativa.
+        if(error&&/not_authorized|42501/.test((error.message||'')+(error.code||''))) this._forgetMembership(saved.tableId);
+        return;
+      }
       const status=data.table_status;
-      const cd=mbr.char_data||{};
+      this._rememberMembership(saved);
       this.setState(s=>({
         joinTableId:saved.tableId, joinTableName:saved.tableName, joinTableType:saved.tableType||'One-shot', memberId:saved.memberId, memberToken:saved.token||null,
-        joinName:mbr.player_name||s.joinName,
-        self:mbr.char_name?{char:mbr.char_name,nick:'',sens:cd.sens||null,attrs:cd.attrs||{},skills:cd.skills||{},weaknesses:cd.weaknesses||[],wounds:Array.isArray(mbr.wounds)?mbr.wounds:[],conditions:Array.isArray(mbr.conditions)?mbr.conditions:[],history:cd.history||''}:s.self
+        joinName:mbr.player_name||s.joinName, tableStatus:status||null, tableGone:false,
+        self:this._selfFromMember(mbr,s.self)
       }));
-      if(status==='Em andamento'){
+      if(status==='Em andamento'||/^Pausada/.test(status||'')||status==='Encerrada'){
         await this._loadTableSession(saved.tableId,false);
         this.setState({screen:'j_panel',nav:[]});
         this._startJogadorSessionPoll(saved.tableId);
@@ -2000,7 +2188,9 @@ class Component extends DCLogic {
       wounds:Array.isArray(m.wounds)?m.wounds:[],conditions:Array.isArray(m.conditions)?m.conditions:[],
       sheetReady:!!m.sheet_ready,approved:!!m.approved_at,cond:'normal',active:!!(m.char_name)};
   }
-  _activeTableRow(){ const nm=this.sessionTitle(); return this.state.tables.find(x=>x.name===nm)||null; }
+  // Mesa ativa do Mestre: identificada pelo ID. O nome só é usado na criação, antes de
+  // existir ID (pickOneshot -> saveCurrentTable define o ID logo em seguida).
+  _activeTableRow(){ const s=this.state; if(s.activeTableId) return s.tables.find(x=>x.id===s.activeTableId)||null; const nm=this.sessionTitle(); return s.tables.find(x=>x.name===nm)||null; }
   _uuid(){ try{ if(window.crypto&&crypto.randomUUID) return crypto.randomUUID(); }catch(e){} return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{ const r=Math.random()*16|0; return (c==='x'?r:(r&3|8)).toString(16); }); }
   _startMemberPolling(){
     clearInterval(this._mpoll);
@@ -2055,6 +2245,7 @@ class Component extends DCLogic {
       // mesmo que a leitura do lobby falhe nesta volta.
       this._pollSelf();
       const tblStatus=await this._pollLobby();
+      if(tblStatus) this.setState({tableStatus:tblStatus});
       if(tblStatus==='Em andamento'){
         clearInterval(this._ppoll);
         await this._loadTableSession(tableId,false);
@@ -2100,16 +2291,70 @@ class Component extends DCLogic {
     }
     this.go('m_session');
   }
+  // ---- biblioteca do Mestre por CONTA (armas, itens, ferimentos e condições) ----
+  // Fica em profiles.master_library e acompanha o Mestre em qualquer mesa/dispositivo.
+  // Na primeira vez é semeada com o catálogo padrão e com o que existia só neste
+  // navegador (chaves antigas), que são apagadas depois de salvas na conta.
+  async _loadAccountLib(){
+    if(!this.sb) return;
+    let uid=null; try{ const {data}=await this.sb.auth.getUser(); uid=data&&data.user&&data.user.id; }catch(e){}
+    if(!uid) return;
+    this._uid=uid;
+    const {data,error}=await this.sb.from('profiles').select('master_library').eq('id',uid).maybeSingle();
+    if(error||this._uid!==uid) return;
+    const lib=(data&&data.master_library)||{};
+    const empty=!Object.keys(lib).length;
+    let acc;
+    if(empty){
+      const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)||{weapons:[],items:[]};
+      const legacy=k=>{ try{ const a=JSON.parse(localStorage.getItem(k)||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; } };
+      acc={weapons:JSON.parse(JSON.stringify(cat.weapons||[])),items:JSON.parse(JSON.stringify(cat.items||[])),
+        wounds:[...new Set([...(this.state.woundLib||[]),...legacy('afterdark_woundlib')])],conditions:[...new Set([...(this.state.condLib||[]),...legacy('afterdark_condlib')])]};
+    } else {
+      const arr=v=>Array.isArray(v)?v:[];
+      acc={weapons:arr(lib.weapons),items:arr(lib.items),wounds:arr(lib.wounds),conditions:arr(lib.conditions)};
+    }
+    this.setState(s=>({accountLib:{weapons:acc.weapons,items:acc.items},woundLib:acc.wounds,condLib:acc.conditions,library:this._mergeLibrary(s.library,acc)}));
+    if(empty&&(await this._saveAccountLib())){ try{ localStorage.removeItem('afterdark_woundlib'); localStorage.removeItem('afterdark_condlib'); }catch(e){} }
+  }
+  _mergeLibrary(t,a){
+    const out={...(t||{})};
+    ['weapons','items'].forEach(k=>{
+      const base=Array.isArray(t&&t[k])?t[k]:[], add=Array.isArray(a&&a[k])?a[k]:[];
+      const ids=new Set(base.map(x=>x&&x.id));
+      out[k]=[...base,...add.filter(x=>x&&!ids.has(x.id))];
+    });
+    return out;
+  }
+  _accountLibPayload(){ const s=this.state, a=s.accountLib||{}; return {weapons:a.weapons||[],items:a.items||[],wounds:s.woundLib||[],conditions:s.condLib||[]}; }
+  async _saveAccountLib(){
+    if(!this.sb||!this.state.auth.loggedIn||!this._uid||!this.state.accountLib) return false;
+    clearTimeout(this._libRetryT);
+    const {error}=await this.sb.from('profiles').upsert({id:this._uid,master_library:this._accountLibPayload()});
+    if(error){
+      if(!this._libErrShown){ this._libErrShown=true; this._flashActionError('Não foi possível salvar sua biblioteca na conta. Vamos tentar de novo.'); }
+      this._libRetryT=setTimeout(()=>this._saveAccountLib(),8000);
+      return false;
+    }
+    this._libErrShown=false;
+    return true;
+  }
+  // Ferimentos/condições pré-cadastrados: na conta quando logado; neste navegador sem conta.
+  _persistLibs(){
+    if(this.state.auth.loggedIn&&this.state.accountLib){ clearTimeout(this._libSaveT); this._libSaveT=setTimeout(()=>this._saveAccountLib(),400); return; }
+    try{ localStorage.setItem('afterdark_woundlib',JSON.stringify(this.state.woundLib)); localStorage.setItem('afterdark_condlib',JSON.stringify(this.state.condLib)); }catch(e){}
+  }
   async _loadUserData(){
     if(!this.sb) return;
     const [chars,tbls]=await Promise.all([
       this.sb.from('characters').select('*').order('created_at',{ascending:true}),
-      this.sb.from('tables').select('*').order('created_at',{ascending:true})
+      this.sb.from('tables').select('id,name,type,faction,theme,status,invite_code,archived,created_at').order('created_at',{ascending:true})
     ]);
+    this._loadAccountLib();
     if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
     if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,archived:!!r.archived,role:'mestre',target:'m_session'}))});
   }
-  componentWillUnmount(){ this._unmounted=true; clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); if(this._onVis) document.removeEventListener('visibilitychange',this._onVis); this._parallaxDisable(); }
+  componentWillUnmount(){ this._unmounted=true; if(this._onPageHide) window.removeEventListener('pagehide',this._onPageHide); clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); if(this._onVis) document.removeEventListener('visibilitychange',this._onVis); this._parallaxDisable(); }
   _NAT_BG={ vampiros:'assets/images/nat-vampiros.png', lobisomens:'assets/images/nat-lobisomens.png', demonios:'assets/images/nat-demonios.png', humano:'assets/images/nat-humano.png' };
   _switchPxBg(key){
     const url=this._NAT_BG[key]||'assets/images/nat-default.png';
@@ -2151,7 +2396,7 @@ class Component extends DCLogic {
   setLogin(k,v){ this.setState(s=>({login:{...s.login,[k]:v},loginError:false})); }
   validEmail(e){ return /.+@.+\..+/.test(e); }
   regValid(){ const r=this.state.reg; return r.name&&this.validEmail(r.email)&&r.phone&&r.pass.length>=6&&r.pass===r.pass2; }
-  _authFromUser(user){ const md=(user&&user.user_metadata)||{}; return {loggedIn:true, name:md.name||(user&&user.email)||'', email:(user&&user.email)||'', phone:md.phone||''}; }
+  _authFromUser(user){ const md=(user&&user.user_metadata)||{}; return {loggedIn:true, id:(user&&user.id)||null, name:md.name||(user&&user.email)||'', email:(user&&user.email)||'', phone:md.phone||''}; }
   _authErrorMsg(err){
     const msg=(err&&err.message)||'';
     const map={
@@ -2202,41 +2447,71 @@ class Component extends DCLogic {
   }
   goAfterReset(){ this.setState({screen:this.state.auth.loggedIn?'profile':'landing',nav:[]}); }
   async logout(){
-    clearInterval(this._ri); clearInterval(this._jsPoll); clearInterval(this._ppoll); clearInterval(this._mpoll);
-    try{ localStorage.removeItem('afterdark:activeMembership'); }catch(e){}
-    if(this.sb){
-      if(this.state.memberId){ this.sb.rpc('player_leave_table',{p_member_id:this.state.memberId,p_token:this.state.memberToken||null}).then(()=>{}); }
-      if(this.state.auth.loggedIn && (this.state.screen==='m_session'||this.state.screen==='m_lobby')){
-        const nm=this.sessionTitle();
-        const row=this.state.tables.find(t=>t.name===nm);
-        if(row&&row.id) this.sb.from('tables').update({status:'Pausada · retomar depois'}).eq('id',row.id).then(()=>{});
+    if(this._loggingOut) return;
+    const s0=this.state, tid=s0.activeTableId;
+    // Mestre: a mesa precisa estar salva antes de sair (não depende do fechamento da aba).
+    if(tid&&this._canSaveRemote(tid)){
+      this._loggingOut=true; const sv=await this._flushSave(tid); this._loggingOut=false;
+      if(!sv.ok&&!sv.fatal){ this._flashActionError('Não foi possível salvar a mesa. Saia de novo quando a conexão voltar, para não perder alterações.'); return; }
+      if(s0.screen==='m_session'||s0.screen==='m_lobby'){
+        const row=this._activeTableRow();
+        if(row&&row.status==='Em andamento'){ try{ await this.sb.rpc('master_set_status',{p_table_id:tid,p_status:'Pausada · retomar depois'}); }catch(e){} }
       }
+    }
+    this._stopAllPolling();
+    this._forgetMembership(s0.joinTableId);
+    if(this.sb){
+      if(s0.memberId){ this.sb.rpc('player_leave_table',{p_member_id:s0.memberId,p_token:s0.memberToken||null}).then(()=>{}); }
       await this.sb.auth.signOut();
     }
-    this.setState({auth:{loggedIn:false,name:'',email:'',phone:''},screen:'landing',nav:[],login:{email:'',pass:''},reg:{name:'',email:'',phone:'',pass:'',pass2:''},memberId:null,memberToken:null,pending:null,pRoll:null,pSend:null,sentReqs:[],players:[]});
+    this._accessToken=null;
+    this.setState({auth:{loggedIn:false,name:'',email:'',phone:''},screen:'landing',nav:[],login:{email:'',pass:''},reg:{name:'',email:'',phone:'',pass:'',pass2:''},memberId:null,memberToken:null,pending:null,pRoll:null,pSend:null,sentReqs:[],players:[],
+      activeTableId:null,saveStatus:'idle',saveError:'',tables:[],characters:[],accountLib:null,tableStatus:null,tableGone:false,joinTableId:null,woundLib:[],condLib:[],...this._blankTableSession()},()=>{ this._uid=null; this.loadWoundLib(); this.loadCondLib(); });
   }
   setProfileTab(t){ this.setState({profileTab:t}); }
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
-  openTable(t){
-    const notStarted=t.role==='mestre'&&t.status==='Aguardando jogadores';
-    this.setState(s=>({tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':t.theme==='werewolf'?'sombras':null, screen:notStarted?'m_lobby':t.target, nav:['profile']}));
-    if(t.role==='mestre' && t.id){ this._startMemberPolling(); this._loadTableSession(t.id,true); }
+  async openTable(t){
+    if(this._opening) return;
+    const prev=this.state.activeTableId;
+    if(prev && prev!==t.id){
+      // Trocar de mesa só depois que a anterior estiver salva.
+      this._opening=true; const sv=await this._flushSave(prev); this._opening=false;
+      if(!sv.ok){ this._flashActionError('Não foi possível salvar a mesa atual. Verifique a conexão antes de trocar de mesa.'); return; }
+    }
+    if(prev!==t.id){ this._stopAllPolling(); }
+    // Mesa ainda não iniciada ou pausada abre no lobby (Iniciar/Retomar passa pela guarda de aprovação).
+    const waiting=t.role==='mestre'&&(t.status==='Aguardando jogadores'||/^Pausada/.test(t.status||''));
+    const fresh=(prev!==t.id)?{...this._blankTableSession(),roteiro:{mode:null,text:'',done:[]},narrativa:{mode:null,text:''},roll:null,rollFrom:'',pendingWound:null,sentReqs:[],players:[],saveStatus:'idle',saveError:''}:{};
+    this.setState(s=>({...fresh,activeTableId:t.role==='mestre'?t.id:s.activeTableId,tableName:t.role==='mestre'?t.name:s.tableName, role:t.role, oneshot:t.theme==='vampire'?'gota':t.theme==='demon'?'misterios':t.theme==='werewolf'?'sombras':null, screen:waiting?'m_lobby':t.target, nav:['profile']}),()=>{
+      if(t.role==='mestre' && t.id){ this._startMemberPolling(); this._loadTableSession(t.id,true); }
+    });
   }
   _genInviteCode(){ const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; return 'SV-'+Array.from({length:4},()=>chars[Math.floor(Math.random()*chars.length)]).join(''); }
   saveCurrentTable(){
     const s=this.state; const nm=(s.tableName||'').trim();
-    if(!nm || s.tables.some(t=>t.name===nm)) return Promise.resolve({ok:true});
+    if(!nm || s.tables.some(t=>t.name===nm)){
+      if(!s.activeTableId){ const ex=s.tables.find(t=>t.name===nm); if(ex) this.setState({activeTableId:ex.id}); }
+      return Promise.resolve({ok:true});
+    }
     const sel=s.oneshot?this.ONESHOTS[s.oneshot]:null;
     const theme=sel? (s.oneshot==='gota'?'vampire':s.oneshot==='misterios'?'demon':'werewolf') : 'human';
     const invite_code=this._genInviteCode();
     const row={name:nm,type:s.mode==='capitulos'?'Campanha':'One-shot',faction:sel?sel.faction.split(' · ')[0]:'Misto',theme,status:'Aguardando jogadores',invite_code};
-    const commit=(entry)=>new Promise(resolve=>this.setState(st=>({tables:[entry,...st.tables]}),()=>resolve({ok:true,entry})));
+    const commit=(entry)=>new Promise(resolve=>{ this._loadedFor=null; this.setState(st=>({tables:[entry,...st.tables],activeTableId:entry.id,saveStatus:'idle',saveError:''}),()=>resolve({ok:true,entry})); });
     if(this.sb && s.auth.loggedIn){
-      return this.sb.from('tables').insert(row).select().single().then(({data,error})=>{
+      // A mesa nova vira a ativa: a anterior precisa estar salva antes da troca.
+      const prev=s.activeTableId;
+      const pre=prev?this._flushSave(prev):Promise.resolve({ok:true});
+      return pre.then(sv=>{
+        if(!sv.ok){ this._flashActionError('Não foi possível salvar a mesa atual. Verifique a conexão antes de criar outra.'); return {ok:false}; }
+        return this.sb.from('tables').insert(row).select('id,name,type,faction,theme,status,invite_code').single();
+      }).then(res=>{
+        if(res&&res.ok===false) return res;
+        const {data,error}=res||{};
         if(error||!data){ this._flashActionError('Não foi possível salvar a mesa. Verifique sua conexão e tente novamente.'); return {ok:false}; }
         return commit({id:data.id,name:data.name,type:data.type,faction:data.faction,theme:data.theme,status:data.status,invite_code:data.invite_code,archived:false,role:'mestre',target:'m_session'});
-      });
+      }).catch(()=>{ this._flashActionError('Não foi possível salvar a mesa. Verifique sua conexão e tente novamente.'); return {ok:false}; });
     }
     // Sem conta: código fica só no estado local — salva no localStorage para que
     // o jogador na mesma máquina possa encontrá-lo sem precisar de Supabase.
@@ -2249,7 +2524,19 @@ class Component extends DCLogic {
   openManage(){ this.setState({manage:{open:true,view:'menu',saved:false,copied:false}}); }
   closeManage(){ this.setState(s=>({manage:{...s.manage,open:false}})); }
   manageSetView(v){ this.setState(s=>({manage:{...s.manage,view:v,copied:false}})); }
-  async saveProgress(){ const r=await this.saveCurrentTable(); if(!r.ok) return; this.setState(s=>({manage:{...s.manage,saved:true},log:[{icon:'💾',t:'Mesa',txt:'Progresso da mesa salvo.',vis:'mestre'},...s.log]})); }
+  async saveProgress(){
+    if(this._savingProgress) return;
+    const r=await this.saveCurrentTable(); if(!r.ok) return;
+    const row=this._activeTableRow();
+    if(!row||!this._canSaveRemote(row.id)){ this.setState(s=>({manage:{...s.manage,saved:true},log:[{icon:'💾',t:'Mesa',txt:'Progresso da mesa salvo.',vis:'mestre'},...s.log]})); return; }
+    this._savingProgress=true; this.setState(s=>({manage:{...s.manage,saved:false,saving:true}}));
+    await new Promise(res=>this.setState(s=>({log:[{icon:'💾',t:'Mesa',txt:'Progresso da mesa salvo.',vis:'mestre'},...s.log]}),res));
+    const sv=await this._flushSave(row.id);
+    this._savingProgress=false;
+    // "Salvo" só depois que o banco confirmou o estado da sessão (não só os dados da mesa).
+    this.setState(s=>({manage:{...s.manage,saving:false,saved:!!sv.ok}}));
+    if(!sv.ok) this._flashActionError(sv.fatal?'Esta mesa não está mais disponível.':'Não foi possível salvar o progresso agora. Ele continua aqui e será salvo quando a conexão voltar.');
+  }
   copyInvite(){
     const code=this._currentTableCode();
     const mg=this.state.manage; const isSpec=mg.view==='invite-spectator';
@@ -2258,16 +2545,22 @@ class Component extends DCLogic {
     this.setState(s=>({manage:{...s.manage,copied:true}}));
   }
   _currentTableCode(){
-    const s=this.state; const nm=this.sessionTitle();
-    const t=s.tables.find(t=>t.name===nm);
+    const t=this._activeTableRow();
     return (t&&t.invite_code)||'—';
   }
+  // Mesa encerrada ou indisponível: encerra o vínculo neste navegador, sem apagar o
+  // registro do jogador na mesa (o Mestre mantém o histórico).
+  exitEndedTable(){
+    this._stopAllPolling();
+    this._forgetMembership(this.state.joinTableId);
+    this.setState({joinTableId:null,joinTableName:'',joinTableType:'',memberId:null,memberToken:null,pending:null,pRoll:null,pSend:null,pendingCount:0,selfApproved:false,selfSheetReady:false,tableStatus:null,tableGone:false,players:[],...this._blankTableSession(),joinCode:'',joinName:'',screen:this.state.auth.loggedIn?'start':'landing',nav:[]});
+  }
   async leaveTable(){
-    clearInterval(this._ppoll); clearInterval(this._jsPoll);
+    this._stopAllPolling();
     const id=this.state.memberId;
     if(this.sb && id){ const {error}=await this.sb.rpc('player_leave_table',{p_member_id:id,p_token:this.state.memberToken||null}); if(error) this._flashActionError('Não foi possível sair da mesa agora. Tente novamente em instantes.'); }
-    try{ localStorage.removeItem('afterdark:activeMembership'); }catch(e){}
-    this.setState({joinTableId:null,joinTableName:'',joinTableType:'',memberId:null,memberToken:null,pending:null,pRoll:null,pSend:null,pendingCount:0,selfApproved:false,selfSheetReady:false,joinCode:'',joinName:'',screen:this.state.auth.loggedIn?'start':'landing',nav:[]});
+    this._forgetMembership(this.state.joinTableId);
+    this.setState({joinTableId:null,joinTableName:'',joinTableType:'',memberId:null,memberToken:null,pending:null,pRoll:null,pSend:null,pendingCount:0,selfApproved:false,selfSheetReady:false,tableStatus:null,tableGone:false,players:[],...this._blankTableSession(),joinCode:'',joinName:'',screen:this.state.auth.loggedIn?'start':'landing',nav:[]});
   }
   async joinByCode(){
     const code=(this.state.joinCode||'').trim().toUpperCase();
@@ -2298,7 +2591,7 @@ class Component extends DCLogic {
         return;
       }
       this.setState({joinTableId:data.table_id,joinTableName:data.table_name,joinTableType:data.table_type||'One-shot',memberId:data.member_id,memberToken:data.member_token,selfApproved:false,selfSheetReady:false,pending:null,pRoll:null,pSend:null});
-      try{ localStorage.setItem('afterdark:activeMembership',JSON.stringify({tableId:data.table_id,memberId:data.member_id,token:data.member_token,tableName:data.table_name,tableType:data.table_type||'One-shot'})); }catch(e){}
+      this._rememberMembership({tableId:data.table_id,memberId:data.member_id,token:data.member_token,tableName:data.table_name,tableType:data.table_type||'One-shot'});
     }
     this.go('j_name');
   }
@@ -2309,17 +2602,26 @@ class Component extends DCLogic {
     clearTimeout(this._lcT); this.setState({lobbyCopied:which}); this._lcT=setTimeout(()=>this.setState({lobbyCopied:null}),2000);
   }
   async updateTableStatus(status,label){
+    if(this.state.statusBusy) return;
     const r=await this.saveCurrentTable();
     if(!r.ok) return;
-    const nm=this.sessionTitle();
-    clearInterval(this._ri);
-    const row=this.state.tables.find(t=>t.name===nm);
-    this.setState(st=>{
-      const tables=st.tables.map(t=>t.name===nm?{...t,status,target:status.includes('Encerrada')?'m_session':'m_session'}:t);
-      return {tables, manage:{...st.manage,open:false}, screen:'profile', nav:[], profileTab:'mesas',
-        log:[{icon:'◷',t:'Mesa',txt:label,vis:'mestre'},...st.log]};
-    });
-    if(this.sb && row && this.state.auth.loggedIn){ this.sb.from('tables').update({status}).eq('id',row.id).then(()=>{}); }
+    const row=this._activeTableRow();
+    const verb=/Encerrada/.test(status)?'encerrar':'pausar';
+    if(row&&this._canSaveRemote(row.id)){
+      this.setState({statusBusy:true});
+      // 1) registra no diário e salva; 2) muda o status; nada disso fica pela metade sem aviso.
+      await new Promise(res=>this.setState(st=>({log:[{icon:'◷',t:'Mesa',txt:label,vis:'mestre'},...st.log]}),res));
+      const sv=await this._flushSave(row.id);
+      if(!sv.ok){ this.setState({statusBusy:false}); this._flashActionError(`Não foi possível salvar a mesa antes de ${verb}. Nada foi alterado — tente de novo.`); return; }
+      let error=null;
+      try{ ({error}=await this.sb.rpc('master_set_status',{p_table_id:row.id,p_status:status})); }catch(e){ error=e; }
+      if(error){ this.setState({statusBusy:false}); this._flashActionError(`Não foi possível ${verb} a mesa. Verifique a conexão e tente de novo.`); return; }
+    } else {
+      this.setState(st=>({log:[{icon:'◷',t:'Mesa',txt:label,vis:'mestre'},...st.log]}));
+    }
+    this._stopAllPolling();
+    this.setState(st=>({statusBusy:false,activeTableId:null,saveStatus:'idle',saveError:'',
+      tables:st.tables.map(t=>row&&t.id===row.id?{...t,status}:t), manage:{...st.manage,open:false}, screen:'profile', nav:[], profileTab:'mesas'}));
   }
   pauseTable(){ this.updateTableStatus('Pausada · retomar depois','Mesa pausada para continuar em outro momento.'); }
   endTable(){ this.updateTableStatus('Encerrada','Mesa encerrada pelo Mestre.'); }
@@ -2328,17 +2630,17 @@ class Component extends DCLogic {
       const {error}=await this.sb.from('tables').delete().eq('id',id);
       if(error){ this._flashActionError('Não foi possível excluir a mesa. Tente novamente.'); return false; }
     }
+    if(this.state.activeTableId===id){ this._stopAllPolling(); this.setState({activeTableId:null}); }
     this.setState(st=>({tables:st.tables.filter(t=>t.id!==id)}));
     return true;
   }
   async deleteTable(){
-    const nm=this.sessionTitle();
-    const row=this.state.tables.find(t=>t.name===nm);
+    const row=this._activeTableRow();
     if(!row) return;
-    clearInterval(this._ri); clearInterval(this._mpoll); clearInterval(this._tsSaveT);
+    this._stopAllPolling();
     const ok=await this._deleteTableRowById(row.id);
-    if(!ok) return;
-    this.setState(st=>({manage:{...st.manage,open:false,view:'menu'}, screen:'profile', nav:[], profileTab:'mesas'}));
+    if(!ok){ this._startMemberPolling(); this._loadTableSession(row.id,true); return; }
+    this.setState(st=>({activeTableId:null,saveStatus:'idle',saveError:'',manage:{...st.manage,open:false,view:'menu'}, screen:'profile', nav:[], profileTab:'mesas'}));
   }
   archiveTable(t){
     if(!this.sb || !t.id || !this.state.auth.loggedIn) return;
@@ -2518,7 +2820,10 @@ class Component extends DCLogic {
     const d=this.state.libDraft; const name=(d.name||'').trim(); if(!name) return;
     const id=(d.kind==='weapons'?'w':'i')+Date.now();
     const entry=d.kind==='weapons'?{id,name,bonus:Number(d.bonus)||0,desc:d.desc||''}:{id,name,desc:d.desc||''};
-    this.setState(s=>({library:{...s.library,[d.kind]:[...s.library[d.kind],entry]},libDraft:{...s.libDraft,name:'',desc:''}}));
+    // Vai para a mesa (jogadores enxergam pelo estado da sessão) e para a conta do Mestre.
+    this.setState(s=>({library:{...s.library,[d.kind]:[...(s.library[d.kind]||[]),entry]},
+      accountLib:s.accountLib?{...s.accountLib,[d.kind]:[...(s.accountLib[d.kind]||[]),entry]}:s.accountLib,
+      libDraft:{...s.libDraft,name:'',desc:''}}),()=>{ if(this.state.accountLib) this._saveAccountLib(); });
   }
 
   // ---- inventário do jogador ----
@@ -2666,7 +2971,7 @@ class Component extends DCLogic {
   onWoundDraft(e){ const v=e.target.value; this.setState({woundDraft:v}); }
   addWoundType(){ const nm=(this.state.woundDraft||'').trim(); if(!nm) return; this.setState(s=> s.woundLib.includes(nm)? {showWoundForm:false,woundDraft:''} : {woundLib:[...s.woundLib,nm],showWoundForm:false,woundDraft:''}, ()=>this.persistWoundLib()); }
   deleteWoundType(nm){ this.setState(s=>({woundLib:s.woundLib.filter(x=>x!==nm)}),()=>this.persistWoundLib()); }
-  persistWoundLib(){ try{ localStorage.setItem('afterdark_woundlib',JSON.stringify(this.state.woundLib)); }catch(e){} }
+  persistWoundLib(){ this._persistLibs(); }
   loadWoundLib(){ try{ const raw=localStorage.getItem('afterdark_woundlib'); if(!raw) return; const a=JSON.parse(raw); if(Array.isArray(a)) this.setState({woundLib:a}); }catch(e){} }
 
   // ---- condições: aplicar / remover / cadastrar ----
@@ -2677,7 +2982,7 @@ class Component extends DCLogic {
   onCondDraft(e){ const v=e.target.value; this.setState({condDraft:v}); }
   addCondType(){ const nm=(this.state.condDraft||'').trim(); if(!nm) return; this.setState(s=> s.condLib.includes(nm)? {showCondForm:false,condDraft:''} : {condLib:[...s.condLib,nm],showCondForm:false,condDraft:''}, ()=>this.persistCondLib()); }
   deleteCondType(nm){ this.setState(s=>({condLib:s.condLib.filter(x=>x!==nm)}),()=>this.persistCondLib()); }
-  persistCondLib(){ try{ localStorage.setItem('afterdark_condlib',JSON.stringify(this.state.condLib)); }catch(e){} }
+  persistCondLib(){ this._persistLibs(); }
   loadCondLib(){ try{ const raw=localStorage.getItem('afterdark_condlib'); if(!raw) return; const a=JSON.parse(raw); if(Array.isArray(a)) this.setState({condLib:a}); }catch(e){} }
 
   // ---- dice ----
@@ -2758,6 +3063,7 @@ class Component extends DCLogic {
     const s=this.state, pt=s.pending;
     // Uma rolagem por solicitação: sem teste pendente, com rolagem em curso ou já rolado, não rola de novo.
     if(!pt||!pt.id||pt.status!=='pendente'||s.pRolling||s.pRoll||this._pRollLock===pt.id) return;
+    if(s.tableGone||(s.tableStatus&&s.tableStatus!=='Em andamento')) return; // mesa pausada/encerrada
     this._pRollLock=pt.id;
     if(s.testNotif){ clearTimeout(this._notifT); this.setState({testNotif:false,notifCancelled:false}); }
     const attrs=s.self.attrs||{}, skills=s.self.skills||{};
@@ -2831,9 +3137,13 @@ class Component extends DCLogic {
     this._selfPollBusy=true;
     try{
       const {data,error}=await this.sb.rpc('player_get_state',{p_member_id:s.memberId,p_token:s.memberToken||null});
-      if(error||!data||this.state.memberId!==s.memberId) return;
+      if(this.state.memberId!==s.memberId) return;
+      // Recusa do banco (vínculo removido ou mesa excluída) é diferente de falha de rede:
+      // só a recusa marca a mesa como indisponível.
+      if(error&&/not_authorized|42501/.test((error.message||'')+(error.code||''))){ this.setState({tableGone:true}); return; }
+      if(error||!data) return;
       const m=data.member||{};
-      this.setState(st=>({self:{...st.self,wounds:Array.isArray(m.wounds)?m.wounds:[],conditions:Array.isArray(m.conditions)?m.conditions:[]},selfApproved:!!m.approved,selfSheetReady:!!m.sheet_ready}));
+      this.setState(st=>({self:this._selfFromMember(m,st.self),selfApproved:!!m.approved,selfSheetReady:!!m.sheet_ready,tableStatus:data.table_status||st.tableStatus,tableGone:false}));
       this._syncPlayerRequests(Array.isArray(data.requests)?data.requests:[]);
     }catch(e){}
     finally{ this._selfPollBusy=false; }
@@ -2896,20 +3206,20 @@ class Component extends DCLogic {
     const s=this.state, w=s.wiz;
     const attrs={}; (this.ATTRS||[]).forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
     const charName=w.charName||'Personagem';
-    const charData={name:charName,sens:w.sens||'humano',attrs,skills:{...w.skills},weaknesses:[...(w.weaknesses||[])]};
+    const charData=this._charDataFromWizard(w,attrs,charName);
     // Só avança ao lobby se a ficha foi gravada na mesa; em falha, o wizard fica como está.
     if(this.sb && s.memberId){
       if(!(await this._submitSheet(w.name||s.auth.name||'Jogador',charName,charData))) return;
     }
     const tid=this.state.joinTableId;
-    this.setState(st=>({screen:'j_lobby',nav:[...st.nav,'j_wizard'],self:{char:charName,nick:'',sens:w.sens||null,attrs,skills:{...w.skills},weaknesses:[...(w.weaknesses||[])],wounds:[],conditions:[],history:w.history||''}}));
+    this.setState(st=>({screen:'j_lobby',nav:[...st.nav,'j_wizard'],self:this._selfFromMember({char_name:charName,char_data:charData,wounds:[],conditions:[]},st.self)}));
     this._startPlayerPolling(tid);
   }
   async _finishCharWizard(){
     const w=this.state.wiz;
     const attrs={}; this.ATTRS.forEach(a=>{ attrs[a.key]=(w.attrs[a.key]||1)+this.bonusForAttr(w.sens,a.key); });
     const name=w.charName||'Novo Personagem';
-    const chData={name,role:w.personality||(w.sens==='humano'?'Humano Comum':'Sensitivo'),sens:w.sens||'humano',usedIn:null,photo:null,attrs,skills:{...w.skills},weaknesses:[...w.weaknesses],bio:w.history||''};
+    const chData={...this._charDataFromWizard(w,attrs,name),role:w.personality||(w.sens==='humano'?'Humano Comum':'Sensitivo'),usedIn:null,photo:null,bio:w.history||''};
     if(this.sb && this.state.auth.loggedIn){
       const {data,error}=await this.sb.from('characters').insert({name,data:chData}).select().single();
       if(error||!data){ this._flashActionError('Não foi possível salvar o personagem. Verifique sua conexão e tente novamente.'); return; }
@@ -2934,11 +3244,11 @@ class Component extends DCLogic {
   startCharWizard(){ this.setState({wizReturn:'player',wizStep:1,wiz:{name:this.state.joinName||this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
   async _selectSavedChar(c){
     const s=this.state;
-    const charData={name:c.name,sens:c.sens||'humano',attrs:c.attrs||{},skills:c.skills||{},weaknesses:c.weaknesses||[]};
+    const charData=this._charDataFromProfile(c);
     if(this.sb && s.memberId){
       if(!(await this._submitSheet(s.joinName||s.auth.name||'Jogador',c.name,charData))) return;
     }
-    this.setState({self:{char:c.name,nick:'',sens:c.sens||null,attrs:c.attrs||{},skills:c.skills||{},weaknesses:c.weaknesses||[],wounds:[],conditions:[],history:c.bio||''}});
+    this.setState(st=>({self:this._selfFromMember({char_name:c.name,char_data:charData,wounds:[],conditions:[]},st.self)}));
     this.go('j_lobby');
     this._startPlayerPolling(s.joinTableId);
   }
@@ -2972,16 +3282,16 @@ class Component extends DCLogic {
   }
 
   // ---- roteiro (script da missão) ----
-  persistRoteiro(){ try{ localStorage.setItem('afterdark_roteiro',JSON.stringify(this.state.roteiro)); }catch(e){} }
-  loadRoteiro(){ try{ const raw=localStorage.getItem('afterdark_roteiro'); if(!raw) return; const r=JSON.parse(raw); this.setState({roteiro:{mode:r.mode||null,text:r.text||'',done:Array.isArray(r.done)?r.done:[]}}); }catch(e){} }
+  // Mesa no Supabase: roteiro e narrativa vão nas notas privadas da mesa pelo salvamento normal.
+  persistRoteiro(){ this._persistLocalNotes(); }
+  _persistLocalNotes(){ if(this._isRemoteCtx()) return; try{ localStorage.setItem(this._localKey()+':notes',JSON.stringify(this._notesPayload())); }catch(e){} }
   setRoteiroMode(m){ this.setState(s=>({roteiro:{...s.roteiro,mode:m}}),()=>this.persistRoteiro()); }
   resetRoteiro(){ this.setState(s=>({roteiro:{...s.roteiro,mode:null}}),()=>this.persistRoteiro()); }
   toggleRoteiroEvent(i){ this.setState(s=>{ const done=s.roteiro.done.includes(i)?s.roteiro.done.filter(x=>x!==i):[...s.roteiro.done,i]; return {roteiro:{...s.roteiro,done}}; },()=>this.persistRoteiro()); }
   onRoteiroText(e){ const v=e.target.value; this.setState(s=>({roteiro:{...s.roteiro,text:v}}),()=>this.persistRoteiro()); }
 
   // ---- narrativa (leitura em voz alta) ----
-  persistNarrativa(){ try{ localStorage.setItem('afterdark_narrativa',JSON.stringify(this.state.narrativa)); }catch(e){} }
-  loadNarrativa(){ try{ const raw=localStorage.getItem('afterdark_narrativa'); if(!raw) return; const r=JSON.parse(raw); this.setState({narrativa:{mode:r.mode||null,text:r.text||''}}); }catch(e){} }
+  persistNarrativa(){ this._persistLocalNotes(); }
   setNarrativaMode(m){ this.setState(s=>({narrativa:{...s.narrativa,mode:m}}),()=>this.persistNarrativa()); }
   resetNarrativa(){ this.setState(s=>({narrativa:{...s.narrativa,mode:null}}),()=>this.persistNarrativa()); }
   onNarrativaText(e){ const v=e.target.value; this.setState(s=>({narrativa:{...s.narrativa,text:v}}),()=>this.persistNarrativa()); }
@@ -3585,6 +3895,17 @@ class Component extends DCLogic {
       playerMenu, fabIcon:s.playerMenuOpen?'✕':'☰', pendingDot, activeTabLabel:tabLabels[s.playerTab]||'Mesa',
       playerMapPins, pendingFormula,
       playerClocks, hasPlayerClocks:playerClocks.length>0, sessionStale:s.sessionStale,
+      // Ponto 3: status da mesa e conexão (jogador)
+      playerOverlay:(screen==='j_panel'||screen==='j_lobby')&&!!(s.tableGone||s.tableStatus==='Encerrada'||(screen==='j_panel'&&/^Pausada/.test(s.tableStatus||''))),
+      overlayIcon:s.tableGone?'⚠':s.tableStatus==='Encerrada'?'✦':'❚❚',
+      overlayTitle:s.tableGone?'Mesa indisponível':s.tableStatus==='Encerrada'?'Mesa encerrada pelo Mestre':'Mesa pausada pelo Mestre',
+      overlayText:s.tableGone?'Esta mesa não está mais disponível para o seu vínculo.':s.tableStatus==='Encerrada'?'A sessão chegou ao fim. Obrigado por jogar.':'Aguardando o Mestre retomar a sessão. Esta tela volta sozinha quando a mesa continuar.',
+      overlayCanExit:!!(s.tableGone||s.tableStatus==='Encerrada'), exitEndedTable:()=>this.exitEndedTable(),
+      playerConnBanner:screen==='j_panel'&&(s.sessionStale||s.reconnected), playerConnLabel:s.sessionStale?'Conexão instável — reconectando…':'✓ Reconectado', playerConnCol:s.sessionStale?'#d2a23a':'#7fae8f',
+      // Ponto 3: indicador de salvamento (Mestre)
+      saveChipShow:s.saveStatus!=='idle', saveChipLabel:({pending:'Alterações pendentes',saving:'Salvando…',saved:'✓ Salvo',error:'⚠ Falha ao salvar',offline:'⚠ Sem conexão'})[s.saveStatus]||'', saveChipTitle:s.saveError||'',
+      saveChipCol:({pending:'#a39e90',saving:'#a39e90',saved:'#7fae8f',error:'#e08a8a',offline:'#d2a23a'})[s.saveStatus]||'#a39e90',
+      saveChipRetry:(s.saveStatus==='error'||s.saveStatus==='offline')&&!!s.activeTableId&&this._loadedFor===s.activeTableId, retrySave:()=>this.retrySave(),
       groupCards, hasGroupCards:groupCards.length>0, noGroupCards:groupCards.length===0, showGrupoBox, closeGroupCard:()=>this.closeGroupCard(),
       // dashboard
       dashCols, showFichaCol, showCenterCol, showRightCol, showTestesBox, showDiarioBox,
@@ -3605,7 +3926,7 @@ class Component extends DCLogic {
       invOwned, noOwned:invOwned.length===0, emptyStuffMsg:s.invDivider==='armas'?'Você não carrega armas ainda.':'Você não carrega itens ainda.',
       invAvailable, noAvailable:invAvailable.length===0, noClues:cluesFoundV.length===0,
       players, readyCount, total:s.players.length, clocksAll, log:s.log, npcs, clues,
-      startSessionDisabled:!startGate.ok||s.startBusy, startBlockReason:startGate.reason, startSessionBg:!startGate.ok?'#26242c':sessTheme.acc, startSessionCol:!startGate.ok?'#6f6b61':'#0b0b10', startSessionCursor:!startGate.ok?'not-allowed':'pointer',
+      startSessionDisabled:!startGate.ok||s.startBusy, startBlockReason:startGate.reason, startSessionLabel:/^Pausada/.test(((this._activeTableRow()||{}).status)||'')?'▸ Retomar RPG':'▸ Iniciar RPG', startSessionBg:!startGate.ok?'#26242c':sessTheme.acc, startSessionCol:!startGate.ok?'#6f6b61':'#0b0b10', startSessionCursor:!startGate.ok?'not-allowed':'pointer',
       tableCode, lobbyInviteLink:`https://afterdark-rpg.netlify.app/?code=${tableCode}`, lobbyNoAuth:!s.auth.loggedIn,
       tools, ptabs,
       toolRoteiro:s.masterTool==='roteiro', roteiroChoosing:!rt.mode, roteiroIsPadrao:rt.mode==='padrao', roteiroIsProprio:rt.mode==='proprio',
