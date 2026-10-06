@@ -106,10 +106,10 @@ select t.ok((public.master_start_session(:'tid')->>'ok')::boolean, 'início libe
 select t.fails(format($$select public.master_start_session(%L)$$, t.v('tid2')), 'mesa sem jogadores não inicia', 'no_players');
 
 -- Mestre envia dois testes para A e um para B; retry com a mesma chave não duplica
-select (public.master_create_request(:'tid', :'ma', 'aaaaaaaa-0000-0000-0000-000000000001', 'geral', '{"label":"Mente + Análise","attrKey":"mente","skillKey":"analise","difficulty":15}'))->>'id' as r1 \gset
+select (public.master_create_request(:'tid', :'ma', 'aaaaaaaa-0000-0000-0000-000000000001', 'geral', '{"label":"Mente + Investigação","attrKey":"mente","skillKey":"investigacao","difficulty":15}'))->>'id' as r1 \gset
 select t.ok((public.master_create_request(:'tid', :'ma', 'aaaaaaaa-0000-0000-0000-000000000001', 'geral', '{"label":"dup"}')->>'duplicate')::boolean, 'retry do envio não duplica');
-select (public.master_create_request(:'tid', :'ma', 'aaaaaaaa-0000-0000-0000-000000000002', 'combate', '{"label":"Ataque","difficulty":13,"danoBase":2}'))->>'id' as r2 \gset
-select (public.master_create_request(:'tid', :'mb', 'aaaaaaaa-0000-0000-0000-000000000003', 'geral', '{"label":"Teste B"}'))->>'id' as r3 \gset
+select (public.master_create_request(:'tid', :'ma', 'aaaaaaaa-0000-0000-0000-000000000002', 'combate', '{"label":"Ataque","attrKey":"corpo","skillKey":"luta","difficulty":13,"danoBase":2}'))->>'id' as r2 \gset
+select (public.master_create_request(:'tid', :'mb', 'aaaaaaaa-0000-0000-0000-000000000003', 'geral', '{"label":"Teste B","attrKey":"instinto","skillKey":"percepcao"}'))->>'id' as r3 \gset
 select set_config('t.r1', :'r1', false), set_config('t.r3', :'r3', false);
 select t.ok((select count(*) from public.table_requests where table_id=:'tid')=3, 'mestre vê 3 solicitações (sem duplicata)');
 select t.fails(format($$select public.master_create_request(%L,%L,gen_random_uuid(),'geral','{}')$$, t.v('tid2'), t.v('ma')), 'alvo de outra mesa bloqueado', 'target_not_in_table');
@@ -118,7 +118,7 @@ select t.fails(format($$select public.master_create_request(%L,%L,gen_random_uui
 reset role; set role anon; select set_config('request.jwt.claim.sub','',false);
 select t.ok(jsonb_array_length(public.player_get_state(t.v('ma')::uuid,t.v('ta'))->'requests')=2, 'A recebe 2 testes');
 select t.ok(jsonb_array_length(public.player_get_state(t.v('mb')::uuid,t.v('tb'))->'requests')=1, 'B recebe só o seu');
-select t.ok(not (public.player_get_state(t.v('mb')::uuid,t.v('tb'))::text like '%Mente + Análise%'), 'B não vê teste de A');
+select t.ok(not (public.player_get_state(t.v('mb')::uuid,t.v('tb'))::text like '%Mente + Investigação%'), 'B não vê teste de A');
 select t.fails(format($$select public.player_answer_request(%L,%L,%L,'{"grade":"x"}')$$, t.v('mb'), t.v('tb'), t.v('r1')), 'B não responde teste de A', 'request_not_found');
 
 -- A responde r1; repetir não duplica nem sobrescreve

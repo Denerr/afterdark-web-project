@@ -18,7 +18,8 @@ As migrações são **incrementais e dependentes de ordem**. Algumas corrigem po
  9. migration_requests_consequences.sql     <- Ponto 1
 10. migration_rls_p2.sql                    <- Ponto 2
 11. migration_player_projection.sql         <- relógios/estresse/grupo
-12. migration_session_persistence.sql       <- Ponto 3 (último)
+12. migration_session_persistence.sql       <- Ponto 3
+13. migration_skill_pairs.sql               <- UI Etapa 5: par atributo/perícia (último)
 ```
 
 Todas são idempotentes: rodar de novo não duplica objeto.
@@ -38,7 +39,8 @@ cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql \
     migration_rls_hardening.sql migration_leave_table.sql \
     migration_archive_table.sql migration_profiles.sql \
     migration_requests_consequences.sql migration_rls_p2.sql \
-    migration_player_projection.sql migration_session_persistence.sql > /tmp/all.sql
+    migration_player_projection.sql migration_session_persistence.sql \
+    migration_skill_pairs.sql > /tmp/all.sql
 
 docker cp /tmp/all.sql adpg:/tmp/all.sql
 docker exec adpg psql -U postgres -q -f /tmp/all.sql
@@ -59,6 +61,15 @@ de versão e três funções do Mestre; não altera policy nem grant. A ordem en
 migração é livre **nesse sentido**: o cliente antigo continua funcionando depois dela.
 Mas o cliente do Ponto 3 chama `master_get_session`/`master_save_session`, então
 **aplique a migração antes (ou junto) do deploy** — sem ela o Mestre não carrega a mesa.
+
+Para um banco que já tem a `migration_session_persistence.sql`, basta
+`migration_skill_pairs.sql` (UI Etapa 5). Ela substitui `master_create_request` e cria a
+tabela de pares `_ad_skill_attr`, fechada para a API. A tabela **espelha**
+`src/data/attributes.js`: ao mudar uma perícia, mudar os dois e rodar
+`node supabase/tests/parity_skills.js`. **Ordem: publicar o `index.html` da Etapa 5
+primeiro, aplicar a migração depois.** O cliente novo funciona com o banco antigo (que
+só não valida o par); já o cliente antigo usa como padrão a perícia inexistente
+`analise`, que o banco novo recusa.
 
 `migration_player_projection.sql` só substitui duas funções (`player_get_session` e
 `player_get_lobby`): não altera tabela, policy nem grant. O cliente publicado funciona

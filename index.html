@@ -421,8 +421,8 @@
                   <sc-for list="{{ attrsAll }}" as="a" hint-placeholder-count="5"><option value="{{ a.key }}">{{ a.label }}</option></sc-for>
                 </select></div>
               <div style="flex:1"><label style="font-size:11px;color:#8d887c;display:block;margin-bottom:5px">Perícia (bônus)</label>
-                <select onChange="{{ onDraftSkill }}" value="{{ testDraft.skillKey }}" style="width:100%;background:#0e0d12;color:#e9e3d4;border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:10px;font-size:13px">
-                  <sc-for list="{{ skillsAll }}" as="a" hint-placeholder-count="5"><option value="{{ a.key }}">{{ a.label }}</option></sc-for>
+                <select onChange="{{ onDraftSkill }}" value="{{ skillGeralSel }}" style="width:100%;background:#0e0d12;color:#e9e3d4;border:1px solid {{ skillGeralBorder }};border-radius:3px;padding:10px;font-size:13px">
+                  <sc-for list="{{ skillsGeral }}" as="a" hint-placeholder-count="5"><option value="{{ a.key }}">{{ a.label }}</option></sc-for>
                 </select></div>
             </div>
             <div style="font-family:'Space Mono';font-size:11px;color:#7e7a70;margin-bottom:14px;padding:9px 11px;background:#0e0d12;border-radius:4px;border:1px solid rgba(255,255,255,.06)">maior de N d20 + perícia · alvo fixo</div>
@@ -436,8 +436,8 @@
                   <sc-for list="{{ attrsAll }}" as="a" hint-placeholder-count="5"><option value="{{ a.key }}">{{ a.label }}</option></sc-for>
                 </select></div>
               <div style="flex:1"><label style="font-size:11px;color:#8d887c;display:block;margin-bottom:5px">Perícia combate</label>
-                <select onChange="{{ onDraftCombatSkill }}" value="{{ combatSkillSel }}" style="width:100%;background:#0e0d12;color:#e9e3d4;border:1px solid rgba(255,255,255,.1);border-radius:3px;padding:10px;font-size:13px">
-                  <sc-for list="{{ skillsAll }}" as="a" hint-placeholder-count="5"><option value="{{ a.key }}">{{ a.label }}</option></sc-for>
+                <select onChange="{{ onDraftCombatSkill }}" value="{{ combatSkillSel }}" style="width:100%;background:#0e0d12;color:#e9e3d4;border:1px solid {{ skillCombatBorder }};border-radius:3px;padding:10px;font-size:13px">
+                  <sc-for list="{{ skillsCombate }}" as="a" hint-placeholder-count="5"><option value="{{ a.key }}">{{ a.label }}</option></sc-for>
                 </select></div>
             </div>
             <!-- ALVO DO ATAQUE: separado de quem executa a rolagem. Sem escolha, o envio para. -->
@@ -474,7 +474,7 @@
           </div>
           <div style="display:flex;gap:8px;margin-bottom:4px">
             <button onClick="{{ sendTest }}" disabled="{{ sendTestDisabled }}" style="flex:1;padding:13px;background: {{ sendTestBg }};color: {{ sendTestCol }};border:none;border-radius:2px;font:700 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor: {{ sendTestCursor }};transition:.2s">{{ sendTestLabel }}</button>
-            <button onClick="{{ rollMaster }}" title="Rolar localmente" style="padding:13px 16px;background:transparent;color:#cfc7b4;border:1px solid rgba(198,166,100,.35);border-radius:2px;font:600 12px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.7);color:#e9e3d4"><sc-if value="{{ testCombate }}">⚔</sc-if><sc-if value="{{ testGeral }}">⚄</sc-if> Rolar</button>
+            <button onClick="{{ rollMaster }}" disabled="{{ rollMasterBlocked }}" title="Rolar localmente" style="padding:13px 16px;background:transparent;color:#cfc7b4;border:1px solid rgba(198,166,100,.35);border-radius:2px;font:600 12px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.7);color:#e9e3d4"><sc-if value="{{ testCombate }}">⚔</sc-if><sc-if value="{{ testGeral }}">⚄</sc-if> Rolar</button>
           </div>
           <sc-if value="{{ sendTestBlock }}"><div style="font-size:11px;color:#a39e90;text-align:center;margin-top:8px;letter-spacing:.02em">{{ sendTestBlock }}</div></sc-if>
           <sc-if value="{{ testSentFlash }}"><div style="font-size:11px;color:#7fae8f;text-align:center;margin-top:8px;letter-spacing:.04em;animation:fadeIn .3s ease">✓ Teste enviado a {{ testSentTo }} — aguardando rolagem.</div></sc-if>
@@ -1794,7 +1794,7 @@ class Component extends DCLogic {
     narrativa:{mode:null,text:''},
     woundTarget:'', woundDraft:'', showWoundForm:false, woundLib:[],
     condTarget:'', condDraft:'', showCondForm:false, condLib:[],
-    testDraft:{playerId:'',attrKey:'mente',skillKey:'analise',difficulty:15,diffGeral:15,diffCombate:13,weaponId:'w3',combatAttr:'corpo',combatSkill:'atletismo',vis:'publico',atkTargetKind:'membro',atkTargetId:''},
+    testDraft:{playerId:'',attrKey:'mente',skillKey:'investigacao',difficulty:15,diffGeral:15,diffCombate:13,weaponId:'w3',combatAttr:'corpo',combatSkill:'luta',vis:'publico',atkTargetKind:'membro',atkTargetId:''},
     pendingWound:null,
     rolling:false, rollTemp:null, roll:null, rollFrom:'',
     sentReqs:[], testSending:false, testSentOk:false, testSentTo:'', startBusy:false, removeConfirmId:null,
@@ -2856,6 +2856,27 @@ class Component extends DCLogic {
   toggleMasterLog(){ this.setState(s=>({masterLogOpen:!s.masterLogOpen})); }
   setMasterPanel(t){ this.setState({masterPanel:t}); }
   setDraft(k,v){ this.setState(s=>({testDraft:{...s.testDraft,[k]:v}})); }
+  // Etapa 5: cada atributo so aceita as proprias pericias (catalogo em
+  // src/data/attributes.js, espelhado no banco por _ad_skill_attr).
+  _skillAttr(k){ const sk=this.SKILLS.find(x=>x.key===k); return sk?sk.attr:null; }
+  _pairOk(attr,skill){ return !!skill&&this._skillAttr(skill)===attr; }
+  _draftPair(){
+    const s=this.state, td=s.testDraft;
+    return s.testMode==='combate'?{attr:td.combatAttr,skill:td.combatSkill}:{attr:td.attrKey,skill:td.skillKey};
+  }
+  // Motivo do bloqueio quando o par atual nao e valido ('' quando esta tudo certo).
+  // Vale para rascunho vindo de qualquer lugar: o estado e revalidado a cada uso.
+  _pairBlock(){
+    const {attr,skill}=this._draftPair();
+    if(!skill) return `Escolha uma perícia de ${this.attrLabel(attr)}.`;
+    if(!this._pairOk(attr,skill)) return `${this.skillLabel(skill)} não é perícia de ${this.attrLabel(attr)}. Escolha outra.`;
+    return '';
+  }
+  // Trocar o atributo limpa a pericia incompativel. NAO escolhe outra sozinho:
+  // o Mestre seleciona de novo, e o motivo aparece junto ao botao de envio.
+  setDraftAttr(attrF,skillF,v){
+    this.setState(s=>{ const td={...s.testDraft,[attrF]:v}; if(!this._pairOk(v,td[skillF])) td[skillF]=''; return {testDraft:td}; });
+  }
   advanceClock(id,d,silent){
     this.setState(s=>{
       let done=false,name='';
@@ -3014,6 +3035,7 @@ class Component extends DCLogic {
     // Nao deixamos o alvo "cair" no atacante por omissao: ou o Mestre escolhe, ou o envio para.
     if(s.testMode==='combate'&&s.testDraft.atkTargetKind==='membro'&&!this._atkTarget())
       return 'Escolha o alvo do ataque antes de enviar.';
+    const pb=this._pairBlock(); if(pb) return pb;
     return '';
   }
   async sendTest(){
@@ -3040,7 +3062,7 @@ class Component extends DCLogic {
     if(error||!data||!data.ok){
       this.setState({testSending:false});
       const m=(error&&error.message)||'';
-      this._flashActionError(/target_without_sheet/.test(m)?`${p.char} ainda não tem ficha na mesa.`:/target_not_in_table/.test(m)?'Esse jogador não está mais na mesa.':'Não foi possível enviar o teste. Verifique sua conexão e tente novamente.');
+      this._flashActionError(/invalid_skill_for_attr/.test(m)?'O banco recusou o teste: a perícia não pertence ao atributo escolhido.':/target_without_sheet/.test(m)?`${p.char} ainda não tem ficha na mesa.`:/target_not_in_table/.test(m)?'Esse jogador não está mais na mesa.':'Não foi possível enviar o teste. Verifique sua conexão e tente novamente.');
       return;
     }
     this._sendKey=null;
@@ -3223,6 +3245,7 @@ class Component extends DCLogic {
   rollMaster(){
     const s=this.state, td=s.testDraft;
     if(s.rolling) return;
+    const pb=this._pairBlock(); if(pb){ this._flashActionError(pb); return; }
     this.setState({rollFrom:''});
     const p=this._draftTarget()||{id:null,attrs:{},skills:{},char:'?'};
     if(s.testMode==='combate'){
@@ -4185,7 +4208,14 @@ class Component extends DCLogic {
       setNarrativaPadrao:()=>this.setNarrativaMode('padrao'), setNarrativaProprio:()=>this.setNarrativaMode('proprio'), resetNarrativa:()=>this.resetNarrativa(), onNarrativaText:(e)=>this.onNarrativaText(e),
       toolTestes:s.masterTool==='testes', toolRelogios:s.masterTool==='relogios', toolEstresse:s.masterTool==='estresse', toolFerimentos:s.masterTool==='ferimentos', toolNpcs:s.masterTool==='npcs', toolCenas:s.masterTool==='cenas', toolBiblioteca:s.masterTool==='biblioteca',
       tabCena:s.playerTab==='cena', tabFicha:s.playerTab==='ficha', tabTestes:s.playerTab==='testes', tabMapa:s.playerTab==='mapa', tabDiario:s.playerTab==='diario', tabNpcs:s.playerTab==='npcs', tabPistas:s.playerTab==='pistas',
-      testDraft:s.testDraft, attrsAll:this.ATTRS, skillsAll:this.SKILLS, diffOptions, combatWeapons, woundLevels, sceneList, libList,
+      testDraft:s.testDraft, attrsAll:this.ATTRS, skillsAll:this.SKILLS,
+      // So as pericias do atributo escolhido; a opcao vazia aparece quando nada valido esta selecionado.
+      skillsGeral:[{key:'',label:'— escolha a perícia —'},...this.SKILLS.filter(k=>k.attr===s.testDraft.attrKey)],
+      skillsCombate:[{key:'',label:'— escolha a perícia —'},...this.SKILLS.filter(k=>k.attr===s.testDraft.combatAttr)],
+      skillGeralSel:this._pairOk(s.testDraft.attrKey,s.testDraft.skillKey)?s.testDraft.skillKey:'',
+      skillGeralBorder:this._pairOk(s.testDraft.attrKey,s.testDraft.skillKey)?'rgba(255,255,255,.1)':'#c41e3a',
+      skillCombatBorder:this._pairOk(s.testDraft.combatAttr,s.testDraft.combatSkill)?'rgba(255,255,255,.1)':'#c41e3a',
+      rollMasterBlocked:!!this._pairBlock(), diffOptions, combatWeapons, woundLevels, sceneList, libList,
       woundPlayerOptions, woundTargetId, woundTargetName, woundTargetNick, woundCustom, currentWounds,
       hasCurrentWounds:currentWounds.length>0, noCurrentWounds:currentWounds.length===0, hasCustomWounds:woundCustom.length>0,
       showWoundForm:s.showWoundForm, woundDraft:s.woundDraft,
@@ -4233,7 +4263,7 @@ class Component extends DCLogic {
           compartilhada:'Compartilhada',perdida:'Perdida',destruida:'Destruída'})[k.status]||k.status,
         hasTxt:!!(k.txt&&k.txt!=='—')})),
       hasClues:clues.length>0, noCluesMaster:clues.length===0,
-      combatTotalLine, combatAttrSel:s.testDraft.combatAttr, combatSkillSel:s.testDraft.combatSkill,
+      combatTotalLine, combatAttrSel:s.testDraft.combatAttr, combatSkillSel:this._pairOk(s.testDraft.combatAttr,s.testDraft.combatSkill)?s.testDraft.combatSkill:'',
       hasPendingWound:!!s.pendingWound,
       pendingWoundTarget:(s.pendingWound?(((s.players.find(p=>p.id===s.pendingWound.targetId)||{}).char)||s.pendingWound.targetName||''):''),
       pendingWoundAttacker:(s.pendingWound?(s.pendingWound.attackerName||''):''),
@@ -4241,8 +4271,8 @@ class Component extends DCLogic {
       pendingWoundLevels:['leve','moderado','grave','critico'].map(lv=>({lv,label:({leve:'Leve',moderado:'Moderado',grave:'Grave',critico:'Crítico'})[lv],onClick:()=>this.adjustPendingWound(lv),sel:s.pendingWound&&s.pendingWound.lvl===lv,bg:(s.pendingWound&&s.pendingWound.lvl===lv)?'#c41e3a':'#0e0d12',border:(s.pendingWound&&s.pendingWound.lvl===lv)?'#c41e3a':'rgba(255,255,255,.12)',col:(s.pendingWound&&s.pendingWound.lvl===lv)?'#fff':'#cdc6b6'})),
       applySuggestedWound:()=>this.applySuggestedWound(), dismissPendingWound:()=>this.dismissPendingWound(),
       draftPlayer:{...draftPlayer, attrLabel:this.attrLabel(isCombat?s.testDraft.combatAttr:s.testDraft.attrKey), skillLabel:this.skillLabel(isCombat?s.testDraft.combatSkill:s.testDraft.skillKey)},
-      onDraftPlayer:(e)=>this.setDraft('playerId',e.target.value), onDraftAttr:(e)=>this.setDraft('attrKey',e.target.value), onDraftSkill:(e)=>this.setDraft('skillKey',e.target.value),
-      onDraftCombatAttr:(e)=>this.setDraft('combatAttr',e.target.value), onDraftCombatSkill:(e)=>this.setDraft('combatSkill',e.target.value),
+      onDraftPlayer:(e)=>this.setDraft('playerId',e.target.value), onDraftAttr:(e)=>this.setDraftAttr('attrKey','skillKey',e.target.value), onDraftSkill:(e)=>this.setDraft('skillKey',e.target.value),
+      onDraftCombatAttr:(e)=>this.setDraftAttr('combatAttr','combatSkill',e.target.value), onDraftCombatSkill:(e)=>this.setDraft('combatSkill',e.target.value),
       rollMaster:()=>this.rollMaster(), rolling:s.rolling, rollTemp:s.rollTemp?s.rollTemp.map(d=>({d})):null, roll:decorate(s.roll), hasRoll:!!s.roll,
       qr,
       joinCode:s.joinCode, joinName:s.joinName, joinTableName:s.joinTableName, joinTableType:s.joinTableType||'Mesa',
