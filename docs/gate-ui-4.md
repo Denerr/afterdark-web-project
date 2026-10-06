@@ -36,6 +36,27 @@ autor: vale o que está definido no site** — o documento do sistema é que ser
 3. **Rituais × Ocultismo:** o oficial resolve "Ritual ofensivo" com
    `1d10 + Espírito + Ocultismo` — a perícia Rituais do app não aparece nessa fórmula.
 
+### Resolução (06/10/2026)
+
+O documento do sistema (`Design System - RPG Afterdark/mecanica-afterdark-att-18-06-26.md`,
+fora deste repositório) foi alinhado ao app e passou à **versão 0.3**. Cópia do original
+ao lado dele: `mecanica-afterdark-att-18-06-26.ANTES-alinhamento-site.md`.
+
+- **Atributos:** de 5 (Corpo, Reflexo, Intelecto, Presença, Espírito) para os 6 do app
+  (Corpo, Reflexos, Mente, Presença, Instinto, Espírito), com os textos do autor.
+- **Perícias:** a lista de 16 virou a tabela das 24 do app, agrupadas por atributo.
+- **Pontos na criação:** 24, como no app (`skillLeft` em `index.html`).
+- **Ritual ofensivo:** `1d10 + Espírito + Rituais`.
+- **Nomes antigos nas fórmulas:** Briga e Armas Brancas → Luta; Disparo → Pontaria;
+  Vontade → Resistência Espiritual; Intelecto → Mente.
+- **Defesa (decisão do autor):** `8 + Reflexos`, sem perícia — o app não tem Esquiva. A
+  tabela de exemplos foi recalculada (o combatente experiente cai de 16 para 12); a tabela
+  de NPCs prontos não muda. No app, o Mestre informa a Defesa como dificuldade do ataque.
+
+Ficaram como estavam, por não serem atributo nem perícia: o relógio "Instinto Lupino" e a
+facção "Submundo independente". As versões anteriores do sistema
+(`mecânica-afterdark.md` e `Afterdark-Mecanica-RPG.md`) não foram tocadas.
+
 ## Testes
 
 | Suíte | Resultado |
