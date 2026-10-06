@@ -13,7 +13,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Afterdark — RPG de Mesa</title>
 <link rel="icon" type="image/x-icon" href="assets/favicon/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png">
@@ -89,12 +89,12 @@
   </sc-if>
   <sc-if value="{{ navNarrow }}">
     <sc-if value="{{ canBack }}">
-      <button onClick="{{ back }}" title="Voltar" style="width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:transparent;color:#cfc7b4;border:1px solid rgba(255,255,255,.12);border-radius:8px;font-size:17px;cursor:pointer">←</button>
+      <button onClick="{{ back }}" title="Voltar" style="width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:transparent;color:#cfc7b4;border:1px solid rgba(255,255,255,.12);border-radius:8px;font-size:17px;cursor:pointer">←</button>
     </sc-if>
     <sc-if value="{{ isLoggedIn }}">
-      <div onClick="{{ goProfile }}" title="Perfil" style="width:38px;height:38px;flex-shrink:0;border-radius:50%;background:#1c1a24;border:1.5px solid #c6a35e;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:14px;color:#e0c179;cursor:pointer">{{ userInitial }}</div>
+      <div onClick="{{ goProfile }}" title="Perfil" style="width:44px;height:44px;flex-shrink:0;border-radius:50%;background:#1c1a24;border:1.5px solid #c6a35e;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:14px;color:#e0c179;cursor:pointer">{{ userInitial }}</div>
     </sc-if>
-    <button onClick="{{ toggleTopMenu }}" title="Menu" style="width:38px;height:38px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background: {{ topMenuBg }};color:#e0c179;border:1px solid rgba(198,166,100,.3);border-radius:8px;font-size:17px;cursor:pointer">{{ topMenuIcon }}</button>
+    <button onClick="{{ toggleTopMenu }}" title="Menu" style="width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background: {{ topMenuBg }};color:#e0c179;border:1px solid rgba(198,166,100,.3);border-radius:8px;font-size:17px;cursor:pointer">{{ topMenuIcon }}</button>
   </sc-if>
 </div>
 
@@ -214,7 +214,7 @@
   <sc-if value="{{ showMSessTabs }}">
     <div style="display:flex;gap:4px;background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:8px;padding:4px;max-width:1560px;margin:0 auto 14px">
       <sc-for list="{{ mSessTabs }}" as="t" hint-placeholder-count="3">
-        <button onClick="{{ t.onClick }}" style="flex:1;padding:10px 4px;border:none;border-radius:6px;font:600 11px 'Archivo';letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background: {{ t.bg }};color: {{ t.col }};transition:.2s">{{ t.l }}</button>
+        <button onClick="{{ t.onClick }}" style="flex:1;min-height:44px;padding:10px 4px;border:none;border-radius:6px;font:600 11px 'Archivo';letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background: {{ t.bg }};color: {{ t.col }};transition:.2s">{{ t.l }}</button>
       </sc-for>
     </div>
   </sc-if>
@@ -954,7 +954,7 @@
 
 <!-- ========================= JOGADOR · MESA (PAINEL / DASHBOARD) ========================= -->
 <sc-if value="{{ isJPanel }}" data-screen-label="Jogador Mesa">
-<div style="min-height:calc(100vh - 54px);padding:18px 16px 96px;animation:fadeIn .4s ease;background:linear-gradient(rgba(5,6,12,0.40),rgba(5,6,12,0.40)),url('assets/images/bg-painel.png') center center/cover no-repeat">
+<div style="min-height:calc(100vh - 54px);padding:18px 16px {{ panelPadBottom }};animation:fadeIn .4s ease;background:linear-gradient(rgba(5,6,12,0.40),rgba(5,6,12,0.40)),url('assets/images/bg-painel.png') center center/cover no-repeat">
   <div style="max-width:1340px;margin:0 auto">
 
     <!-- test notification -->
@@ -969,8 +969,8 @@
           </div>
         </div>
         <sc-if value="{{ notifActive }}"><div style="display:flex;gap:8px;margin-top:12px">
-          <button onClick="{{ openTestFromNotif }}" style="flex:1;padding:10px;background:#c6a35e;color:#0b0b10;border:none;border-radius:5px;font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Abrir teste</button>
-          <button onClick="{{ dismissNotif }}" style="padding:10px 14px;background:transparent;color:#8d887c;border:1px solid rgba(255,255,255,.12);border-radius:5px;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="color:#cfc7b4">Depois</button>
+          <button onClick="{{ openTestFromNotif }}" style="flex:1;min-height:44px;padding:10px;background:#c6a35e;color:#0b0b10;border:none;border-radius:5px;font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Abrir teste</button>
+          <button onClick="{{ dismissNotif }}" style="min-height:44px;padding:10px 14px;background:transparent;color:#8d887c;border:1px solid rgba(255,255,255,.12);border-radius:5px;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="color:#cfc7b4">Depois</button>
         </div></sc-if>
       </div>
     </sc-if>
@@ -979,9 +979,9 @@
     <!-- atributos essenciais e acesso à ficha completa e aos materiais conhecidos. -->
     <div style="display:flex;align-items:center;gap:16px 22px;background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:14px 18px;margin-bottom:16px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:16px;min-width:0;flex:1 1 320px">
-        <div style="width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:24px;color:#efe8d8;background: {{ selfAvatarBg }};border:2px solid #c41e3a;box-shadow:0 0 18px rgba(196,30,58,.25)">{{ selfAvatarInitial }}</div>
+        <div style="width: {{ hdrAvatar }};height: {{ hdrAvatar }};border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:22px;color:#efe8d8;background: {{ selfAvatarBg }};border:2px solid #c41e3a;box-shadow:0 0 18px rgba(196,30,58,.25)">{{ selfAvatarInitial }}</div>
         <div style="min-width:0">
-          <div style="font-family:'Cinzel';font-weight:700;font-size:22px;color:#efe8d8;line-height:1.15;overflow-wrap:anywhere">{{ self.char }}</div>
+          <div style="font-family:'Cinzel';font-weight:700;font-size: {{ hdrNameSize }};color:#efe8d8;line-height:1.15;overflow-wrap:anywhere">{{ self.char }}</div>
           <div style="font-size:13px;color:#a39e90;margin-top:4px">Sensibilidade: <span style="color: {{ selfSens.accent }}">{{ selfSens.label }}</span></div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px">
             <sc-for list="{{ selfConditions }}" as="c" hint-placeholder-count="2"><span style="font-size:12px;color: {{ c.col }};padding:4px 10px;border:1px solid {{ c.col }}55;border-radius:20px">{{ c.icon }} {{ c.label }}</span></sc-for>
@@ -1007,17 +1007,22 @@
         <sc-for list="{{ selfAttr }}" as="a" hint-placeholder-count="6"><div style="text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:7px 2px"><div style="font-family:'Space Mono';font-weight:700;font-size:16px;color:#e0c179">{{ a.val }}</div><div style="font-size:9px;color:#8d887c;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.label }}</div></div></sc-for>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
-        <sc-if value="{{ pendingDot }}"><button onClick="{{ openTestFromNotif }}" style="cursor:pointer;background:transparent;font:500 10px 'Archivo';letter-spacing:.1em;text-transform:uppercase;color:#e0c179;padding:9px 12px;border:1px solid rgba(224,193,121,.4);border-radius:14px;animation:glowPulse 2s ease-in-out infinite">⚄ teste pendente</button></sc-if>
+        <sc-if value="{{ pendingDot }}"><button onClick="{{ openTestFromNotif }}" style="cursor:pointer;min-height:40px;background:transparent;font:500 10px 'Archivo';letter-spacing:.1em;text-transform:uppercase;color:#e0c179;padding:0 12px;border:1px solid rgba(224,193,121,.4);border-radius:20px;animation:glowPulse 2s ease-in-out infinite">⚄ teste pendente</button></sc-if>
+        <sc-if value="{{ hdrActions }}">
         <button onClick="{{ openFicha }}" style="padding:9px 13px;background:rgba(198,163,94,.1);border:1px solid rgba(198,166,100,.4);border-radius:7px;color:#e0c179;font:600 11px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="background:rgba(198,163,94,.18)">⚇ Ficha completa</button>
         <button onClick="{{ openNpcs }}" style="padding:9px 12px;background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#cfc7b4;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">☻ NPCs</button>
         <button onClick="{{ openPistas }}" style="padding:9px 12px;background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#cfc7b4;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">◷ Pistas</button>
         <button onClick="{{ openInv }}" style="padding:9px 12px;background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:7px;color:#cfc7b4;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">🗀 Inventário</button>
+        </sc-if>
       </div>
     </div>
 
-    <!-- mobile back bar -->
+    <!-- celular: título da seção aberta + retorno à mesa (mesmo padrão em Testes, Grupo e Diário) -->
     <sc-if value="{{ mobileFocusBar }}">
-      <button onClick="{{ backToMap }}" style="display:flex;align-items:center;gap:8px;margin-bottom:12px;background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:9px 14px;color:#cfc7b4;font:500 12px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">← Voltar ao mapa · {{ focusLabel }}</button>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+        <button onClick="{{ backToMap }}" aria-label="Voltar à mesa" style="display:flex;align-items:center;gap:8px;min-height:44px;background:transparent;border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:0 14px;color:#cfc7b4;font:500 12px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">← Mesa</button>
+        <div style="font-family:'Cinzel';font-weight:600;font-size:17px;color:#efe8d8">{{ focusLabel }}</div>
+      </div>
     </sc-if>
 
     <!-- DASHBOARD GRID -->
@@ -1027,8 +1032,8 @@
       <sc-if value="{{ showCenterCol }}">
         <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
           <div style="display:flex;gap:4px;background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:10px;padding:5px">
-            <button onClick="{{ onCenterMapa }}" style="flex:1;padding:11px;border:none;border-radius:7px;font:600 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;background: {{ mapaTabBg }};color: {{ mapaTabCol }};transition:.2s">◉ Mapa</button>
-            <button onClick="{{ onCenterCena }}" style="flex:1;padding:11px;border:none;border-radius:7px;font:600 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;background: {{ cenaTabBg }};color: {{ cenaTabCol }};transition:.2s">❖ Cena</button>
+            <button onClick="{{ onCenterMapa }}" style="flex:1;min-height:44px;padding:11px;border:none;border-radius:7px;font:600 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;background: {{ mapaTabBg }};color: {{ mapaTabCol }};transition:.2s">◉ Mapa</button>
+            <button onClick="{{ onCenterCena }}" style="flex:1;min-height:44px;padding:11px;border:none;border-radius:7px;font:600 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;background: {{ cenaTabBg }};color: {{ cenaTabCol }};transition:.2s">❖ Cena</button>
           </div>
 
           <!-- MAP -->
@@ -1139,7 +1144,7 @@
                     <sc-if value="{{ pSendError }}">
                       <div style="margin-top:10px;text-align:center">
                         <div style="font-size:11px;color:#e08a8a;margin-bottom:8px">{{ pSendMsg }}</div>
-                        <button onClick="{{ resendPlayerResult }}" style="padding:9px 16px;background:transparent;color:#e0c179;border:1px solid rgba(224,193,121,.5);border-radius:5px;font:600 11px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Reenviar resultado</button>
+                        <button onClick="{{ resendPlayerResult }}" style="min-height:44px;padding:9px 16px;background:transparent;color:#e0c179;border:1px solid rgba(224,193,121,.5);border-radius:5px;font:600 11px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer">Reenviar resultado</button>
                       </div>
                     </sc-if>
                   </div>
@@ -1248,7 +1253,7 @@
             <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e">⚇ Ficha do Personagem</div>
             <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;overflow-wrap:anywhere">{{ self.char }}</div>
           </div>
-          <button onClick="{{ backToMap }}" aria-label="Fechar ficha" style="flex-shrink:0;padding:9px 14px;border-radius:7px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#cfc7b4;font:500 12px 'Archivo';cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">✕ Fechar</button>
+          <button onClick="{{ backToMap }}" aria-label="Fechar ficha" style="flex-shrink:0;min-height:44px;padding:0 14px;border-radius:7px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#cfc7b4;font:500 12px 'Archivo';cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">✕ Fechar</button>
         </div>
         <div style="padding:18px 20px 28px">
           <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Atributos</div>
@@ -1288,7 +1293,7 @@
       <div onClick="{{ stop }}" style="width:100%;max-width:460px;max-height:86vh;overflow-y:auto;background:#13121a;border:1px solid rgba(198,166,100,.25);border-radius:14px;box-shadow:0 40px 120px rgba(0,0,0,.7);animation:fadeUp .35s ease">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid rgba(255,255,255,.07);position:sticky;top:0;background:#13121a;z-index:2">
           <span style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8">{{ overlayTitle }}</span>
-          <button onClick="{{ backToMap }}" style="width:30px;height:30px;border-radius:50%;background:transparent;border:1px solid rgba(255,255,255,.12);color:#a39e90;font-size:15px;cursor:pointer" style-hover="color:#e9e3d4">✕</button>
+          <button onClick="{{ backToMap }}" aria-label="Fechar" style="flex-shrink:0;min-height:44px;padding:0 14px;border-radius:7px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#cfc7b4;font:500 12px 'Archivo';cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">✕ Fechar</button>
         </div>
         <div style="padding:18px 20px 22px">
           <!-- NPCS -->
@@ -1361,9 +1366,9 @@
   <!-- FAB menu -->
   <sc-if value="{{ playerMenuOpen }}">
     <div onClick="{{ closePlayerMenu }}" style="position:fixed;inset:0;z-index:74;background:rgba(6,6,10,.55);backdrop-filter:blur(2px);animation:fadeIn .25s ease"></div>
-    <div style="position:fixed;right:18px;bottom:88px;z-index:76;width:230px;background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:12px;padding:8px;box-shadow:0 24px 60px rgba(0,0,0,.6);animation:fadeUp .25s ease">
+    <div style="position:fixed;right:18px;bottom: {{ menuBottom }};z-index:76;width:230px;max-width:calc(100vw - 36px);background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:12px;padding:8px;box-shadow:0 24px 60px rgba(0,0,0,.6);animation:fadeUp .25s ease">
       <sc-for list="{{ playerMenu }}" as="m" hint-placeholder-count="7">
-        <button onClick="{{ m.onClick }}" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;background: {{ m.bg }};border:none;border-radius:8px;cursor:pointer;transition:.15s" style-hover="background:rgba(198,163,94,.1)">
+        <button onClick="{{ m.onClick }}" style="display:flex;align-items:center;gap:12px;width:100%;min-height:44px;text-align:left;padding:12px 14px;background: {{ m.bg }};border:none;border-radius:8px;cursor:pointer;transition:.15s" style-hover="background:rgba(198,163,94,.1)">
           <span style="width:22px;text-align:center;font-size:15px;color: {{ m.iconCol }}">{{ m.icon }}</span>
           <span style="flex:1;font-size:14px;color: {{ m.col }}">{{ m.l }}</span>
           <sc-if value="{{ m.badge }}"><span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#0b0b10;background:#e0c179;border-radius:10px;padding:2px 7px">{{ m.badgeText }}</span></sc-if>
@@ -1371,10 +1376,24 @@
       </sc-for>
     </div>
   </sc-if>
-  <button onClick="{{ togglePlayerMenu }}" style="position:fixed;right:18px;bottom:20px;z-index:77;width:60px;height:60px;border-radius:50%;background:#c6a35e;border:none;box-shadow:0 14px 36px rgba(0,0,0,.5),0 0 24px rgba(198,163,94,.25);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;color:#0b0b10" style-hover="background:#e0c179">
+  <sc-if value="{{ showFab }}">
+  <button onClick="{{ togglePlayerMenu }}" aria-label="Menu da mesa" style="position:fixed;right:18px;bottom:20px;z-index:77;width:60px;height:60px;border-radius:50%;background:#c6a35e;border:none;box-shadow:0 14px 36px rgba(0,0,0,.5),0 0 24px rgba(198,163,94,.25);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:24px;color:#0b0b10" style-hover="background:#e0c179">
     <span>{{ fabIcon }}</span>
     <sc-if value="{{ pendingDot }}"><span style="position:absolute;top:4px;right:4px;width:14px;height:14px;border-radius:50%;background:#c41e3a;border:2px solid #0a0b10;animation:glowPulse 1.5s ease-in-out infinite"></span></sc-if>
   </button>
+  </sc-if>
+  <!-- celular: navegação fixa Mesa / Ficha / Grupo / Testes / Mais (some com o teclado aberto) -->
+  <sc-if value="{{ showBottomNav }}">
+    <nav aria-label="Navegação da mesa" style="position:fixed;left:0;right:0;bottom:0;z-index:77;display:flex;background:#13121a;border-top:1px solid rgba(198,166,100,.25);box-shadow:0 -10px 30px rgba(0,0,0,.45);padding:0 4px env(safe-area-inset-bottom,0px)">
+      <sc-for list="{{ bottomNav }}" as="b" hint-placeholder-count="5">
+        <button onClick="{{ b.onClick }}" aria-current="{{ b.current }}" style="position:relative;flex:1;min-width:0;min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:transparent;border:none;border-top:2px solid {{ b.bar }};cursor:pointer;color: {{ b.col }}">
+          <span style="font-size:17px;line-height:1;color: {{ b.iconCol }}">{{ b.icon }}</span>
+          <span style="font:600 10px 'Archivo';letter-spacing:.06em;text-transform:uppercase">{{ b.l }}</span>
+          <sc-if value="{{ b.badge }}"><span style="position:absolute;top:6px;left:calc(50% + 6px);font-family:'Space Mono';font-size:10px;color:#0b0b10;background:#e0c179;border-radius:10px;padding:0 5px;animation:glowPulse 2s ease-in-out infinite">{{ b.badgeText }}</span></sc-if>
+        </button>
+      </sc-for>
+    </nav>
+  </sc-if>
 </div>
 </sc-if>
 
@@ -1720,14 +1739,14 @@ class Component extends DCLogic {
     sceneMode:null,
     wizStep:1, sensHover:null, pxImgA:'assets/images/nat-default.png', pxImgB:'assets/images/nat-default.png', pxSlot:'a',
     wiz:{name:'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''},
-    playerTab:'mapa', centerTab:'mapa', playerFocus:null, playerNarrow:false, sideTab:'testes',
+    playerTab:'mapa', centerTab:'mapa', playerFocus:null, playerNarrow:false, layoutMid:false, navCompact:false, kbOpen:false, sideTab:'testes',
     pending:null,
     pRoll:null, pRolling:false, pRollTemp:null, pSend:null, pendingCount:0, selfApproved:false, selfSheetReady:false,
     self:{char:'',nick:'',sens:null,attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},weaknesses:[],wounds:[],conditions:[],history:''},
     scene:{local:'',clima:'',desc:'',npc:'',pistas:[]}
   };
 
-  componentDidMount(){ this._versions={}; this._savedStr={}; this._initSync(); this._hydrateData(()=>{ this._ready=true; const hadCode=this._initFromUrl(); if(!hadCode) this._tryResumeMembership(); }); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onPageHide=()=>this._saveOnPageHide(); window.addEventListener('pagehide',this._onPageHide); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow(); this._onVis=()=>this._syncMotionVisibility(); document.addEventListener('visibilitychange',this._onVis); this._syncMotionVisibility();
+  componentDidMount(){ this._versions={}; this._savedStr={}; this._initSync(); this._hydrateData(()=>{ this._ready=true; const hadCode=this._initFromUrl(); if(!hadCode) this._tryResumeMembership(); }); this.loadWoundLib(); this.loadCondLib(); this._initAuth(); this._onPageHide=()=>this._saveOnPageHide(); window.addEventListener('pagehide',this._onPageHide); this._onR=()=>this.checkNarrow(); window.addEventListener('resize',this._onR); this.checkNarrow(); this._onFI=(e)=>this._onFocusIn(e); this._onFO=()=>setTimeout(()=>this._onFocusIn({target:document.activeElement}),0); document.addEventListener('focusin',this._onFI); document.addEventListener('focusout',this._onFO); this._onVis=()=>this._syncMotionVisibility(); document.addEventListener('visibilitychange',this._onVis); this._syncMotionVisibility();
     this._preloadMotionAssets();
     this._syncParallax();
   }
@@ -2413,7 +2432,13 @@ class Component extends DCLogic {
   }
   hoverSens(k){ this._switchPxBg(k); this.setState({sensHover:k}); }
   unhoverSens(k){ if(this.state.sensHover===k){ this._switchPxBg(this.state.wiz.sens||null); this.setState({sensHover:null}); } }
-  checkNarrow(){ const n=(window.innerWidth||1200)<900; if(n!==this.state.playerNarrow) this.setState({playerNarrow:n}); }
+  // Faixas de largura: estreita (<900, uma área), média (900–1279, duas áreas) e larga (≥1280).
+  // O menu superior vira o menu compacto abaixo de 1100 px (os botões completos não cabem).
+  checkNarrow(){ const w=window.innerWidth||1200, n=w<900, m=!n&&w<1280, c=w<1100;
+    if(n!==this.state.playerNarrow||m!==this.state.layoutMid||c!==this.state.navCompact) this.setState({playerNarrow:n,layoutMid:m,navCompact:c}); }
+  // Teclado virtual: com um campo de texto em foco no celular, a barra inferior sai da frente.
+  _onFocusIn(e){ const t=e&&e.target; const typing=!!(t&&(t.tagName==='TEXTAREA'||(t.tagName==='INPUT'&&!/^(button|checkbox|radio|range|submit)$/i.test(t.type||''))||t.isContentEditable));
+    if(typing!==this.state.kbOpen) this.setState({kbOpen:typing}); }
 
   // ---- nav ----
   go(screen,patch){ this.setState(s=>({nav:[...s.nav,s.screen],screen,...(patch||{})})); }
@@ -3707,19 +3732,21 @@ class Component extends DCLogic {
     const libNameOk=!!(ld.name||'').trim();
 
     // ---- player panel (dashboard) ----
-    const tabLabels={mapa:'Mapa',cena:'Cena',ficha:'Ficha',testes:'Testes',npcs:'NPCs',diario:'Diário',inventario:'Inventário',grupo:'Grupo'};
-    const tabIcons={mapa:'◉',cena:'❖',ficha:'⚇',testes:'⚄',inventario:'🗀',npcs:'☻',diario:'✒',grupo:'⚭'};
+    const tabLabels={mapa:'Mapa',cena:'Cena',ficha:'Ficha',testes:'Testes',npcs:'NPCs',diario:'Diário',inventario:'Inventário',grupo:'Grupo',pistas:'Pistas'};
+    const tabIcons={mapa:'◉',cena:'❖',ficha:'⚇',testes:'⚄',inventario:'🗀',npcs:'☻',diario:'✒',grupo:'⚭',pistas:'◷'};
     const pNarrow=s.playerNarrow, focus=s.playerFocus;
     // ---- master session (mestre) responsive layout ----
-    const mSessTab=s.masterPanel;
-    const mSessCols=pNarrow?'minmax(0,1fr)':'268px 1fr 320px';
-    const showPlayersColM=!pNarrow||mSessTab==='jogadores';
-    const showCenterColM=!pNarrow||mSessTab==='cena';
+    // Faixa média: Ferramentas fixas à direita; Jogadores e Cena alternam por abas à esquerda.
+    const mMid=!pNarrow&&s.layoutMid;
+    const mSessTab=(mMid&&s.masterPanel==='ferramentas')?'cena':s.masterPanel;
+    const mSessCols=pNarrow?'minmax(0,1fr)':(mMid?'minmax(0,1fr) 300px':'268px 1fr 320px');
+    const showPlayersColM=(!pNarrow&&!mMid)||mSessTab==='jogadores';
+    const showCenterColM=(!pNarrow&&!mMid)||mSessTab==='cena';
     const showToolsColM=!pNarrow||mSessTab==='ferramentas';
-    const mSessTabs=[['jogadores','Jogadores'],['cena','Cena'],['ferramentas','Ferramentas']].map(([k,l])=>({k,l,onClick:()=>this.setMasterPanel(k),bg:mSessTab===k?'rgba(198,163,94,.14)':'transparent',col:mSessTab===k?'#e9e3d4':'#8d887c'}));
+    const mSessTabs=(mMid?[['jogadores','Jogadores'],['cena','Cena']]:[['jogadores','Jogadores'],['cena','Cena'],['ferramentas','Ferramentas']]).map(([k,l])=>({k,l,onClick:()=>this.setMasterPanel(k),bg:mSessTab===k?'rgba(198,163,94,.14)':'transparent',col:mSessTab===k?'#e9e3d4':'#8d887c'}));
     // Etapa UI 1: a ficha saiu do grid (resumo no cabeçalho + painel próprio), então o
     // mapa ocupa o espaço que antes era da coluna fixa de 320 px.
-    const dashCols=pNarrow?'minmax(0,1fr)':'minmax(0,1fr) minmax(300px,360px)';
+    const dashCols=pNarrow?'minmax(0,1fr)':(s.layoutMid?'minmax(0,1fr) minmax(280px,320px)':'minmax(0,1fr) minmax(300px,360px)');
     const overlayFocus=focus==='ficha'||focus==='npcs'||focus==='inventario';
     const sideKeys=['testes','grupo','diario'];
     const sideActive=pNarrow?(sideKeys.includes(focus)?focus:null):(s.sideTab||'testes');
@@ -3732,9 +3759,11 @@ class Component extends DCLogic {
     const centerIsMapa=s.centerTab==='mapa';
     const fichaOpen=focus==='ficha';
     const overlayNpcs=focus==='npcs', overlayInv=focus==='inventario', overlayOpen=overlayNpcs||overlayInv;
-    const mobileFocusBar=pNarrow&&(focus==='testes'||focus==='diario');
-    const menuKeys=['mapa','cena','ficha','testes','grupo','diario','npcs','inventario'];
+    const mobileFocusBar=pNarrow&&sideKeys.includes(focus);
+    // Celular: Mesa/Ficha/Grupo/Testes ficam na barra inferior; o resto vai para "Mais".
+    const menuKeys=pNarrow?['cena','diario','npcs','pistas','inventario']:['mapa','cena','ficha','testes','grupo','diario','npcs','inventario'];
     const activeMenu=(k)=>{ if(k==='mapa') return s.centerTab==='mapa'&&!focus; if(k==='cena') return s.centerTab==='cena'&&!focus;
+      if(k==='pistas') return focus==='inventario'&&s.invDivider==='pistas'; if(k==='inventario') return focus==='inventario'&&s.invDivider!=='pistas';
       if(!pNarrow&&sideKeys.includes(k)) return !focus&&s.sideTab===k; return focus===k; };
     const playerMenu=menuKeys.map(k=>({k,l:tabLabels[k],icon:tabIcons[k],onClick:()=>this.openPlayerArea(k),bg:activeMenu(k)?'rgba(198,163,94,.1)':'transparent',col:activeMenu(k)?'#efe8d8':'#cfc7b4',iconCol:activeMenu(k)?'#e0c179':'#8d887c',badge:(k==='testes'&&s.testNotif),badgeText:'novo'}));
     // Relógios do jogador: o banco (player_get_session) já filtra; este filtro é a
@@ -3818,6 +3847,13 @@ class Component extends DCLogic {
     const selfIdentity=[['Natureza',(selfSens&&selfSens.label)||''],['Idade',selfV.age],['Origem',selfV.origin],['Aparência',selfV.appearance],['Roupas',selfV.clothes],
       ['Personalidade',selfV.personality],['Manifestação',selfV.manifest],['Marcas e limitações',selfV.marks],['Histórico',selfV.history]]
       .filter(([,v])=>v&&String(v).trim()).map(([l,v])=>({l,v:String(v)}));
+    // Barra inferior (celular). "Mesa" = mapa/cena sem nenhuma seção aberta.
+    const moreKeys=['diario','npcs','pistas','inventario'];
+    const navActive=(k)=>{ if(k==='mesa') return !focus&&!s.playerMenuOpen; if(k==='mais') return s.playerMenuOpen||moreKeys.includes(focus)||(focus==='inventario'); return focus===k&&!s.playerMenuOpen; };
+    const bottomNav=[['mesa','Mesa','◉'],['ficha','Ficha','⚇'],['grupo','Grupo','⚭'],['testes','Testes','⚄'],['mais','Mais','☰']].map(([k,l,icon])=>{ const on=navActive(k);
+      return {k,l,icon,current:on?'page':'false',bar:on?'#c6a35e':'transparent',col:on?'#efe8d8':'#8d887c',iconCol:on?'#e0c179':'#8d887c',
+        badge:k==='testes'&&pendingTotal>0, badgeText:String(pendingTotal),
+        onClick:k==='mesa'?(()=>this.setState({playerFocus:null,playerMenuOpen:false})):k==='mais'?(()=>this.togglePlayerMenu()):(()=>this.openPlayerArea(k))}; });
     const pendingHeader=!pt?'Nenhum teste solicitado':pt.status==='cancelado'?'Teste cancelado pelo Mestre':pt.status==='respondido'?'Último teste solicitado':('Solicitado pelo Mestre'+(extraQueue?` · +${extraQueue} na fila`:''));
 
     // inventory
@@ -3896,7 +3932,7 @@ class Component extends DCLogic {
       charOpen:!!selChar, charDetail, closeChar:()=>this.closeChar(), onCharPhoto:(e)=>this.onCharPhoto(e), removeCharPhoto:()=>this.removeCharPhoto(),
       charDeleteConfirm:s.charDeleteConfirm, charDeleteConfirmOff:!s.charDeleteConfirm, toggleCharDeleteConfirm:()=>this.toggleCharDeleteConfirm(), cancelCharDelete:()=>this.cancelCharDelete(), deleteCharacter:()=>this.deleteCharacter(),
       playerCardOpen, playerCard, closePlayerCard:()=>this.closePlayerCard(),      canBack:s.nav.length>0, breadcrumb:this.crumb(),
-      navWide:!s.playerNarrow, navNarrow:s.playerNarrow, showBreadcrumb:!s.playerNarrow,
+      navWide:!s.navCompact, navNarrow:!!s.navCompact, showBreadcrumb:!s.playerNarrow&&!s.layoutMid,
       topMenuOpen:s.topMenuOpen, toggleTopMenu:()=>this.toggleTopMenu(), closeTopMenu:()=>this.closeTopMenu(),
       topMenuIcon:s.topMenuOpen?'\u2715':'\u2630', topMenuBg:s.topMenuOpen?'rgba(198,163,94,.16)':'transparent',
       topGoStart:()=>{this.setState({topMenuOpen:false});this.goStart();},
@@ -3920,7 +3956,7 @@ class Component extends DCLogic {
       toLobby:()=>{ this.saveCurrentTable().then(r=>{ if(!r.ok) return; this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>this.startGameSession(), closeScene:()=>this.closeScene(),
       onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:sel?sel.title:sessionTitle,acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:sel?sel.summary:'A cena se revela diante do grupo, e o Mestre conduz a narrativa.'}),
       onSceneNpc:()=>this.openScene({title:'NPC Revelado',sub:sel?sel.ref:'Figura misteriosa',acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:sel?`${sel.ref} se aproxima, como quem já decidiu o desfecho da noite — sua ligação com ${sel.faction} não é mais segredo.`:'Uma figura observa do canto da sala, atenta a cada movimento do grupo.'}),
-      showMSessTabs:pNarrow, mSessCols, showPlayersColM, showCenterColM, showToolsColM, mSessTabs,
+      showMSessTabs:pNarrow||mMid, mSessCols, showPlayersColM, showCenterColM, showToolsColM, mSessTabs,
       stageSceneTitle:sel?sel.title:'Cena Atual', stageSceneDesc:sel?sel.summary:'A cena começa a se revelar diante do grupo.',
       oneshotList, chaptersView, selChapter, sessTheme, sessName, centerBorder:'rgba(198,166,100,.18)',
       // master stage
@@ -3986,6 +4022,8 @@ class Component extends DCLogic {
       groupCards, hasGroupCards:groupCards.length>0, noGroupCards:groupCards.length===0, showGrupoBox, closeGroupCard:()=>this.closeGroupCard(),
       // dashboard
       dashCols, showCenterCol, showRightCol, showTestesBox, showDiarioBox, showSideTabs, sideTabs,
+      showFab:!pNarrow, showBottomNav:pNarrow&&!s.kbOpen, bottomNav, menuBottom:pNarrow?'calc(70px + env(safe-area-inset-bottom, 0px))':'88px',
+      panelPadBottom:pNarrow?'calc(84px + env(safe-area-inset-bottom, 0px))':'96px', hdrActions:!pNarrow, hdrAvatar:pNarrow?'44px':'56px', hdrNameSize:pNarrow?'18px':'22px',
       fichaOpen, selfIdentity, hasSelfIdentity:selfIdentity.length>0, noSelfSkill:selfSkill.length===0, noSelfWeak:selfWeak.length===0,
       openFicha:()=>this.openPlayerArea('ficha'), openNpcs:()=>this.openPlayerArea('npcs'), openPistas:()=>this.openPlayerArea('pistas'), openInv:()=>this.openPlayerArea('inventario'),
       centerIsMapa, centerIsCena:!centerIsMapa,

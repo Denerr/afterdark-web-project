@@ -18,8 +18,8 @@
         <input onInput="{{ onWizName }}" value="{{ wiz.name }}" placeholder="Nome do jogador *" style="background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
         <input onInput="{{ onWizChar }}" value="{{ wiz.charName }}" placeholder="Nome do personagem *" style="background:#0e0d12;border:1px solid rgba(198,166,100,.3);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
         <div style="display:flex;gap:10px">
-          <input onInput="{{ onWizAge }}" value="{{ wiz.age }}" placeholder="Idade" style="flex:1;background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
-          <input onInput="{{ onWizOrigin }}" value="{{ wiz.origin }}" placeholder="Origem" style="flex:2;background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
+          <input onInput="{{ onWizAge }}" value="{{ wiz.age }}" placeholder="Idade" style="flex:1;min-width:0;background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
+          <input onInput="{{ onWizOrigin }}" value="{{ wiz.origin }}" placeholder="Origem" style="flex:2;min-width:0;background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
         </div>
         <input onInput="{{ onWizAppear }}" value="{{ wiz.appearance }}" placeholder="Aparência" style="background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
         <input onInput="{{ onWizClothes }}" value="{{ wiz.clothes }}" placeholder="Roupas e estilo" style="background:#0e0d12;border:1px solid rgba(255,255,255,.1);border-radius:4px;padding:13px;font-size:15px;color:#e9e3d4;outline:none"/>
@@ -169,13 +169,13 @@
         <sc-for list="{{ skillGroups }}" as="g" hint-placeholder-count="6">
           <div>
             <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;font-weight:700;margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid rgba(198,166,100,.2)">{{ g.attrLabel }}</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:9px">
               <sc-for list="{{ g.skills }}" as="a" hint-placeholder-count="4">
-                <div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background: {{ a.bg }};border:1px solid {{ a.border }};border-radius:5px">
-                  <span style="flex:1;font-size:13px;color: {{ a.txtCol }}">{{ a.label }}</span>
-                  <button onClick="{{ a.onDec }}" style="width:24px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer">−</button>
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px 6px 11px;min-width:0;background: {{ a.bg }};border:1px solid {{ a.border }};border-radius:5px">
+                  <span style="flex:1;min-width:0;font-size:13px;color: {{ a.txtCol }};overflow-wrap:anywhere">{{ a.label }}</span>
+                  <button onClick="{{ a.onDec }}" aria-label="Remover ponto de {{ a.label }}" style="flex-shrink:0;width:44px;height:44px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer">−</button>
                   <span data-motion="skill-value" data-skill-key="{{ a.key }}" style="width:24px;text-align:center;font-family:'Space Mono';font-weight:700;font-size:15px;color: {{ a.valCol }}">{{ a.disp }}</span>
-                  <button onClick="{{ a.onInc }}" style="width:24px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(198,166,100,.35);color:#e0c179;font-size:14px;cursor:pointer">+</button>
+                  <button onClick="{{ a.onInc }}" aria-label="Adicionar ponto em {{ a.label }}" style="flex-shrink:0;width:44px;height:44px;border-radius:3px;background:#1a1820;border:1px solid rgba(198,166,100,.35);color:#e0c179;font-size:14px;cursor:pointer">+</button>
                 </div>
               </sc-for>
             </div>

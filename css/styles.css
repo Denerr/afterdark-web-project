@@ -31,3 +31,8 @@ input,textarea,select{font-family:'Archivo',sans-serif}
    cada render, sem precisar tocar na propriedade que o React já é dono. */
 body.motion-tab-hidden [data-motion="particle-field"] *,
 body.motion-tab-hidden [data-motion="nature-ring"] * { animation-play-state: paused !important; }
+
+/* Etapa UI 2: foco visível para teclado, com o dourado já usado no tema. */
+button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, [tabindex]:focus-visible {
+  outline: 2px solid #e0c179; outline-offset: 2px;
+}
