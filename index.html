@@ -594,6 +594,10 @@
               <select onChange="{{ onStressClock }}" value="{{ stressDraft.clockId }}" style="width:100%;background:#13121a;color:#e9e3d4;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;margin-bottom:13px">
                 <sc-for list="{{ stressDraftClockOptions }}" as="c" hint-placeholder-count="4"><option value="{{ c.id }}">{{ c.name }}</option></sc-for>
               </select>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:5px">Quem vê esta barra</label>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:13px">
+                <sc-for list="{{ stressVisOptions }}" as="v" hint-placeholder-count="3"><button onClick="{{ v.onClick }}" style="padding:9px 6px;border-radius:4px;font:600 10px 'Archivo';letter-spacing:.04em;text-transform:uppercase;cursor:pointer;background: {{ v.bg }};border:1px solid {{ v.border }};color: {{ v.col }}">{{ v.l }}</button></sc-for>
+              </div>
               <button onClick="{{ createStress }}" disabled="{{ stressCreateDisabled }}" style="width:100%;padding:11px;background: {{ stressCreateBg }};color: {{ stressCreateCol }};border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor: {{ stressCreateCursor }}">Criar barra de estresse</button>
             </div>
           </sc-if>
@@ -607,6 +611,10 @@
                 </div>
                 <div style="display:flex;gap:4px;margin-bottom:9px">
                   <sc-for list="{{ b.segs }}" as="sg" hint-placeholder-count="4"><div style="flex:1;height:9px;border-radius:2px;background: {{ sg.col }}"></div></sc-for>
+                </div>
+                <div style="display:flex;align-items:center;gap:7px;margin-bottom:8px">
+                  <button onClick="{{ b.onCycleVis }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid {{ b.visCol }}55;color: {{ b.visCol }};border-radius:3px;padding:4px 9px;cursor:pointer">{{ b.visLabel }}</button>
+                  <sc-if value="{{ b.semTitular }}"><span style="font-size:10px;color:#c44a5e;font-family:'Cormorant Garamond';font-style:italic">Sem titular: ninguém vê</span></sc-if>
                 </div>
                 <div style="display:flex;align-items:center;gap:8px">
                   <span style="font-size:10px;letter-spacing:.06em;color:#7e7a70;flex:1">◷ {{ b.clockName }}</span>
@@ -1037,6 +1045,31 @@
                 </div>
               </div>
             </div>
+
+            <!-- RELOGIOS DO JOGADOR: imediatamente abaixo do mapa -->
+            <!-- Somente leitura: nenhum controle de avancar/reduzir/revelar/excluir. -->
+            <!-- A secao inteira desaparece quando nao ha relogio permitido, para nao -->
+            <!-- anunciar a existencia de relogios secretos do Mestre. -->
+            <sc-if value="{{ hasPlayerClocks }}">
+              <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:14px;margin-top:14px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
+                  <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e">Relógios</div>
+                  <sc-if value="{{ sessionStale }}"><span style="font-size:10px;letter-spacing:.06em;color:#8d887c;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:3px 9px">Reconectando…</span></sc-if>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px">
+                  <sc-for list="{{ playerClocks }}" as="c" hint-placeholder-count="3">
+                    <div style="background: {{ c.bumpBg }};border:1px solid {{ c.bumpBorder }};border-left:3px solid {{ c.col }};border-radius:6px;padding:12px 10px;text-align:center;transition:background .6s ease, border-color .6s ease">
+                      <div style="position:relative;width:66px;height:66px;margin:0 auto 9px;border-radius:50%;background: {{ c.gradient }};box-shadow:0 0 0 1px rgba(198,166,100,.22), inset 0 0 14px rgba(0,0,0,.6)">
+                        <div style="position:absolute;inset:0;border-radius:50%;background: {{ c.seg }}"></div>
+                        <div style="position:absolute;inset:9px;border-radius:50%;background:#0c0b11;border:1px solid rgba(198,166,100,.18);display:flex;align-items:center;justify-content:center;font-family:'Space Mono';font-weight:700;font-size:12px;color:#e9e3d4">{{ c.label }}</div>
+                      </div>
+                      <div style="font-size:12px;color:#e9e3d4;line-height:1.3;word-break:break-word">{{ c.name }}</div>
+                      <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#7e7a70;margin-top:4px">{{ c.type }} · {{ c.ownerLabel }}</div>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
           </sc-if>
 
           <!-- SCENE -->
@@ -1125,6 +1158,68 @@
                   </div>
                 </sc-for>
               </div>
+            </div>
+          </sc-if>
+          <!-- GRUPO: participantes da mesa e seus status compartilhados. -->
+          <!-- Somente consulta: nenhum controle de aprovar, remover ou alterar. -->
+          <sc-if value="{{ showGrupoBox }}">
+            <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:18px;margin-top:16px">
+              <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e;margin-bottom:14px">⚭ Grupo</div>
+              <sc-if value="{{ hasGroupCards }}">
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <sc-for list="{{ groupCards }}" as="g" hint-placeholder-count="3">
+                    <div style="background:#0f0e13;border:1px solid {{ g.cardBorder }};border-radius:8px;overflow:hidden;transition:border-color .3s ease">
+                      <button onClick="{{ g.onToggle }}" style="display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:transparent;border:none;padding:12px 13px;cursor:pointer">
+                        <span style="width:34px;height:34px;flex-shrink:0;border-radius:50%;background:#1a1820;border:1px solid {{ g.acc }};display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-size:15px;color: {{ g.acc }}">{{ g.initial }}</span>
+                        <span style="flex:1;min-width:0">
+                          <span style="display:block;font-size:13px;color:#e9e3d4">{{ g.char }}<sc-if value="{{ g.isSelf }}"><span style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#0b0b10;background:#c6a35e;border-radius:10px;padding:2px 7px;margin-left:8px">{{ g.youLabel }}</span></sc-if></span>
+                          <span style="display:block;font-size:11px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic">{{ g.player }}</span>
+                        </span>
+                        <span style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color: {{ g.healthCol }};flex-shrink:0">{{ g.healthLabel }}</span>
+                      </button>
+                      <sc-if value="{{ g.open }}">
+                        <div style="border-top:1px solid rgba(255,255,255,.06);padding:12px 13px;display:flex;flex-direction:column;gap:10px">
+                          <sc-if value="{{ g.hasNat }}">
+                            <div><span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7e7a70">Natureza</span>
+                            <span style="font-size:12px;color: {{ g.acc }};margin-left:8px">{{ g.nat }}</span></div>
+                          </sc-if>
+                          <sc-if value="{{ g.hasWounds }}">
+                            <div style="display:flex;flex-wrap:wrap;gap:6px">
+                              <sc-for list="{{ g.wounds }}" as="w" hint-placeholder-count="2"><span style="font-size:11px;color: {{ w.col }};border:1px solid {{ w.col }}55;border-radius:20px;padding:4px 10px">✕ {{ w.label }}</span></sc-for>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ g.hasConds }}">
+                            <div style="display:flex;flex-wrap:wrap;gap:6px">
+                              <sc-for list="{{ g.conds }}" as="c" hint-placeholder-count="2"><span style="font-size:11px;color: {{ c.col }};border:1px solid {{ c.col }}55;border-radius:20px;padding:4px 10px">⚑ {{ c.label }}</span></sc-for>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ g.hasBars }}">
+                            <div style="display:flex;flex-wrap:wrap;gap:14px">
+                              <sc-for list="{{ g.bars }}" as="b" hint-placeholder-count="1">
+                                <div style="min-width:120px">
+                                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+                                    <span style="font-size:10px;letter-spacing:.04em;color:#9b9588">⚠ {{ b.name }}</span>
+                                    <span style="font-family:'Space Mono';font-size:10px;color: {{ b.col }}">{{ b.label }}</span>
+                                  </div>
+                                  <div style="display:flex;gap:3px">
+                                    <sc-for list="{{ b.segs }}" as="sg" hint-placeholder-count="4"><div style="width:16px;height:7px;border-radius:2px;background: {{ sg.col }}"></div></sc-for>
+                                  </div>
+                                </div>
+                              </sc-for>
+                            </div>
+                          </sc-if>
+                          <sc-if value="{{ g.clean }}">
+                            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#7fae8f">Sem ferimentos ou condições compartilhadas.</div>
+                          </sc-if>
+                        </div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <sc-if value="{{ noGroupCards }}">
+                <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:16px 0">Nenhum personagem na mesa ainda.</div>
+              </sc-if>
             </div>
           </sc-if>
         </div>
@@ -1545,9 +1640,10 @@ class Component extends DCLogic {
     tables:[],
     players:[],
     clocks:[],
+    sessionStale:false, clockBump:{}, groupOpenId:null,
     clockDraft:{name:'',seg:8,type:'Investigação',scope:'mesa',playerId:'',visMode:'todos'}, showClockForm:false,
     stressBars:[],
-    stressDraft:{playerId:'',name:'',max:4,clockId:''}, showStressForm:false,
+    stressDraft:{playerId:'',name:'',max:4,clockId:'',vis:'titular'}, showStressForm:false,
     library:{weapons:[],items:[]},
     libDraft:{kind:'weapons',name:'',bonus:1,dano:2,alcance:'Corpo a corpo',ruido:'Médio',desc:''},
     inventory:{ items:['i2'], weapons:['w1'] },
@@ -1784,19 +1880,30 @@ class Component extends DCLogic {
   async _loadTableSession(tableId,isOwner){
     const base=this._blankTableSession();
     if(!tableId||!this.sb){ this.setState(base); return; }
-    let remote=null;
+    const {memberId,memberToken}=this.state;
+    if(!isOwner&&!memberId) return;
+    let remote=null, failed=false;
     try{
-      if(isOwner){ const {data}=await this.sb.from('tables').select('session_state').eq('id',tableId).single(); remote=data&&data.session_state; }
-      else {
+      if(isOwner){
+        const {data,error}=await this.sb.from('tables').select('session_state').eq('id',tableId).single();
+        if(error) failed=true; else remote=data&&data.session_state;
+      } else {
         // Jogador recebe o estado JÁ FILTRADO pelo banco (relógios ocultos, NPCs
         // não revelados, pistas ocultas e log do mestre não chegam ao navegador).
-        const {memberId,memberToken}=this.state;
-        if(!memberId) return;
-        const {data}=await this.sb.rpc('player_get_session',{p_member_id:memberId,p_token:memberToken||null});
-        remote=data;
+        const {data,error}=await this.sb.rpc('player_get_session',{p_member_id:memberId,p_token:memberToken||null});
+        if(error) failed=true; else remote=data;
       }
-    }catch(e){}
-    this.setState((remote&&Object.keys(remote).length)?{...base,...remote}:base);
+    }catch(e){ failed=true; }
+    // Resposta atrasada de outra mesa/vínculo (troca rápida de contexto): descarta.
+    const sameCtx=isOwner?(((this._activeTableRow()||{}).id)===tableId):(this.state.memberId===memberId);
+    if(!sameCtx) return;
+    // Falha de leitura NÃO apaga o que já estava na tela: preserva o último estado
+    // válido e sinaliza que a atualização está indisponível. Estado vazio só entra
+    // quando o banco confirma que a mesa realmente não tem estado.
+    if(failed){ if(!this.state.sessionStale) this.setState({sessionStale:true}); return; }
+    const next=(remote&&Object.keys(remote).length)?{...base,...remote}:base;
+    if(!isOwner) next.clockBump=this._clockBumps(this.state.clocks,next.clocks);
+    this.setState({...next,sessionStale:false});
   }
   _saveTableSession(tableId){
     if(!tableId||!this.sb) return;
@@ -2294,7 +2401,20 @@ class Component extends DCLogic {
   advanceClock(id,d,silent){
     this.setState(s=>{
       let done=false,name='';
-      const clocks=s.clocks.map(c=>{ if(c.id!==id) return c; const fill=Math.max(0,Math.min(c.seg,c.fill+d)); if(fill>=c.seg&&c.fill<c.seg){done=true;name=c.name;} return {...c,fill}; });
+      const clocks=s.clocks.map(c0=>{
+        if(c0.id!==id) return c0;
+        const c=this._normClock(c0);
+        const fill=Math.max(0,Math.min(c.seg,c.fill+d));
+        if(fill>=c.seg&&c.fill<c.seg){done=true;name=c.name;}
+        // Revelação por gatilho: dispara UMA vez e fica. Reduzir o relógio depois
+        // não volta a esconder — só o Mestre oculta, explicitamente.
+        let vis=c.vis, revealDone=c.revealDone;
+        if(!revealDone && vis==='mestre'){
+          const fire=(c.visMode==='avancar') ? (d>0&&fill>0) : (c.visMode==='completar') ? (fill>=c.seg) : false;
+          if(fire){ vis=this._clockAudience(c); revealDone=true; }
+        }
+        return {...c,fill,vis,revealDone};
+      });
       const log = d>0 && !silent ? [{icon:'◷',t:'Relógio',txt:`Um relógio avançou.`,vis:'todos'},...s.log] : s.log;
       return {clocks,log};
     });
@@ -2311,7 +2431,10 @@ class Component extends DCLogic {
   // ---- barras de estresse ----
   toggleStressForm(){ this.setState(s=>({showStressForm:!s.showStressForm})); }
   setStressDraft(k,v){ this.setState(s=>({stressDraft:{...s.stressDraft,[k]:v}})); }
-  createStress(){ const d=this.state.stressDraft; const name=(d.name||'').trim(); if(!name) return; const bar={id:'st'+Date.now(),playerId:d.playerId,name,level:0,max:Number(d.max)||4,clockId:d.clockId||''}; this.setState(s=>({stressBars:[...s.stressBars,bar],showStressForm:false,stressDraft:{...s.stressDraft,name:''},log:[{icon:'⚠',t:'Estresse',txt:`Nova barra de estresse criada: "${name}".`,vis:'mestre'},...s.log]})); }
+  setStressVis(id,vis){ this.setState(s=>({stressBars:s.stressBars.map(b=>b.id===id?{...this._normStress(b),vis}:b)})); }
+  cycleStressVis(id){ const order=['todos','titular','mestre']; this.setState(s=>({stressBars:s.stressBars.map(b=>{
+    if(b.id!==id) return b; const n=this._normStress(b); return {...n,vis:order[(order.indexOf(n.vis)+1)%order.length]}; })})); }
+  createStress(){ const d=this.state.stressDraft; const name=(d.name||'').trim(); if(!name) return; const bar=this._normStress({id:'st'+Date.now(),playerId:d.playerId,name,level:0,max:Number(d.max)||4,clockId:d.clockId||'',vis:d.vis||'titular'}); this.setState(s=>({stressBars:[...s.stressBars,bar],showStressForm:false,stressDraft:{...s.stressDraft,name:''},log:[{icon:'⚠',t:'Estresse',txt:`Nova barra de estresse criada: "${name}".`,vis:'mestre'},...s.log]})); }
   bumpStress(id,delta){ this.setState(s=>({stressBars:s.stressBars.map(b=>b.id===id?{...b,level:Math.max(0,Math.min(b.max,b.level+delta))}:b)})); }
   deleteStress(id){ this.setState(s=>({stressBars:s.stressBars.filter(b=>b.id!==id)})); }
   revealNextClue(clockName){
@@ -2326,7 +2449,43 @@ class Component extends DCLogic {
     const m={'Ameaça':'A ameaça se concretiza. Reforços da Sociedade Rubra cercam o salão — as saídas se fecham uma a uma.','Tensão':'As sirenes ecoam por Alta Vesper. A polícia chegou, e ninguém aqui quer ser interrogado.','Investigação':'As peças se encaixam: o sangue falso foi comprado por dentro. O comprador estava na sala o tempo todo.','Perda de Controle':'O instinto rompe a coleira. Por um instante terrível, o controle não pertence mais a você.'};
     return m[c.type]||'A consequência se desenrola, e Saint Vesper fica mais perigosa.';
   }
-  revealClock(id){ this.setState(s=>({clocks:s.clocks.map(c=>c.id===id?{...c,vis:c.vis==='todos'?'mestre':'todos'}:c)})); }
+  // Quem é o público de um relógio quando ele está revelado: a mesa inteira, ou só
+  // o titular, no caso de um relógio de personagem. Separar "a quem pertence" de
+  // "quem pode ver" evita que revelar um relógio individual o torne público.
+  // Destaque discreto, uma vez por alteração confirmada de progresso. Não reanima a
+  // cada ciclo de polling: só entra quando o valor mudou em relação ao que está na tela.
+  _clockBumps(prev,next){
+    if(this._prefersReducedMotion()) return {};
+    const was={}; (prev||[]).forEach(c=>{ was[c.id]=c.fill; });
+    const bump={...(this.state.clockBump||{})}; const now=Date.now(); let any=false;
+    (next||[]).forEach(c=>{ if(was[c.id]!==undefined && was[c.id]!==c.fill){ bump[c.id]=now; any=true; } });
+    if(any){ clearTimeout(this._clkBumpT); this._clkBumpT=setTimeout(()=>this.setState({clockBump:{}}),1400); }
+    return bump;
+  }
+  _clockAudience(c){ return (c.scope==='player'||c.visMode==='jogador') ? 'jogador' : 'todos'; }
+  // Relógio antigo (criado antes deste modelo) ou com valores inválidos: completa os
+  // campos sem perder id, progresso, titular nem estado de revelação.
+  _normClock(c){
+    const seg=Math.max(1,Number(c.seg)||8);
+    const fill=Math.max(0,Math.min(seg,Number(c.fill)||0));
+    const visMode=c.visMode||(c.scope==='player'?'jogador':(c.vis==='mestre'?'mestre':'todos'));
+    const scope=c.scope||(visMode==='jogador'?'player':'mesa');
+    const vis=c.vis||((visMode==='mestre'||visMode==='avancar'||visMode==='completar')?'mestre':(visMode==='jogador'?'jogador':'todos'));
+    return {...c,seg,fill,visMode,scope,vis,
+      playerId:scope==='player'?(c.playerId||''):null,
+      revealDone:c.revealDone!==undefined?!!c.revealDone:(vis!=='mestre')};
+  }
+  // Revelar/ocultar pelo Mestre. Revelar devolve o relógio ao seu público (mesa ou
+  // titular), não "a todos" sempre. revealDone marca que a decisão passou a ser
+  // manual, então um gatilho de avanço não desfaz uma ocultação explícita.
+  revealClock(id){
+    this.setState(s=>({clocks:s.clocks.map(c=>{
+      if(c.id!==id) return c;
+      const n=this._normClock(c);
+      const hidden=n.vis==='mestre';
+      return {...n, vis:hidden?this._clockAudience(n):'mestre', revealDone:true};
+    })}));
+  }
   openScene(p){ this.setState({sceneMode:p}); }
   revealNpc(id){ this.setState(s=>({npcs:s.npcs.map(n=>n.id===id?{...n,reveal:Math.min(4,n.reveal+1)}:n)})); }
   closeScene(){ this.setState({sceneMode:null}); }
@@ -2345,7 +2504,10 @@ class Component extends DCLogic {
     const vm=d.visMode||'todos';
     const scope=(vm==='jogador')?'player':'mesa';
     const vis=(vm==='mestre'||vm==='completar'||vm==='avancar')?'mestre':(vm==='jogador'?'jogador':'todos');
-    const clk={id:'c'+Date.now(),name,type:d.type,seg:Number(d.seg)||8,fill:0,vis,scope,visMode:vm,playerId:scope==='player'?d.playerId:null};
+    // revealDone=false só nos modos de gatilho: eles ainda vão revelar sozinhos.
+    const porGatilho=(vm==='avancar'||vm==='completar');
+    const clk={id:'c'+Date.now(),name,type:d.type,seg:Math.max(1,Number(d.seg)||8),fill:0,vis,scope,visMode:vm,
+      playerId:scope==='player'?(d.playerId||''):null,revealDone:!porGatilho};
     this.setState(s=>({clocks:[...s.clocks,clk],showClockForm:false,clockDraft:{...s.clockDraft,name:''},log:[{icon:'◷',t:'Relógio',txt:`Novo relógio criado: "${name}".`,vis:'mestre'},...s.log]}));
   }
   deleteClock(id){ this.setState(s=>({clocks:s.clocks.filter(c=>c.id!==id)})); }
@@ -2763,6 +2925,10 @@ class Component extends DCLogic {
   setPlayerTab(t){ this.setState({playerTab:t,playerMenuOpen:false}); }
   setCenterTab(t){ this.setState({centerTab:t,playerFocus:null,playerMenuOpen:false}); }
   setPlayerFocus(f){ this.setState({playerFocus:f,playerMenuOpen:false}); }
+  // Resumo público de um colega. Guardado por ID do membro, não pelo objeto: o
+  // polling troca a lista de membros a cada ciclo e o resumo aberto continua aberto.
+  toggleGroupCard(id){ this.setState(s=>({groupOpenId:s.groupOpenId===id?null:id})); }
+  closeGroupCard(){ this.setState({groupOpenId:null}); }
   clearFocus(){ this.setState({playerFocus:null}); }
   createCharProfile(){ this.setState({wizReturn:'profile',wizStep:1,wiz:{name:this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
   startCharWizard(){ this.setState({wizReturn:'player',wizStep:1,wiz:{name:this.state.joinName||this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
@@ -2843,7 +3009,27 @@ class Component extends DCLogic {
   }
 
   stressColor(level,max){ const r=max?level/max:0; if(level<=0) return '#5a564e'; if(r<=.34) return '#c6a35e'; if(r<=.67) return '#d6452f'; return '#c41e3a'; }
-  stressView(b){ const col=this.stressColor(b.level,b.max); const clk=this.state.clocks.find(c=>c.id===b.clockId); const segs=Array.from({length:b.max},(_,i)=>({on:i<b.level,col:i<b.level?col:'rgba(255,255,255,.07)'})); return {...b,col,segs,label:`${b.level}/${b.max}`,clockName:clk?clk.name:'sem relógio',hasClock:!!clk}; }
+  // Visibilidade de uma barra: 'todos' (mesa), 'titular' (so o dono e o Mestre) ou
+  // 'mestre'. Barra antiga sem o campo assume 'titular' — padrao conservador: nunca
+  // revela para a mesa algo que o Mestre nao marcou como publico.
+  STRESS_VIS = {todos:'Visível a todos',titular:'Visível só ao titular',mestre:'Oculto p/ jogadores'};
+  _normStress(b){
+    const max=Math.max(1,Math.min(24,Number(b.max)||4));
+    const level=Math.max(0,Math.min(max,Number(b.level)||0));
+    const vis=(b.vis==='todos'||b.vis==='mestre')?b.vis:'titular';
+    return {...b,max,level,vis,playerId:b.playerId||'',clockId:b.clockId||''};
+  }
+  stressView(b0){
+    const b=this._normStress(b0);
+    const col=this.stressColor(b.level,b.max);
+    // clockName sai da lista de relogios que ESTE cliente recebeu: se o relogio
+    // vinculado estiver oculto, ele nao esta aqui e o vinculo nao e exibido.
+    const clk=this.state.clocks.find(c=>c.id===b.clockId);
+    const segs=Array.from({length:b.max},(_,i)=>({on:i<b.level,col:i<b.level?col:'rgba(255,255,255,.07)'}));
+    return {...b,col,segs,label:`${b.level}/${b.max}`,
+      clockName:clk?clk.name:'sem relógio',hasClock:!!clk,
+      visLabel:this.STRESS_VIS[b.vis]||b.vis};
+  }
 
   renderVals(){
     const s=this.state;
@@ -2908,11 +3094,17 @@ class Component extends DCLogic {
     // (no banco, em player_get_session, e aqui na tela).
     const selfId=s.memberId||'';
     const playerName=(id)=>{ const p=s.players.find(x=>x.id===id); return p?p.char:'Jogador'; };
-    const clocksAll=s.clocks.map(c=>{ const v=this.clockView(c); const isPlayer=c.scope==='player'; return {...v,
+    const clocksAll=s.clocks.map(c0=>{ const c=this._normClock(c0); const v=this.clockView(c);
+      const isPlayer=c.scope==='player'; const hidden=c.vis==='mestre';
+      const semTitular=isPlayer&&!c.playerId;
+      return {...v,
       onAdv:()=>this.advanceClock(c.id,1), onDec:()=>this.advanceClock(c.id,-1), onReveal:()=>this.revealClock(c.id), onDelete:()=>this.deleteClock(c.id),
-      visLabel:c.vis==='todos'?'Visível a todos':'Oculto p/ jogadores', revealLabel:c.vis==='todos'?'Ocultar':'Revelar',
+      // Rótulos distinguem os três estados reais: público, individual e oculto.
+      visLabel:hidden?'Oculto p/ jogadores':(isPlayer?'Visível só ao titular':'Visível a todos'),
+      revealLabel:hidden?'Revelar':'Ocultar',
       isPlayer, ownerName:isPlayer?playerName(c.playerId):'', ownerCol:isPlayer?(this.SENS_ACCENT[(s.players.find(p=>p.id===c.playerId)||{}).sens]||'#b9a06a'):'#c6a35e',
-      scopeLabel:isPlayer?('Jogador · '+playerName(c.playerId)):(c.vis==='todos'?'Mesa · visível':'Mesa · oculto')
+      scopeLabel:(isPlayer?('Jogador · '+(semTitular?'sem titular':playerName(c.playerId))):'Mesa')+' · '+(hidden?'oculto':(isPlayer?'visível ao titular':'visível')),
+      warnLabel:semTitular&&!hidden?'Escolha o jogador: sem titular, ninguém vê este relógio.':''
     }; });
     const clocksMesa=clocksAll.filter(c=>c.scope!=='player');
     const clocksPlayer=clocksAll.filter(c=>c.scope==='player');
@@ -3122,7 +3314,7 @@ class Component extends DCLogic {
     const stressNameOk=!!(sd2.name||'').trim();
     const stressDraftClockOptions=[{id:'',name:'Sem relógio (manual)'},...s.clocks.map(c=>({id:c.id,name:c.name}))];
     const maxOptions=[3,4,6].map(v=>({v,sel:sd2.max===v,onClick:()=>this.setStressDraft('max',v),bg:sd2.max===v?'#c6a35e':'#13121a',border:sd2.max===v?'#c6a35e':'rgba(255,255,255,.12)',col:sd2.max===v?'#0b0b10':'#cfc7b4'}));
-    const stressList=s.stressBars.map(b=>{ const v=this.stressView(b); const p=s.players.find(x=>x.id===b.playerId); return {...v, playerName:p?p.char:'—', playerAcc:this.SENS_ACCENT[(p||{}).sens]||'#b9a06a', onInc:()=>this.bumpStress(b.id,1), onDec:()=>this.bumpStress(b.id,-1), onDelete:()=>this.deleteStress(b.id)}; });
+    const stressList=s.stressBars.map(b=>{ const v=this.stressView(b); const p=s.players.find(x=>x.id===b.playerId); return {...v, playerName:p?p.char:'—', playerAcc:this.SENS_ACCENT[(p||{}).sens]||'#b9a06a', onInc:()=>this.bumpStress(b.id,1), onDec:()=>this.bumpStress(b.id,-1), onDelete:()=>this.deleteStress(b.id), onCycleVis:()=>this.cycleStressVis(b.id), visCol:v.vis==='todos'?'#7fae8f':(v.vis==='mestre'?'#8d887c':'#c6a35e'), semTitular:!b.playerId&&v.vis==='titular'}; });
 
     // ---- biblioteca ----
     const ld=s.libDraft;
@@ -3145,8 +3337,8 @@ class Component extends DCLogic {
     const libNameOk=!!(ld.name||'').trim();
 
     // ---- player panel (dashboard) ----
-    const tabLabels={mapa:'Mapa',cena:'Cena',ficha:'Ficha',testes:'Testes',npcs:'NPCs',diario:'Diário',inventario:'Inventário'};
-    const tabIcons={mapa:'◉',cena:'❖',ficha:'⚇',testes:'⚄',inventario:'🗀',npcs:'☻',diario:'✒'};
+    const tabLabels={mapa:'Mapa',cena:'Cena',ficha:'Ficha',testes:'Testes',npcs:'NPCs',diario:'Diário',inventario:'Inventário',grupo:'Grupo'};
+    const tabIcons={mapa:'◉',cena:'❖',ficha:'⚇',testes:'⚄',inventario:'🗀',npcs:'☻',diario:'✒',grupo:'⚭'};
     const pNarrow=s.playerNarrow, focus=s.playerFocus;
     // ---- master session (mestre) responsive layout ----
     const mSessTab=s.masterPanel;
@@ -3158,15 +3350,53 @@ class Component extends DCLogic {
     const dashCols=pNarrow?'minmax(0,1fr)':'320px minmax(0,1fr) 340px';
     const showFichaCol=!pNarrow||focus==='ficha';
     const showCenterCol=!pNarrow||focus===null;
-    const showRightCol=!pNarrow||focus==='testes'||focus==='diario';
+    const showRightCol=!pNarrow||focus==='testes'||focus==='diario'||focus==='grupo';
     const showTestesBox=!pNarrow||focus==='testes';
     const showDiarioBox=!pNarrow||focus==='diario';
+    const showGrupoBox=!pNarrow||focus==='grupo';
     const centerIsMapa=s.centerTab==='mapa';
     const overlayNpcs=focus==='npcs', overlayInv=focus==='inventario', overlayOpen=overlayNpcs||overlayInv;
     const mobileFocusBar=pNarrow&&(focus==='ficha'||focus==='testes'||focus==='diario');
-    const menuKeys=pNarrow?['mapa','cena','ficha','testes','diario','npcs','inventario']:['mapa','cena','npcs','inventario'];
+    const menuKeys=pNarrow?['mapa','cena','ficha','grupo','testes','diario','npcs','inventario']:['mapa','cena','grupo','npcs','inventario'];
     const activeMenu=(k)=>{ if(k==='mapa') return s.centerTab==='mapa'&&!focus; if(k==='cena') return s.centerTab==='cena'&&!focus; return focus===k; };
     const playerMenu=menuKeys.map(k=>({k,l:tabLabels[k],icon:tabIcons[k],onClick:(k==='mapa'||k==='cena')?(()=>this.setCenterTab(k)):(()=>this.setPlayerFocus(k)),bg:activeMenu(k)?'rgba(198,163,94,.1)':'transparent',col:activeMenu(k)?'#efe8d8':'#cfc7b4',iconCol:activeMenu(k)?'#e0c179':'#8d887c',badge:(k==='testes'&&s.testNotif),badgeText:'novo'}));
+    // Relógios do jogador: o banco (player_get_session) já filtra; este filtro é a
+    // segunda barreira, para o cliente nunca pintar algo que não deveria ter recebido.
+    const reduz=this._prefersReducedMotion();
+    const playerClocks=(s.clocks||[]).map(c=>this._normClock(c))
+      .filter(c=> c.vis==='todos' || (c.vis==='jogador' && !!selfId && c.playerId===selfId))
+      .map(c=>{ const v=this.clockView(c);
+        const recent=!reduz && !!(s.clockBump||{})[c.id] && (Date.now()-s.clockBump[c.id] < 1400);
+        return {...v, mine:c.vis==='jogador', ownerLabel:c.vis==='jogador'?'Seu personagem':'Mesa',
+          bumpBg: recent?'rgba(198,163,94,.10)':'#0f0e13',
+          bumpBorder: recent?(v.col||'#c6a35e'):'rgba(255,255,255,.07)' }; });
+    // GRUPO: visão compartilhada dos participantes. Vem de s.players, que é a
+    // projeção autorizada de player_get_lobby — sem ficha completa de terceiros.
+    // Avatar é sempre a inicial: NÃO procuramos foto por coincidência de nome, que
+    // casaria o personagem da mesa com um personagem salvo de outra pessoa.
+    const wLvlLabel={leve:'Ferimento leve',moderado:'Ferimento moderado',grave:'Ferimento grave',critico:'Ferimento crítico'};
+    const wLvlCol={leve:'#d2a23a',moderado:'#d6452f',grave:'#c41e3a',critico:'#8a1f1f'};
+    const groupCards=(s.players||[]).filter(p=>!!p.char&&p.char!=='—').map(p=>{
+      const acc=this.SENS_ACCENT[p.sens]||'#b9a06a';
+      const nat=(this.SENS[p.sens]||{}).label||'';
+      // Gravidade autorizada, nunca a descrição escrita pelo Mestre. Ferimento
+      // personalizado aparece como categoria genérica.
+      const wounds=(p.wounds||[]).map(w=>({label:wLvlLabel[w.lvl]||'Ferimento',col:wLvlCol[w.lvl]||'#c0473f'}));
+      const conds=(p.conditions||[]).map(c=>({label:c,col:this.condColorFor(c)}));
+      // Barras públicas: as que este cliente recebeu marcadas como 'todos'.
+      const bars=(s.stressBars||[]).map(b=>this._normStress(b))
+        .filter(b=>b.playerId===p.id&&b.vis==='todos').map(b=>this.stressView(b));
+      const isSelf=!!selfId&&p.id===selfId;
+      const hurt=wounds.length>0, shaken=conds.length>0;
+      return {id:p.id, char:p.char, player:p.player||'Jogador', isSelf, youLabel:isSelf?'Você':'',
+        initial:p.char[0], acc, nat, hasNat:!!nat,
+        healthLabel:hurt?'Ferido':(shaken?'Abalado':'Saudável'),
+        healthCol:hurt?'#c41e3a':(shaken?'#d2a23a':'#7fae8f'),
+        wounds, conds, hasWounds:hurt, hasConds:shaken, bars, hasBars:bars.length>0,
+        clean:!hurt&&!shaken, open:s.groupOpenId===p.id,
+        onToggle:()=>this.toggleGroupCard(p.id),
+        cardBorder:(s.groupOpenId===p.id)?acc:'rgba(255,255,255,.07)'};
+    });
     const playerMapPins=[
       {top:'42%',left:'36%',label:'◉ Você está aqui',color:'#c41e3a',glow:'rgba(196,30,58,.6)',size:'15px',labelCol:'#e07a8a'},
       {top:'60%',left:'60%',label:'Docas',color:'#7ea6d4',glow:'rgba(126,166,212,.45)',size:'11px',labelCol:'#a9c4e0'},
@@ -3329,6 +3559,11 @@ class Component extends DCLogic {
       stressFormBtnLabel:s.showStressForm?'✕ Fechar':'＋ Nova barra', stressFormBtnCol:s.showStressForm?'#c44a5e':'#e0c179',
       stressDraft:s.stressDraft, onStressName:(e)=>this.setStressDraft('name',e.target.value), onStressPlayer:(e)=>this.setStressDraft('playerId',e.target.value), onStressClock:(e)=>this.setStressDraft('clockId',e.target.value),
       stressDraftClockOptions, maxOptions, stressList,
+      stressVisOptions:[['todos','Todos'],['titular','Titular'],['mestre','Só Mestre']].map(([v,l])=>{
+        const sel=(s.stressDraft.vis||'titular')===v;
+        return {v,l,onClick:()=>this.setStressDraft('vis',v),
+          bg:sel?'rgba(198,163,94,.16)':'#13121a',border:sel?'#c6a35e':'rgba(255,255,255,.12)',col:sel?'#e0c179':'#a39e90'};
+      }),
       createStress:()=>this.createStress(), stressCreateDisabled:!stressNameOk, stressCreateBg:stressNameOk?'#c6a35e':'#26242c', stressCreateCol:stressNameOk?'#0b0b10':'#6f6b61', stressCreateCursor:stressNameOk?'pointer':'not-allowed',
       selfStress, selfHasStress:selfStress.length>0,
       // biblioteca
@@ -3349,6 +3584,8 @@ class Component extends DCLogic {
       playerMenuOpen:s.playerMenuOpen, togglePlayerMenu:()=>this.togglePlayerMenu(), closePlayerMenu:()=>this.closePlayerMenu(),
       playerMenu, fabIcon:s.playerMenuOpen?'✕':'☰', pendingDot, activeTabLabel:tabLabels[s.playerTab]||'Mesa',
       playerMapPins, pendingFormula,
+      playerClocks, hasPlayerClocks:playerClocks.length>0, sessionStale:s.sessionStale,
+      groupCards, hasGroupCards:groupCards.length>0, noGroupCards:groupCards.length===0, showGrupoBox, closeGroupCard:()=>this.closeGroupCard(),
       // dashboard
       dashCols, showFichaCol, showCenterCol, showRightCol, showTestesBox, showDiarioBox,
       centerIsMapa, centerIsCena:!centerIsMapa,

@@ -10,7 +10,7 @@
 --   docker exec adpg psql -U postgres -q -f /tmp/t2.sql | grep -E "PASSOU|FALHOU|TODOS"
 --   docker rm -f adpg
 -- Rodar numa base limpa (sem o ponto1_tests.sql antes, que cria o schema t).
--- Esperado: 71 linhas PASSOU e 'TODOS OS TESTES DO PONTO 2 PASSARAM'.
+-- Esperado: 73 linhas PASSOU e 'TODOS OS TESTES DO PONTO 2 PASSARAM'.
 \set ON_ERROR_STOP 1
 
 create schema t;
@@ -151,9 +151,9 @@ update public.tables set session_state = jsonb_build_object(
      jsonb_build_object('id','k1','name','PISTA-ENCONTRADA','status','encontrada'),
      jsonb_build_object('id','k2','name','PISTA-OCULTA','status','oculta')),
   'stressBars', jsonb_build_array(
-     jsonb_build_object('id','s1','name','ESTRESSE-DA-ANA','playerId',t.v('ma'),'level',1,'max',4),
-     jsonb_build_object('id','s2','name','ESTRESSE-DA-BIA','playerId',t.v('mb'),'level',2,'max',4),
-     jsonb_build_object('id','s3','name','ESTRESSE-DA-MESA','playerId','','level',0,'max',4)),
+     jsonb_build_object('id','s1','name','ESTRESSE-DA-ANA','playerId',t.v('ma'),'level',1,'max',4,'vis','titular'),
+     jsonb_build_object('id','s2','name','ESTRESSE-DA-BIA','playerId',t.v('mb'),'level',2,'max',4,'vis','titular'),
+     jsonb_build_object('id','s3','name','ESTRESSE-DA-MESA','playerId','','level',0,'max',4,'vis','todos')),
   'log', jsonb_build_array(
      jsonb_build_object('icon','◷','t','Relógio','txt','LOG-PUBLICO','vis','todos'),
      jsonb_build_object('icon','💾','t','Mesa','txt','LOG-DO-MESTRE','vis','mestre'),
@@ -191,7 +191,7 @@ select t.ok(t.v('sa') not like '%PISTA-OCULTA%', 'pista oculta NÃO chega ao jog
 -- estresse
 select t.ok(t.v('sa') like '%ESTRESSE-DA-ANA%', 'Ana recebe a própria barra de estresse');
 select t.ok(t.v('sa') not like '%ESTRESSE-DA-BIA%', 'Ana NÃO recebe a barra de estresse da Bia');
-select t.ok(t.v('sa') like '%ESTRESSE-DA-MESA%', 'barra de estresse sem dono é da mesa');
+select t.ok(t.v('sa') like '%ESTRESSE-DA-MESA%', 'barra marcada como da mesa chega a todos');
 
 -- log
 select t.ok(t.v('sa') like '%LOG-PUBLICO%', 'log da mesa chega ao jogador');
@@ -219,7 +219,13 @@ select t.ok(public.player_get_session(t.v('mc')::uuid, t.v('tokc'))::text not li
 -- ---------------------------------------------------------------------------
 select set_config('t.la', public.player_get_lobby(t.v('ma')::uuid, t.v('toka'))::text, false);
 select t.ok(t.v('la') like '%Rook%', 'Ana vê o personagem da Bia no lobby');
-select t.ok(t.v('la') like '%Corte no braço%', 'Ana vê os ferimentos da Bia (decisão desta etapa)');
+-- Colegas veem que ha ferimento e QUAO grave (categoria autorizada), mas nao a
+-- descricao escrita pelo Mestre, que pode ser narrativa reservada. A propria ficha
+-- continua inteira para o titular, por player_get_state.
+select t.ok(t.v('la') like '%leve%', 'Ana vê a gravidade do ferimento da Bia');
+select t.ok(t.v('la') not like '%Corte no braço%', 'Ana NÃO vê a descrição do ferimento escrita pelo Mestre');
+select t.ok(public.player_get_state(t.v('mb')::uuid, t.v('tokb'))::text like '%Corte no braço%',
+  'a própria Bia continua vendo a descrição do seu ferimento');
 select t.ok(t.v('la') like '%Abalada%', 'Ana vê as condições da Bia');
 select t.ok(t.v('la') like '%farejador%', 'Ana vê a natureza da Bia');
 select t.ok(t.v('la') not like '%SEGREDO-DA-BIA%', 'Ana NÃO vê o histórico da Bia');

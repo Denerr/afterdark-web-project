@@ -16,7 +16,8 @@ As migrações são **incrementais e dependentes de ordem**. Algumas corrigem po
  7. migration_archive_table.sql
  8. migration_profiles.sql
  9. migration_requests_consequences.sql     <- Ponto 1
-10. migration_rls_p2.sql                    <- Ponto 2 (precisa ser o último)
+10. migration_rls_p2.sql                    <- Ponto 2
+11. migration_player_projection.sql         <- relógios/estresse/grupo (último)
 ```
 
 Todas são idempotentes: rodar de novo não duplica objeto.
@@ -35,7 +36,8 @@ cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql \
     migration_table_members.sql migration_session_state.sql \
     migration_rls_hardening.sql migration_leave_table.sql \
     migration_archive_table.sql migration_profiles.sql \
-    migration_requests_consequences.sql migration_rls_p2.sql > /tmp/all.sql
+    migration_requests_consequences.sql migration_rls_p2.sql \
+    migration_player_projection.sql > /tmp/all.sql
 
 docker cp /tmp/all.sql adpg:/tmp/all.sql
 docker exec adpg psql -U postgres -q -f /tmp/all.sql
@@ -45,7 +47,15 @@ docker exec adpg psql -U postgres -q -f /tmp/all.sql
 
 ## Atualizar um banco que já existe
 
-Rodar apenas o que ainda não passou. Para um banco que já tinha até o Ponto 1, basta `migration_rls_p2.sql`.
+Rodar apenas o que ainda não passou. Para um banco que já tinha até o Ponto 1, rodar `migration_rls_p2.sql` e depois
+`migration_player_projection.sql`. Para um banco que já está no Ponto 2, basta
+`migration_player_projection.sql`.
+
+`migration_player_projection.sql` só substitui duas funções (`player_get_session` e
+`player_get_lobby`): não altera tabela, policy nem grant. O cliente publicado funciona
+**antes e depois** dela — sem a migração, a filtragem de estresse e a limpeza do ferimento
+acontecem só no navegador; com ela, acontecem no banco. Então, diferente do Ponto 2, aqui
+a ordem entre deploy e migração é livre.
 
 Depois de aplicar o Ponto 2, confirmar que não sobrou policy permissiva:
 
@@ -72,7 +82,7 @@ Esperado: nenhuma linha.
 ## Testes
 
 ```bash
-for suite in ponto1_tests ponto2_tests; do
+for suite in ponto1_tests ponto2_tests ponto2b_tests; do
   docker rm -f adpg >/dev/null 2>&1
   docker run -d --name adpg -e POSTGRES_PASSWORD=pg postgres:15 >/dev/null
   until docker exec adpg pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
@@ -86,8 +96,9 @@ done
 docker rm -f adpg
 ```
 
-Esperado: **52 PASSOU** no Ponto 1 e **71 PASSOU** no Ponto 2.
+Esperado: **52** no Ponto 1, **73** no Ponto 2 e **24** no 2B (relógios/estresse).
 
-Cada arquivo cria o schema `t`, então **cada suíte precisa de uma base recém-criada** — rodar as duas na mesma base falha na segunda. Recriar o container entre elas.
+Cada arquivo cria o schema `t`, então **cada suíte precisa de uma base recém-criada** — rodar duas na mesma base falha na segunda. Recriar o container entre elas.
 
-Os testes do Ponto 1 são a regressão da etapa anterior e precisam continuar passando depois do Ponto 2.
+Os testes das etapas anteriores são a regressão e precisam continuar passando: ao aplicar
+`migration_player_projection.sql`, `ponto1_tests` e `ponto2_tests` seguem verdes.
