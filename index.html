@@ -923,13 +923,13 @@
 </sc-if>
 
 <!-- ========================= JOGADOR · MESA PAUSADA / ENCERRADA / INDISPONÍVEL ========================= -->
-<sc-if value="{{ playerOverlay }}">
+<sc-if value="{{ tblOvShow }}">
   <div style="position:fixed;inset:0;z-index:90;background:rgba(5,6,12,.78);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .3s ease">
     <div style="max-width:420px;width:100%;background:linear-gradient(180deg,#1c1810,#13121a);border:1px solid rgba(198,166,100,.4);border-radius:12px;padding:26px 24px;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.6)">
-      <div style="font-size:26px;color:#e0c179;margin-bottom:10px">{{ overlayIcon }}</div>
-      <div style="font-family:'Cinzel';font-weight:700;font-size:20px;color:#efe8d8;margin-bottom:8px">{{ overlayTitle }}</div>
-      <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.45;color:#cdc6b6;margin:0 0 18px">{{ overlayText }}</p>
-      <sc-if value="{{ overlayCanExit }}"><button onClick="{{ exitEndedTable }}" style="padding:12px 26px;background:#c6a35e;color:#0b0b10;border:none;border-radius:5px;font:700 11px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Sair</button></sc-if>
+      <div style="font-size:26px;color:#e0c179;margin-bottom:10px">{{ tblOvIcon }}</div>
+      <div style="font-family:'Cinzel';font-weight:700;font-size:20px;color:#efe8d8;margin-bottom:8px">{{ tblOvTitle }}</div>
+      <p style="font-family:'Cormorant Garamond';font-size:17px;line-height:1.45;color:#cdc6b6;margin:0 0 18px">{{ tblOvText }}</p>
+      <sc-if value="{{ tblOvCanExit }}"><button onClick="{{ exitEndedTable }}" style="padding:12px 26px;background:#c6a35e;color:#0b0b10;border:none;border-radius:5px;font:700 11px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Sair</button></sc-if>
     </div>
   </div>
 </sc-if>
@@ -1886,6 +1886,8 @@ class Component extends DCLogic {
   _isRemoteCtx(){ const s=this.state; return !!(s.memberId || (s.activeTableId && !this._isLocalTableId(s.activeTableId))); }
   _localKey(){ const s=this.state; return 'afterdark:session:local:'+(s.activeTableId||s.joinTableName||'mesa'); }
   _initSync(){
+    // Cache global anterior ao Ponto 3 (misturava mesas): descartado.
+    try{ localStorage.removeItem('afterdark:session'); localStorage.removeItem('afterdark:session:local:mesa'); }catch(e){}
     this._onStorage=(ev)=>{ if(ev&&ev.key&&ev.key===this._localKey()&&ev.newValue) this._applyIncoming(ev.newValue); };
     window.addEventListener('storage',this._onStorage);
   }
@@ -1901,7 +1903,10 @@ class Component extends DCLogic {
     return this._bc;
   }
   _applyIncoming(str){ if(this._isRemoteCtx()||!str||str===this._lastSync) return; try{ const o=JSON.parse(str); this._lastSync=str; this.setState(o); }catch(e){} }
-  _saveSession(){ if(!this._ready||this._isRemoteCtx()) return; try{ const str=JSON.stringify(this._snapshot()); if(str===this._lastSync) return; this._lastSync=str; localStorage.setItem(this._localKey(),str); const bc=this._localChannel(); if(bc) bc.postMessage({str}); }catch(e){} }
+  // Só existe cache local quando há de fato uma mesa local (Mestre sem conta, ou o
+  // Jogador que entrou nela pelo código neste mesmo navegador).
+  _hasLocalTable(){ const s=this.state; return this._isLocalTableId(s.activeTableId)||(!s.memberId&&!!s.joinTableName&&!s.joinTableId); }
+  _saveSession(){ if(!this._ready||this._isRemoteCtx()||!this._hasLocalTable()) return; try{ const str=JSON.stringify(this._snapshot()); if(str===this._lastSync) return; this._lastSync=str; localStorage.setItem(this._localKey(),str); const bc=this._localChannel(); if(bc) bc.postMessage({str}); }catch(e){} }
   // ---- estado da sessão de jogo por mesa (Supabase) ----
   _blankTableSession(){
     const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)?JSON.parse(JSON.stringify(window.AfterdarkData.catalog)):{weapons:[],items:[]};
@@ -2028,6 +2033,11 @@ class Component extends DCLogic {
     if(/not_authorized|table_not_found/.test(m)){
       this.setState({saveStatus:'error',saveError:'Esta mesa não está mais disponível. As alterações não puderam ser salvas.'});
       return {ok:false,fatal:true};
+    }
+    if(/invalid_state|invalid_notes/.test(m)){
+      // Recusa do banco (dados inválidos): repetir sozinho não adianta.
+      this.setState({saveStatus:'error',saveError:'O banco recusou o salvamento. As alterações continuam aqui; use "Tentar de novo" depois de corrigir.'});
+      return {ok:false};
     }
     // Falha temporária: mantém tudo na tela e tenta de novo com espera crescente.
     this._retryN=(this._retryN||0)+1;
@@ -3896,11 +3906,11 @@ class Component extends DCLogic {
       playerMapPins, pendingFormula,
       playerClocks, hasPlayerClocks:playerClocks.length>0, sessionStale:s.sessionStale,
       // Ponto 3: status da mesa e conexão (jogador)
-      playerOverlay:(screen==='j_panel'||screen==='j_lobby')&&!!(s.tableGone||s.tableStatus==='Encerrada'||(screen==='j_panel'&&/^Pausada/.test(s.tableStatus||''))),
-      overlayIcon:s.tableGone?'⚠':s.tableStatus==='Encerrada'?'✦':'❚❚',
-      overlayTitle:s.tableGone?'Mesa indisponível':s.tableStatus==='Encerrada'?'Mesa encerrada pelo Mestre':'Mesa pausada pelo Mestre',
-      overlayText:s.tableGone?'Esta mesa não está mais disponível para o seu vínculo.':s.tableStatus==='Encerrada'?'A sessão chegou ao fim. Obrigado por jogar.':'Aguardando o Mestre retomar a sessão. Esta tela volta sozinha quando a mesa continuar.',
-      overlayCanExit:!!(s.tableGone||s.tableStatus==='Encerrada'), exitEndedTable:()=>this.exitEndedTable(),
+      tblOvShow:(screen==='j_panel'||screen==='j_lobby')&&!!(s.tableGone||s.tableStatus==='Encerrada'||(screen==='j_panel'&&/^Pausada/.test(s.tableStatus||''))),
+      tblOvIcon:s.tableGone?'⚠':s.tableStatus==='Encerrada'?'✦':'❚❚',
+      tblOvTitle:s.tableGone?'Mesa indisponível':s.tableStatus==='Encerrada'?'Mesa encerrada pelo Mestre':'Mesa pausada pelo Mestre',
+      tblOvText:s.tableGone?'Esta mesa não está mais disponível para o seu vínculo.':s.tableStatus==='Encerrada'?'A sessão chegou ao fim. Obrigado por jogar.':'Aguardando o Mestre retomar a sessão. Esta tela volta sozinha quando a mesa continuar.',
+      tblOvCanExit:!!(s.tableGone||s.tableStatus==='Encerrada'), exitEndedTable:()=>this.exitEndedTable(),
       playerConnBanner:screen==='j_panel'&&(s.sessionStale||s.reconnected), playerConnLabel:s.sessionStale?'Conexão instável — reconectando…':'✓ Reconectado', playerConnCol:s.sessionStale?'#d2a23a':'#7fae8f',
       // Ponto 3: indicador de salvamento (Mestre)
       saveChipShow:s.saveStatus!=='idle', saveChipLabel:({pending:'Alterações pendentes',saving:'Salvando…',saved:'✓ Salvo',error:'⚠ Falha ao salvar',offline:'⚠ Sem conexão'})[s.saveStatus]||'', saveChipTitle:s.saveError||'',
