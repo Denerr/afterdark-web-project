@@ -360,17 +360,24 @@
           </div>
         </sc-if>
       </div>
-      <!-- log -->
-      <div style="background:#100f15;border:1px solid rgba(198,166,100,.14);border-radius:7px;padding:16px 18px;max-height:190px;overflow-y:auto">
-        <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7e7a70;margin-bottom:12px">Log de acontecimentos</div>
-        <div style="display:flex;flex-direction:column;gap:9px">
-          <sc-for list="{{ log }}" as="e" hint-placeholder-count="4">
+      <!-- log: resumo recolhido, consulta completa ao expandir -->
+      <div style="background:#100f15;border:1px solid rgba(198,166,100,.14);border-radius:7px;padding:16px 18px">
+        <button onClick="{{ toggleMasterLog }}" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:none;padding:0;cursor:pointer;min-height:36px">
+          <span style="flex:1;font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7e7a70">Log de acontecimentos</span>
+          <span style="font-size:11px;color:#8d887c;font-family:'Space Mono'">{{ masterLogCount }}</span>
+          <span style="font-size:12px;color:#c6a35e">{{ masterLogCaret }}</span>
+        </button>
+        <div style="display:flex;flex-direction:column;gap:9px;margin-top:12px; max-height: {{ masterLogMaxH }};overflow-y:auto">
+          <sc-for list="{{ masterLogList }}" as="e" hint-placeholder-count="3">
             <div style="display:flex;gap:11px;align-items:flex-start">
               <span style="color:#c6a35e;font-size:14px;line-height:1.4">{{ e.icon }}</span>
-              <div style="flex:1"><span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7e7a70;margin-right:8px">{{ e.t }}</span><span style="font-family:'Cormorant Garamond';font-size:16px;color:#cdc6b6">{{ e.txt }}</span></div>
+              <div style="flex:1"><span style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7e7a70;margin-right:8px">{{ e.t }}</span><span style="font-size:13px;color:#b9b2a2">{{ e.txt }}</span></div>
             </div>
           </sc-for>
         </div>
+        <sc-if value="{{ masterLogHasMore }}">
+          <button onClick="{{ toggleMasterLog }}" style="margin-top:10px;background:transparent;border:1px solid rgba(198,166,100,.3);border-radius:4px;color:#cfc7b4;font-size:11px;letter-spacing:.06em;padding:7px 12px;cursor:pointer;min-height:36px">{{ masterLogMoreLabel }}</button>
+        </sc-if>
       </div>
     </div>
     </sc-if>
@@ -378,11 +385,20 @@
     <!-- RIGHT: tools -->
     <sc-if value="{{ showToolsColM }}">
     <div style="background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:7px;padding:0;overflow:hidden">
+      <!-- NIVEL 1: grupos de tarefa -->
       <div style="display:flex;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.06)">
-        <sc-for list="{{ tools }}" as="t" hint-placeholder-count="6">
-          <button onClick="{{ t.onClick }}" style="flex:1;min-width:33%;padding:11px 4px;background: {{ t.bg }};border:none;border-bottom:2px solid {{ t.under }};color: {{ t.col }};font-size:11px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:.2s">{{ t.l }}</button>
+        <sc-for list="{{ toolGroups }}" as="g" hint-placeholder-count="5">
+          <button onClick="{{ g.onClick }}" style="flex:1;min-width:20%;padding:11px 4px;background: {{ g.bg }};border:none;border-bottom:2px solid {{ g.under }};color: {{ g.col }};font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;min-height:44px">{{ g.l }}</button>
         </sc-for>
       </div>
+      <!-- NIVEL 2: ferramentas do grupo ativo (some quando o grupo tem uma so) -->
+      <sc-if value="{{ showToolTabs }}">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;padding:11px 14px 0">
+          <sc-for list="{{ tools }}" as="t" hint-placeholder-count="3">
+            <button onClick="{{ t.onClick }}" style="padding:8px 13px;background: {{ t.bg }};border:1px solid {{ t.border }};border-radius:20px;color: {{ t.col }};font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;min-height:36px">{{ t.l }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
       <div style="padding:20px">
         <!-- TESTES -->
         <sc-if value="{{ toolTestes }}">
@@ -424,6 +440,23 @@
                   <sc-for list="{{ skillsAll }}" as="a" hint-placeholder-count="5"><option value="{{ a.key }}">{{ a.label }}</option></sc-for>
                 </select></div>
             </div>
+            <!-- ALVO DO ATAQUE: separado de quem executa a rolagem. Sem escolha, o envio para. -->
+            <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:5px">Alvo do ataque</label>
+            <div style="display:flex;gap:5px;margin-bottom:7px">
+              <sc-for list="{{ atkKindOptions }}" as="k" hint-placeholder-count="2"><button onClick="{{ k.onClick }}" style="flex:1;padding:9px 6px;border-radius:4px;font:600 10px 'Archivo';letter-spacing:.04em;text-transform:uppercase;cursor:pointer;background: {{ k.bg }};border:1px solid {{ k.border }};color: {{ k.col }}">{{ k.l }}</button></sc-for>
+            </div>
+            <sc-if value="{{ atkTargetIsMember }}">
+              <select onChange="{{ onAtkTarget }}" value="{{ atkTargetSel }}" style="width:100%;background:#0e0d12;color:#e9e3d4;border:1px solid {{ atkTargetBorder }};border-radius:3px;padding:10px;font-size:13px;margin-bottom:4px">
+                <sc-for list="{{ atkTargetOptions }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.label }}</option></sc-for>
+              </select>
+            </sc-if>
+            <sc-if value="{{ atkTargetIsNpc }}">
+              <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8d887c;margin-bottom:4px">Adversário fora da mesa: o resultado é narrado, e nenhum ferimento é sugerido automaticamente.</div>
+            </sc-if>
+            <sc-if value="{{ atkTargetWarn }}">
+              <div style="font-size:11px;color:#c44a5e;margin-bottom:4px">{{ atkTargetWarnText }}</div>
+            </sc-if>
+            <div style="font-family:'Space Mono';font-size:11px;color:#7e7a70;margin:8px 0 12px;padding:9px 11px;background:#0e0d12;border:1px solid rgba(255,255,255,.07);border-radius:3px">{{ atkFlowLine }}</div>
             <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:7px">Arma do atacante</label>
             <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">
               <sc-for list="{{ combatWeapons }}" as="w" hint-placeholder-count="5"><button onClick="{{ w.onClick }}" style="display:flex;align-items:center;gap:10px;text-align:left;padding:9px 12px;border-radius:5px;cursor:pointer;background: {{ w.bg }};border:1px solid {{ w.border }}">
@@ -504,7 +537,12 @@
             <sc-if value="{{ hasPendingWound }}">
               <div style="margin-top:12px;padding:16px;border-radius:6px;background:#1a0e12;border:1px solid rgba(196,30,58,.35);animation:fadeUp .35s ease">
                 <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#c44a5e;margin-bottom:4px">Ferimento sugerido — confirme ou ajuste</div>
-                <div style="font-size:13px;color:#cdc6b6;margin-bottom:12px">Alvo: <span style="color:#e9e3d4">{{ pendingWoundTarget }}</span></div>
+                <sc-if value="{{ pendingWoundHasAttacker }}">
+                  <div style="font-size:13px;color:#cdc6b6;margin-bottom:12px">Atacante: <span style="color:#e9e3d4">{{ pendingWoundAttacker }}</span> → Alvo: <span style="color:#e9e3d4">{{ pendingWoundTarget }}</span></div>
+                </sc-if>
+                <sc-if value="{{ pendingWoundNoAttacker }}">
+                  <div style="font-size:13px;color:#cdc6b6;margin-bottom:12px">Alvo: <span style="color:#e9e3d4">{{ pendingWoundTarget }}</span></div>
+                </sc-if>
                 <div style="display:flex;gap:6px;margin-bottom:12px">
                   <sc-for list="{{ pendingWoundLevels }}" as="wl" hint-placeholder-count="4"><button onClick="{{ wl.onClick }}" style="flex:1;padding:9px 4px;border-radius:4px;font:600 11px 'Archivo';letter-spacing:.04em;cursor:pointer;background: {{ wl.bg }};border:1px solid {{ wl.border }};color: {{ wl.col }}">{{ wl.label }}</button></sc-for>
                 </div>
@@ -627,6 +665,30 @@
               </div>
             </sc-for>
           </div>
+        </sc-if>
+        <!-- PISTAS: somente leitura. O status muda pelos relogios de investigacao, -->
+        <!-- nao por edicao manual, entao nao ha controle aqui. -->
+        <sc-if value="{{ toolPistas }}">
+          <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;margin-bottom:12px">Pistas</div>
+          <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 14px">Uma pista oculta é revelada quando um relógio de Investigação se completa.</p>
+          <sc-if value="{{ hasClues }}">
+            <div style="display:flex;flex-direction:column;gap:9px">
+              <sc-for list="{{ cluesMaster }}" as="k" hint-placeholder-count="3">
+                <div style="background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-left:3px solid {{ k.sColor }};border-radius:4px;padding:11px 13px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+                    <span style="font-size:13px;color:#e9e3d4;flex:1;min-width:0">{{ k.name }}</span>
+                    <span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color: {{ k.sColor }}">{{ k.statusLabel }}</span>
+                  </div>
+                  <sc-if value="{{ k.hasTxt }}">
+                    <div style="font-family:'Cormorant Garamond';font-size:15px;color:#b9b2a2;margin-top:6px">{{ k.txt }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noCluesMaster }}">
+            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:16px 0">Nenhuma pista neste roteiro ainda.</div>
+          </sc-if>
         </sc-if>
         <!-- FERIMENTOS -->
         <sc-if value="{{ toolFerimentos }}">
@@ -1727,12 +1789,12 @@ class Component extends DCLogic {
     log:[],
     npcs:[],
     clues:[],
-    masterTool:'testes', testMode:'geral', masterPanel:'cena',
+    masterTool:'testes', masterLogOpen:false, testMode:'geral', masterPanel:'cena',
     roteiro:{mode:null,text:'',done:[]},
     narrativa:{mode:null,text:''},
     woundTarget:'', woundDraft:'', showWoundForm:false, woundLib:[],
     condTarget:'', condDraft:'', showCondForm:false, condLib:[],
-    testDraft:{playerId:'',attrKey:'mente',skillKey:'analise',difficulty:15,diffGeral:15,diffCombate:13,weaponId:'w3',combatAttr:'corpo',combatSkill:'atletismo',vis:'publico'},
+    testDraft:{playerId:'',attrKey:'mente',skillKey:'analise',difficulty:15,diffGeral:15,diffCombate:13,weaponId:'w3',combatAttr:'corpo',combatSkill:'atletismo',vis:'publico',atkTargetKind:'membro',atkTargetId:''},
     pendingWound:null,
     rolling:false, rollTemp:null, roll:null, rollFrom:'',
     sentReqs:[], testSending:false, testSentOk:false, testSentTo:'', startBusy:false, removeConfirmId:null,
@@ -2770,7 +2832,28 @@ class Component extends DCLogic {
   }
 
   // ---- session ----
+  // Etapa 3: as 10 ferramentas viravam 4 linhas de abas. Agrupadas por tarefa, a
+  // navegacao fica em dois niveis. O grupo ativo e DERIVADO de masterTool, para nao
+  // existir um segundo estado capaz de desincronizar.
+  TOOL_GROUPS = [
+    {k:'acoes',       l:'Ações',        tools:['testes']},
+    {k:'personagens', l:'Personagens',  tools:['estresse','ferimentos','condicoes']},
+    {k:'investigacao',l:'Investigação', tools:['relogios','pistas','npcs']},
+    {k:'conducao',    l:'Condução',     tools:['cenas','roteiro','narrativa']},
+    {k:'acervo',      l:'Acervo',       tools:['biblioteca']},
+  ];
+  TOOL_LABELS = {testes:'Testes',estresse:'Estresse',ferimentos:'Ferimentos',condicoes:'Condições',
+    relogios:'Relógios',pistas:'Pistas',npcs:'NPCs',cenas:'Cenas',roteiro:'Roteiro',
+    narrativa:'Narrativa',biblioteca:'Biblioteca'};
+  _toolGroupOf(tool){ const g=this.TOOL_GROUPS.find(g=>g.tools.includes(tool)); return g?g.k:'acoes'; }
+  // Trocar de grupo mantem a ferramenta se ela ja pertence a ele; senao abre a primeira.
+  setToolGroup(gk){
+    const g=this.TOOL_GROUPS.find(x=>x.k===gk); if(!g) return;
+    if(g.tools.includes(this.state.masterTool)) return;
+    this.setTool(g.tools[0]);
+  }
   setTool(t){ this.setState({masterTool:t}); }
+  toggleMasterLog(){ this.setState(s=>({masterLogOpen:!s.masterLogOpen})); }
   setMasterPanel(t){ this.setState({masterPanel:t}); }
   setDraft(k,v){ this.setState(s=>({testDraft:{...s.testDraft,[k]:v}})); }
   advanceClock(id,d,silent){
@@ -2907,6 +2990,20 @@ class Component extends DCLogic {
   // ---- enviar teste ao jogador ----
   // Alvo do teste: o jogador escolhido no seletor, desde que tenha ficha; senão o primeiro
   // jogador com ficha (é o que o <select> exibe). Sem nenhum, não há alvo válido.
+  // Combate tem TRES papeis distintos: quem executa a rolagem (o atacante), o alvo
+  // do ataque, e o destinatario da consequencia. Antes, os tres eram a mesma pessoa:
+  // o ferimento sugerido voltava para o proprio atacante.
+  _atkTarget(){
+    const td=this.state.testDraft;
+    if(td.atkTargetKind!=='membro'||!td.atkTargetId) return null;
+    return this.state.players.find(p=>p.id===td.atkTargetId)||null;
+  }
+  _atkTargetLabel(){
+    const td=this.state.testDraft;
+    if(td.atkTargetKind!=='membro') return 'NPC / adversário';
+    const t=this._atkTarget();
+    return t?t.char:'';
+  }
   _draftTarget(){ const s=this.state; const act=s.players.filter(p=>p.active); return act.find(p=>p.id===s.testDraft.playerId)||act[0]||null; }
   _sendTestBlock(){
     const s=this.state;
@@ -2914,6 +3011,9 @@ class Component extends DCLogic {
     const row=this._activeTableRow();
     if(!row||!row.id) return 'Salve a mesa antes de enviar testes.';
     if(!this._draftTarget()) return 'Nenhum jogador com ficha na mesa para receber o teste.';
+    // Nao deixamos o alvo "cair" no atacante por omissao: ou o Mestre escolhe, ou o envio para.
+    if(s.testMode==='combate'&&s.testDraft.atkTargetKind==='membro'&&!this._atkTarget())
+      return 'Escolha o alvo do ataque antes de enviar.';
     return '';
   }
   async sendTest(){
@@ -2926,7 +3026,10 @@ class Component extends DCLogic {
     const attrKey=isCombat?td.combatAttr:td.attrKey, skillKey=isCombat?td.combatSkill:td.skillKey;
     const wpn=isCombat?(s.library.weapons.find(w=>w.id===td.weaponId)||{bonus:0,dano:0,name:'Desarmado'}):null;
     const label=isCombat?`Ataque com ${wpn.name} — ${p.char}`:`${this.attrLabel(attrKey)} + ${this.skillLabel(skillKey)}`;
-    const params={from:'Mestre',to:p.id,toName:p.char,label,attrKey,skillKey,weaponId:isCombat?td.weaponId:null,weaponBonus:wpn?(wpn.bonus||0):0,danoBase:wpn?(wpn.dano||0):0,weaponName:wpn?wpn.name:'',difficulty:td.difficulty,vis:td.vis};
+    const atk=isCombat?this._atkTarget():null;
+    // O alvo viaja no proprio pedido (params e jsonb livre), entao nao precisa migracao.
+    const params={from:'Mestre',to:p.id,toName:p.char,label,attrKey,skillKey,weaponId:isCombat?td.weaponId:null,weaponBonus:wpn?(wpn.bonus||0):0,danoBase:wpn?(wpn.dano||0):0,weaponName:wpn?wpn.name:'',difficulty:td.difficulty,vis:td.vis,
+      atkTargetKind:isCombat?td.atkTargetKind:null,atkTargetId:atk?atk.id:null,atkTargetName:isCombat?this._atkTargetLabel():''};
     // Mesma solicitação após uma falha reaproveita a chave: se o envio anterior chegou
     // ao banco, o servidor devolve o registro existente em vez de criar outro.
     const fp=JSON.stringify([row.id,p.id,s.testMode,params]);
@@ -2982,7 +3085,11 @@ class Component extends DCLogic {
       grade:String(res.grade||''),narr:String(res.narr||''),label:String(res.label||(r.params&&r.params.label)||''),nat:!!res.nat,allOnes:!!res.allOnes,hit:!!res.hit,
       danoBase:n(res.danoBase),danoFinal:n(res.danoFinal),woundLvl:String(res.woundLvl||'—'),
       atk:{die:n(atk.die),attr:n(atk.attr),skill:n(atk.skill),weaponBonus:n(atk.weaponBonus),attrLabel:String(atk.attrLabel||''),skillLabel:String(atk.skillLabel||''),weaponName:String(atk.weaponName||'')},
-      targetId:r.target_member_id};
+      // Em combate, o destinatario da consequencia e o ALVO gravado no pedido.
+      // Pedido antigo (sem alvo) fica com targetId nulo: nada e sugerido automaticamente.
+      targetId:isCombat?((r.params||{}).atkTargetId||null):r.target_member_id,
+      attackerName:String((r.params||{}).toName||''),
+      targetName:String((r.params||{}).atkTargetName||'')};
   }
   _onPlayerResult(r){
     const res=this._cleanResult(r);
@@ -2991,7 +3098,7 @@ class Component extends DCLogic {
     const isCombat=r.kind==='combate';
     this.setState(s=>({
       roll:res, rollFrom:nm, rolling:false, rollTemp:null,
-      pendingWound:(isCombat&&res.hit&&res.woundLvl!=='—')?{targetId:r.target_member_id,lvl:res.woundLvl}:s.pendingWound,
+      pendingWound:(isCombat&&res.hit&&res.woundLvl!=='—'&&res.targetId)?{targetId:res.targetId,lvl:res.woundLvl,attackerName:res.attackerName||nm,targetName:res.targetName}:s.pendingWound,
       log:[{icon:isCombat?'⚔':'⚄',t:isCombat?'Combate':'Teste',txt:`${nm} · ${res.label.replace(/ — [^—]*$/,'')} — ${res.grade} (${res.total} vs ${res.diff}).`,vis:this._logVis((r.params||{}).vis,r.target_member_id)},...s.log]
     }));
     if(this._isFailGrade(res.grade)){ setTimeout(()=>this.advanceClock('c1',1),400); }
@@ -3094,7 +3201,8 @@ class Component extends DCLogic {
       res={mode:'combate',dice:[die],sides:10,max:die,bonus,total,diff,margin,grade:g,nat:crit,
         atk:{die,attr:ctx.atkAttr||0,skill:ctx.atkSkill||0,weaponBonus:ctx.weaponBonus||0,attrLabel:ctx.atkAttrLabel||'',skillLabel:ctx.atkSkillLabel||'',weaponName:ctx.weaponName||''},
         danoBase,danoFinal,hit,woundLvl,woundSug:hit?this.woundLvlLabel(woundLvl):'—',
-        wound:this.woundFromMargin(margin),label:ctx.label,narr:this.narr(g),targetId:ctx.targetId};
+        wound:this.woundFromMargin(margin),label:ctx.label,narr:this.narr(g),targetId:ctx.targetId,
+        attackerName:ctx.attackerName||'',targetName:ctx.targetName||''};
     } else {
       const n=Math.max(1,ctx.attrVal||1);
       const dice=Array.from({length:n},()=>this.rN(20));
@@ -3104,7 +3212,7 @@ class Component extends DCLogic {
       res={mode:'geral',dice,sides:20,max,bonus,total,diff,grade:g,nat:nat20,allOnes,label:ctx.label,narr:this.narr(g)};
     }
     this.setState(s=>({[flagKey]:false,[tempKey]:null,[rollKey]:res,
-      pendingWound: (ctx.mode==='combate'&&res.hit&&setKey==='roll'&&res.targetId) ? {targetId:res.targetId,lvl:res.woundLvl} : s.pendingWound,
+      pendingWound: (ctx.mode==='combate'&&res.hit&&setKey==='roll'&&res.targetId) ? {targetId:res.targetId,lvl:res.woundLvl,attackerName:res.attackerName,targetName:res.targetName} : s.pendingWound,
       log:[{icon:ctx.mode==='combate'?'⚔':'⚄',t:ctx.mode==='combate'?'Combate':'Teste',txt:`${ctx.label} — ${res.grade} (${res.total} vs ${res.diff}).`,vis:setKey==='roll'?this._logVis(this.state.testDraft.vis,ctx.targetId):'todos'},...s.log]}));
     // Relógio avança só no Mestre: na rolagem local dele aqui, e na do jogador quando
     // o resultado chega (_onPlayerResult). A visibilidade continua definida pelo Mestre.
@@ -3120,9 +3228,12 @@ class Component extends DCLogic {
     if(s.testMode==='combate'){
       const av=(p.attrs[td.combatAttr]||1), b=(p.skills[td.combatSkill]||0);
       const wpn=s.library.weapons.find(w=>w.id===td.weaponId)||{bonus:0,dano:0,name:'Desarmado'};
-      const lbl=`${p.char} · Ataque com ${wpn.name}`;
+      const alvo=this._atkTarget(); const alvoNome=this._atkTargetLabel();
+      const lbl=`${p.char} · Ataque com ${wpn.name}`+(alvoNome?` em ${alvoNome}`:'');
       this.doRoll({mode:'combate',bonus:av+b+(wpn.bonus||0),difficulty:td.difficulty,label:lbl,
-        atkAttr:av,atkSkill:b,weaponBonus:wpn.bonus||0,atkAttrLabel:this.attrLabel(td.combatAttr),atkSkillLabel:this.skillLabel(td.combatSkill),weaponName:wpn.name,danoBase:wpn.dano||0,targetId:p.id},'roll');
+        atkAttr:av,atkSkill:b,weaponBonus:wpn.bonus||0,atkAttrLabel:this.attrLabel(td.combatAttr),atkSkillLabel:this.skillLabel(td.combatSkill),weaponName:wpn.name,danoBase:wpn.dano||0,
+        // targetId = destinatario da consequencia (o ALVO). attackerId fica separado.
+        targetId:alvo?alvo.id:null, attackerId:p.id, attackerName:p.char, targetName:alvoNome},'roll');
     } else {
       const av=(p.attrs[td.attrKey]||1), b=(p.skills[td.skillKey]||0);
       const lbl=`${p.char} · ${this.attrLabel(td.attrKey)} + ${this.skillLabel(td.skillKey)}`;
@@ -3574,7 +3685,18 @@ class Component extends DCLogic {
     const selfWeak=selfV.weaknesses.map(x=>({txt:x}));
     const selfStress=s.stressBars.filter(b=>b.playerId===selfId).map(b=>this.stressView(b));
 
-    const tools=[['testes','Testes'],['relogios','Relógios'],['estresse','Estresse'],['ferimentos','Ferimentos'],['condicoes','Condições'],['npcs','NPCs'],['cenas','Cenas'],['roteiro','Roteiro'],['narrativa','Narrativa'],['biblioteca','Biblioteca']].map(([k,l])=>({k,l, onClick:()=>this.setTool(k), bg:s.masterTool===k?'rgba(198,163,94,.12)':'transparent', under:s.masterTool===k?'#c6a35e':'transparent', col:s.masterTool===k?'#e9e3d4':'#8d887c' }));
+    // Nivel 1: grupos. Nivel 2: ferramentas do grupo ativo (oculto quando o grupo tem uma so).
+    const grupoAtivo=this._toolGroupOf(s.masterTool);
+    const toolGroups=this.TOOL_GROUPS.map(g=>{ const sel=g.k===grupoAtivo; return {k:g.k,l:g.l,
+      onClick:()=>this.setToolGroup(g.k),
+      bg:sel?'rgba(198,163,94,.14)':'transparent', under:sel?'#c6a35e':'transparent',
+      col:sel?'#e9e3d4':'#8d887c' }; });
+    const grupoObj=this.TOOL_GROUPS.find(g=>g.k===grupoAtivo)||this.TOOL_GROUPS[0];
+    const tools=grupoObj.tools.map(k=>{ const sel=s.masterTool===k; return {k,l:this.TOOL_LABELS[k]||k,
+      onClick:()=>this.setTool(k),
+      bg:sel?'rgba(198,163,94,.12)':'transparent', border:sel?'#c6a35e':'rgba(255,255,255,.12)',
+      col:sel?'#e9e3d4':'#8d887c' }; });
+    const showToolTabs=grupoObj.tools.length>1;
     const ptabs=[['cena','Cena'],['ficha','Ficha'],['testes','Testes'],['mapa','Mapa'],['diario','Diário'],['npcs','NPCs'],['pistas','Pistas']].map(([k,l])=>({k,l, onClick:()=>this.setPlayerTab(k), bg:s.playerTab===k?'#c41e3a':'transparent', border:s.playerTab===k?'#c41e3a':'rgba(255,255,255,.12)', col:s.playerTab===k?'#fff':'#a39e90' }));
 
     const isCombat=s.testMode==='combate';
@@ -3586,6 +3708,11 @@ class Component extends DCLogic {
     const selWeapon=s.library.weapons.find(w=>w.id===s.testDraft.weaponId)||s.library.weapons[0]||{name:'Desarmado',bonus:0,dano:0,alcance:'—',ruido:'—'};
     const combatWeapons=s.library.weapons.map(w=>({...w, sel:s.testDraft.weaponId===w.id, onClick:()=>this.setDraft('weaponId',w.id), bonusLabel:(w.bonus>=0?'+':'')+w.bonus, bg:s.testDraft.weaponId===w.id?'rgba(196,30,58,.14)':'#0e0d12', border:s.testDraft.weaponId===w.id?'#c41e3a':'rgba(255,255,255,.1)', nameCol:s.testDraft.weaponId===w.id?'#efe8d8':'#cdc6b6'}));
     const draftPlayer=this._draftTarget()||{attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},char:'?'};
+    const atkT=this._atkTarget();
+    const atkKind=s.testDraft.atkTargetKind||'membro';
+    const atkMissing=isCombat&&atkKind==='membro'&&!atkT;
+    const atkSelfHit=isCombat&&!!atkT&&atkT.id===draftPlayer.id;
+    const atkFlowTarget=atkKind==='npc'?'NPC / adversário':(atkT?atkT.char:'não escolhido');
     const dPattr=draftPlayer.attrs[isCombat?s.testDraft.combatAttr:s.testDraft.attrKey]||1;
     const dPskill=draftPlayer.skills[isCombat?s.testDraft.combatSkill:s.testDraft.skillKey]||0;
     const combatTotalLine=`1d10 + ${dPattr} (atr) + ${dPskill} (perícia) + ${selWeapon.bonus} (arma)`;
@@ -4073,8 +4200,42 @@ class Component extends DCLogic {
       testModeBg:(m)=>s.testMode===m?'rgba(198,163,94,.16)':'transparent',
       geralTabBg:s.testMode==='geral'?'#c6a35e':'transparent', geralTabCol:s.testMode==='geral'?'#0b0b10':'#cfc7b4',
       combatTabBg:s.testMode==='combate'?'#c41e3a':'transparent', combatTabCol:s.testMode==='combate'?'#fff':'#cfc7b4',
+      // ---- Alvo do ataque (Etapa 3): tres papeis separados no combate ----
+      atkKindOptions:[['membro','Jogador da mesa'],['npc','NPC / adversário']].map(([v,l])=>{
+        const sel=(s.testDraft.atkTargetKind||'membro')===v;
+        return {v,l,onClick:()=>this.setDraft('atkTargetKind',v),
+          bg:sel?'rgba(198,163,94,.16)':'#0e0d12',border:sel?'#c6a35e':'rgba(255,255,255,.12)',col:sel?'#e0c179':'#a39e90'};
+      }),
+      atkTargetIsMember:(s.testDraft.atkTargetKind||'membro')==='membro',
+      atkTargetIsNpc:(s.testDraft.atkTargetKind||'membro')==='npc',
+      atkTargetSel:s.testDraft.atkTargetId||'',
+      atkTargetOptions:[{id:'',label:'— escolha o alvo —'},
+        ...s.players.filter(p=>p.active).map(p=>({id:p.id,label:p.char+(p.id===draftPlayer.id?' (quem executa)':'')}))],
+      atkTargetBorder:(atkMissing?'#c41e3a':'rgba(255,255,255,.1)'),
+      atkTargetWarn:atkMissing||atkSelfHit,
+      atkTargetWarnText:atkMissing?'Escolha o alvo: o ataque não assume o atacante por omissão.'
+        :(atkSelfHit?'Atacante e alvo são a mesma pessoa — confirme se é isso que você quer.':''),
+      atkFlowLine:`Executa: ${draftPlayer.char||'—'}  →  Alvo: ${atkFlowTarget}`,
+      onAtkTarget:(e)=>this.setDraft('atkTargetId',e.target.value),
+      pendingWoundNoAttacker:!!(s.pendingWound&&!s.pendingWound.attackerName),
+      toggleMasterLog:()=>this.toggleMasterLog(),
+      masterLogList:(s.masterLogOpen?s.log:s.log.slice(0,3)),
+      masterLogCount:String(s.log.length),
+      masterLogCaret:s.masterLogOpen?'▴':'▾',
+      masterLogMaxH:s.masterLogOpen?'260px':'none',
+      masterLogHasMore:s.log.length>3,
+      masterLogMoreLabel:s.masterLogOpen?'Recolher':`Ver todos os ${s.log.length} registros`,
+      toolGroups, showToolTabs, toolPistas:s.masterTool==='pistas',
+      cluesMaster:clues.map(k=>({...k,
+        statusLabel:({oculta:'Oculta',encontrada:'Encontrada',analisada:'Analisada',
+          compartilhada:'Compartilhada',perdida:'Perdida',destruida:'Destruída'})[k.status]||k.status,
+        hasTxt:!!(k.txt&&k.txt!=='—')})),
+      hasClues:clues.length>0, noCluesMaster:clues.length===0,
       combatTotalLine, combatAttrSel:s.testDraft.combatAttr, combatSkillSel:s.testDraft.combatSkill,
-      hasPendingWound:!!s.pendingWound, pendingWoundTarget:(s.pendingWound?(s.players.find(p=>p.id===s.pendingWound.targetId)||{}).char:''),
+      hasPendingWound:!!s.pendingWound,
+      pendingWoundTarget:(s.pendingWound?(((s.players.find(p=>p.id===s.pendingWound.targetId)||{}).char)||s.pendingWound.targetName||''):''),
+      pendingWoundAttacker:(s.pendingWound?(s.pendingWound.attackerName||''):''),
+      pendingWoundHasAttacker:!!(s.pendingWound&&s.pendingWound.attackerName),
       pendingWoundLevels:['leve','moderado','grave','critico'].map(lv=>({lv,label:({leve:'Leve',moderado:'Moderado',grave:'Grave',critico:'Crítico'})[lv],onClick:()=>this.adjustPendingWound(lv),sel:s.pendingWound&&s.pendingWound.lvl===lv,bg:(s.pendingWound&&s.pendingWound.lvl===lv)?'#c41e3a':'#0e0d12',border:(s.pendingWound&&s.pendingWound.lvl===lv)?'#c41e3a':'rgba(255,255,255,.12)',col:(s.pendingWound&&s.pendingWound.lvl===lv)?'#fff':'#cdc6b6'})),
       applySuggestedWound:()=>this.applySuggestedWound(), dismissPendingWound:()=>this.dismissPendingWound(),
       draftPlayer:{...draftPlayer, attrLabel:this.attrLabel(isCombat?s.testDraft.combatAttr:s.testDraft.attrKey), skillLabel:this.skillLabel(isCombat?s.testDraft.combatSkill:s.testDraft.skillKey)},
