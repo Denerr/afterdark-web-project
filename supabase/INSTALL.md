@@ -110,7 +110,7 @@ bash supabase/tests/run_all.sh
 Ou manualmente:
 
 ```bash
-for suite in ponto1_tests ponto2_tests ponto2b_tests ponto3_tests; do
+for suite in ponto1_tests ponto2_tests ponto2b_tests ponto3_tests ponto5_tests; do
   docker rm -f adpg >/dev/null 2>&1
   docker run -d --name adpg -e POSTGRES_PASSWORD=pg postgres:15 >/dev/null
   until docker exec adpg pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
@@ -124,8 +124,9 @@ done
 docker rm -f adpg
 ```
 
-Esperado: **52** no Ponto 1, **73** no Ponto 2, **24** no 2B (relógios/estresse) e
-**32** no Ponto 3.
+Esperado: **52** no Ponto 1, **73** no Ponto 2, **24** no 2B (relógios/estresse),
+**32** no Ponto 3 e **16** na UI Etapa 5. O `run_all.sh` também roda a paridade
+catálogo × banco (`node tests/parity_skills.js`, 24 perícias).
 
 Cada arquivo cria o schema `t`, então **cada suíte precisa de uma base recém-criada** — rodar duas na mesma base falha na segunda. Recriar o container entre elas.
 

@@ -25,6 +25,11 @@
         <span style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color: {{ mySheetCol }};padding:5px 12px;border:1px solid {{ mySheetCol }}59;border-radius:20px">{{ mySheetLabel }}</span>
       </div>
     </div>
+    <!-- Etapa 6: sem ficha, o lobby explica o proximo passo e leva ao wizard -->
+    <sc-if value="{{ needsSheet }}"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:-8px 0 20px;padding:12px 14px;background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:8px">
+      <span style="flex:1;min-width:180px;font-family:'Cormorant Garamond';font-size:16px;color:#cfc7b4">Você ainda não tem ficha nesta mesa. Crie seu personagem para o Mestre poder aprovar.</span>
+      <button onClick="{{ toWizard }}" style="padding:11px 18px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;min-height:44px">Criar ficha</button>
+    </div></sc-if>
     <!-- all players -->
     <div style="background:rgba(20,18,24,.7);border:1px solid rgba(198,166,100,.15);border-radius:10px;padding:20px">
       <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:14px">Jogadores na mesa · {{ lobbyPlayerCount }}</div>
@@ -45,6 +50,7 @@
       </div>
     </div>
     <div style="text-align:center;margin-top:22px">
+<sc-if value="{{ hasErrJogador }}"><div role="alert" style="margin:0 0 12px;text-align:left;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:6px"><span style="font-size:14px;color:#e08a8a;flex-shrink:0">⚠</span><span style="flex:1;min-width:160px;font-size:13px;color:#e9e3d4">{{ errJogador }}</span><button onClick="{{ retryJogador }}" style="flex-shrink:0;background:transparent;border:1px solid rgba(198,166,100,.35);color:#cfc7b4;border-radius:4px;font-size:11px;letter-spacing:.04em;padding:7px 11px;cursor:pointer;min-height:36px">Tentar de novo</button><button onClick="{{ dismissErrJogador }}" aria-label="Dispensar aviso" style="flex-shrink:0;background:transparent;border:none;color:#8d887c;font-size:14px;cursor:pointer;min-width:36px;min-height:36px">✕</button></div></sc-if>
       <span onClick="{{ leaveTable }}" style="font-size:13px;color:#8d887c;cursor:pointer;text-decoration:underline" style-hover="color:#e08a8a">Sair da mesa</span>
     </div>
   </div>

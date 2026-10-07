@@ -12,6 +12,7 @@
     <button onClick="{{ startSession }}" disabled="{{ startSessionDisabled }}" style="padding:15px 34px;background: {{ startSessionBg }};color: {{ startSessionCol }};border:none;border-radius:2px;font:700 12px/1 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor: {{ startSessionCursor }};transition:.25s;box-shadow:0 0 0 1px {{ startSessionBg }}" style-hover="filter:brightness(1.18);box-shadow:0 0 30px {{ sessTheme.glow }}">{{ startSessionLabel }}</button>
   </div>
   <sc-if value="{{ startBlockReason }}"><p style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8d887c;margin:-18px 0 18px;text-align:right">{{ startBlockReason }}</p></sc-if>
+<sc-if value="{{ hasErrLobby }}"><div role="alert" style="margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:6px"><span style="font-size:14px;color:#e08a8a;flex-shrink:0">⚠</span><span style="flex:1;min-width:160px;font-size:13px;color:#e9e3d4">{{ errLobby }}</span><button onClick="{{ dismissErrLobby }}" aria-label="Dispensar aviso" style="flex-shrink:0;background:transparent;border:none;color:#8d887c;font-size:14px;cursor:pointer;min-width:36px;min-height:36px">✕</button></div></sc-if>
 
   <div style="display:flex;gap:24px;flex-wrap:wrap">
     <!-- invite -->

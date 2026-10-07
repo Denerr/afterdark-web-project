@@ -11,6 +11,12 @@
     </div>
 
     <!-- STEP 1 identity -->
+    <!-- Etapa 6: rascunho recuperado apos F5 (ou ao voltar ao wizard) -->
+    <sc-if value="{{ wizRestored }}"><div role="status" style="position:relative;z-index:2;display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 16px;padding:10px 12px;background:#0e0d12;border:1px solid rgba(198,166,100,.3);border-radius:6px">
+      <span style="flex:1;min-width:180px;font-size:13px;color:#cfc7b4">Rascunho recuperado: você continua de onde parou.</span>
+      <button onClick="{{ discardWizDraft }}" style="background:transparent;border:1px solid rgba(198,166,100,.35);color:#cfc7b4;border-radius:4px;font-size:11px;letter-spacing:.04em;padding:7px 11px;cursor:pointer;min-height:36px">Descartar e começar de novo</button>
+      <button onClick="{{ dismissWizRestored }}" aria-label="Fechar aviso" style="background:transparent;border:none;color:#8d887c;font-size:14px;cursor:pointer;min-width:36px;min-height:36px">✕</button>
+    </div></sc-if>
     <sc-if value="{{ step1 }}">
     <div data-motion="step-section">
       <h2 style="font-family:'Cinzel';font-weight:600;font-size:24px;margin:0 0 18px;color:#efe8d8">Identidade</h2>
@@ -151,9 +157,9 @@
         <sc-for list="{{ attrView }}" as="a" hint-placeholder-count="6">
           <div style="display:flex;align-items:center;gap:14px;padding:13px 16px;background:#0f0e13;border:1px solid rgba(255,255,255,.08);border-radius:6px">
             <div style="flex:1"><span style="font-size:15px;color:#e9e3d4">{{ a.label }}</span><sc-if value="{{ a.isBonus }}"><span style="font-size:11px;color:#c6a35e;margin-left:8px;font-family:'Space Mono';padding:2px 7px;border:1px solid rgba(198,166,100,.35);border-radius:10px">+{{ a.bonus }} Natureza</span></sc-if></div>
-            <button onClick="{{ a.onDec }}" style="width:30px;height:30px;border-radius:4px;background:#1a1820;border:1px solid rgba(255,255,255,.12);color:#cfc7b4;font-size:17px;cursor:pointer;opacity: {{ a.decOpacity }}">−</button>
+            <button onClick="{{ a.onDec }}" aria-label="Remover ponto de {{ a.label }}" style="width:44px;height:44px;border-radius:4px;background:#1a1820;border:1px solid rgba(255,255,255,.12);color:#cfc7b4;font-size:17px;cursor:pointer;opacity: {{ a.decOpacity }}">−</button>
             <div data-motion="attr-value" data-attr-key="{{ a.key }}" style="width:36px;text-align:center;font-family:'Space Mono';font-weight:700;font-size:20px;color: {{ a.valColor }}">{{ a.eff }}</div>
-            <button onClick="{{ a.onInc }}" style="width:30px;height:30px;border-radius:4px;background:#1a1820;border:1px solid rgba(198,166,100,.4);color:#e0c179;font-size:17px;cursor: {{ a.incCursor }};opacity: {{ a.incOpacity }}">+</button>
+            <button onClick="{{ a.onInc }}" aria-label="Adicionar ponto em {{ a.label }}" style="width:44px;height:44px;border-radius:4px;background:#1a1820;border:1px solid rgba(198,166,100,.4);color:#e0c179;font-size:17px;cursor: {{ a.incCursor }};opacity: {{ a.incOpacity }}">+</button>
           </div>
         </sc-for>
       </div>
@@ -279,6 +285,7 @@
     </sc-if>
 
     <!-- nav -->
+    <sc-if value="{{ hasErrFicha }}"><div role="alert" style="position:relative;z-index:2;margin:26px 0 -14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:6px"><span style="font-size:14px;color:#e08a8a;flex-shrink:0">⚠</span><span style="flex:1;min-width:160px;font-size:13px;color:#e9e3d4">{{ errFicha }}</span><button onClick="{{ dismissErrFicha }}" aria-label="Dispensar aviso" style="flex-shrink:0;background:transparent;border:none;color:#8d887c;font-size:14px;cursor:pointer;min-width:36px;min-height:36px">✕</button></div></sc-if>
     <div style="position:relative;z-index:2;display:flex;gap:12px;margin-top:26px">
       <button onClick="{{ wizPrev }}" style="padding:13px 22px;background:rgba(14,13,18,.7);border:1px solid rgba(255,255,255,.14);border-radius:3px;color:#cfc7b4;font:500 12px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(255,255,255,.3)">← Voltar</button>
       <button onClick="{{ wizNext }}" disabled="{{ nextDisabled }}" style="flex:1;padding:13px;background: {{ nextBg }};color: {{ nextCol }};border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.14em;text-transform:uppercase;cursor: {{ nextCursor }};transition:.2s">{{ nextLabel }}</button>

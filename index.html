@@ -89,7 +89,7 @@
   </sc-if>
   <sc-if value="{{ navNarrow }}">
     <sc-if value="{{ canBack }}">
-      <button onClick="{{ back }}" title="Voltar" style="width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:transparent;color:#cfc7b4;border:1px solid rgba(255,255,255,.12);border-radius:8px;font-size:17px;cursor:pointer">←</button>
+      <button onClick="{{ back }}" aria-label="Voltar" title="Voltar" style="width:44px;height:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:transparent;color:#cfc7b4;border:1px solid rgba(255,255,255,.12);border-radius:8px;font-size:17px;cursor:pointer">←</button>
     </sc-if>
     <sc-if value="{{ isLoggedIn }}">
       <div onClick="{{ goProfile }}" title="Perfil" style="width:44px;height:44px;flex-shrink:0;border-radius:50%;background:#1c1a24;border:1.5px solid #c6a35e;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:14px;color:#e0c179;cursor:pointer">{{ userInitial }}</div>
@@ -186,7 +186,7 @@
 
 <!-- ========================= MESTRE · LOBBY ========================= -->
 <sc-if value="{{ isMLobby }}" data-screen-label="Mestre Lobby">
-<dc-import name="MLobby" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" startSessionDisabled="{{ startSessionDisabled }}" startBlockReason="{{ startBlockReason }}" startSessionLabel="{{ startSessionLabel }}" startSessionBg="{{ startSessionBg }}" startSessionCol="{{ startSessionCol }}" startSessionCursor="{{ startSessionCursor }}" tableCode="{{ tableCode }}" lobbyInviteLink="{{ lobbyInviteLink }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" lobbyNoAuth="{{ lobbyNoAuth }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
+<dc-import name="MLobby" errLobby="{{ errLobby }}" hasErrLobby="{{ hasErrLobby }}" dismissErrLobby="{{ dismissErrLobby }}" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" startSessionDisabled="{{ startSessionDisabled }}" startBlockReason="{{ startBlockReason }}" startSessionLabel="{{ startSessionLabel }}" startSessionBg="{{ startSessionBg }}" startSessionCol="{{ startSessionCol }}" startSessionCursor="{{ startSessionCursor }}" tableCode="{{ tableCode }}" lobbyInviteLink="{{ lobbyInviteLink }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" lobbyNoAuth="{{ lobbyNoAuth }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · SESSÃO (PAINEL) ========================= -->
@@ -333,9 +333,10 @@
               </div>
               <div style="font-size:11px;color:#cdc6b6;line-height:1.25;margin-bottom:3px;min-height:28px">{{ c.name }}</div>
               <div style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color: {{ c.col }};margin-bottom:7px">{{ c.type }}</div>
+              <div style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#8d887c;margin:-4px 0 7px">{{ c.visText }}</div>
               <div style="display:flex;gap:6px;justify-content:center">
-                <button onClick="{{ c.onDec }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer" style-hover="border-color:rgba(255,255,255,.3)">−</button>
-                <button onClick="{{ c.onAdv }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid {{ c.col }}66;color: {{ c.col }};font-size:14px;cursor:pointer" style-hover="background:#221f2a">+</button>
+                <button onClick="{{ c.onDec }}" aria-label="Reduzir relógio {{ c.name }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer" style-hover="border-color:rgba(255,255,255,.3)">−</button>
+                <button onClick="{{ c.onAdv }}" aria-label="Avançar relógio {{ c.name }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid {{ c.col }}66;color: {{ c.col }};font-size:14px;cursor:pointer" style-hover="background:#221f2a">+</button>
               </div>
             </div>
           </sc-for>
@@ -350,10 +351,11 @@
                   <div style="position:absolute;inset:10px;border-radius:50%;background:#0c0b11;border:1px solid rgba(198,166,100,.18);display:flex;align-items:center;justify-content:center;font-family:'Space Mono';font-weight:700;font-size:14px;color:#e9e3d4">{{ c.label }}</div>
                 </div>
                 <div style="font-size:11px;color:#cdc6b6;line-height:1.25;margin-bottom:2px;min-height:28px">{{ c.name }}</div>
-                <div style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color: {{ c.ownerCol }};margin-bottom:7px">▸ {{ c.ownerName }}</div>
+                <div style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color: {{ c.ownerCol }};margin-bottom:3px">▸ {{ c.ownerName }}</div>
+                <div style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#8d887c;margin-bottom:7px">{{ c.visText }}</div>
                 <div style="display:flex;gap:6px;justify-content:center">
-                  <button onClick="{{ c.onDec }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer">−</button>
-                  <button onClick="{{ c.onAdv }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid {{ c.col }}66;color: {{ c.col }};font-size:14px;cursor:pointer">+</button>
+                  <button onClick="{{ c.onDec }}" aria-label="Reduzir relógio {{ c.name }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer">−</button>
+                  <button onClick="{{ c.onAdv }}" aria-label="Avançar relógio {{ c.name }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid {{ c.col }}66;color: {{ c.col }};font-size:14px;cursor:pointer">+</button>
                 </div>
               </div>
             </sc-for>
@@ -401,6 +403,8 @@
         </div>
       </sc-if>
       <div style="padding:20px">
+        <!-- erro de consequencia fica visivel em qualquer ferramenta ate dar certo -->
+        <sc-if value="{{ hasErrCons }}"><div role="alert" style="margin:0 0 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:6px"><span style="font-size:14px;color:#e08a8a;flex-shrink:0">⚠</span><span style="flex:1;min-width:160px;font-size:13px;color:#e9e3d4">{{ errCons }}</span><button onClick="{{ retryCons }}" style="flex-shrink:0;background:transparent;border:1px solid rgba(198,166,100,.35);color:#cfc7b4;border-radius:4px;font-size:11px;letter-spacing:.04em;padding:7px 11px;cursor:pointer;min-height:36px">Tentar de novo</button><button onClick="{{ dismissErrCons }}" aria-label="Dispensar aviso" style="flex-shrink:0;background:transparent;border:none;color:#8d887c;font-size:14px;cursor:pointer;min-width:36px;min-height:36px">✕</button></div></sc-if>
         <!-- TESTES -->
         <sc-if value="{{ toolTestes }}">
           <!-- sub-tabs Geral / Combate -->
@@ -478,6 +482,7 @@
             <button onClick="{{ rollMaster }}" disabled="{{ rollMasterBlocked }}" title="Rolar localmente" style="padding:13px 16px;background:transparent;color:#cfc7b4;border:1px solid rgba(198,166,100,.35);border-radius:2px;font:600 12px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.7);color:#e9e3d4"><sc-if value="{{ testCombate }}">⚔</sc-if><sc-if value="{{ testGeral }}">⚄</sc-if> Rolar</button>
           </div>
           <sc-if value="{{ sendTestBlock }}"><div style="font-size:11px;color:#a39e90;text-align:center;margin-top:8px;letter-spacing:.02em">{{ sendTestBlock }}</div></sc-if>
+          <sc-if value="{{ hasErrTeste }}"><div role="alert" style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:6px"><span style="font-size:14px;color:#e08a8a;flex-shrink:0">⚠</span><span style="flex:1;min-width:160px;font-size:13px;color:#e9e3d4">{{ errTeste }}</span><button onClick="{{ retryTeste }}" style="flex-shrink:0;background:transparent;border:1px solid rgba(198,166,100,.35);color:#cfc7b4;border-radius:4px;font-size:11px;letter-spacing:.04em;padding:7px 11px;cursor:pointer;min-height:36px">Tentar de novo</button><button onClick="{{ dismissErrTeste }}" aria-label="Dispensar aviso" style="flex-shrink:0;background:transparent;border:none;color:#8d887c;font-size:14px;cursor:pointer;min-width:36px;min-height:36px">✕</button></div></sc-if>
           <sc-if value="{{ testSentFlash }}"><div style="font-size:11px;color:#7fae8f;text-align:center;margin-top:8px;letter-spacing:.04em;animation:fadeIn .3s ease">✓ Teste enviado a {{ testSentTo }} — aguardando rolagem.</div></sc-if>
           <sc-if value="{{ hasSentReqs }}">
             <div style="margin-top:14px">
@@ -602,13 +607,14 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:13px;color:#e9e3d4">{{ c.name }}</span><span style="font-family:'Space Mono';font-size:13px;color: {{ c.col }}">{{ c.label }}</span></div>
                 <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">{{ c.type }} · {{ c.scopeLabel }}</div>
                 <div style="display:flex;gap:6px">
-                  <button onClick="{{ c.onDec }}" style="flex:1;padding:6px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;border-radius:3px;font-size:12px;cursor:pointer">−</button>
+                  <button onClick="{{ c.onDec }}" aria-label="Reduzir relógio {{ c.name }}" style="flex:1;padding:6px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;border-radius:3px;font-size:12px;cursor:pointer">−</button>
                   <button onClick="{{ c.onAdv }}" style="flex:1;padding:6px;background:#1a1820;border:1px solid {{ c.col }}55;color: {{ c.col }};border-radius:3px;font-size:12px;cursor:pointer">+ Avançar</button>
                   <button onClick="{{ c.onReveal }}" style="padding:6px 9px;background:transparent;border:1px solid rgba(198,166,100,.25);color:#cfc7b4;border-radius:3px;font-size:11px;cursor:pointer">{{ c.revealLabel }}</button>
-                  <button onClick="{{ c.onDelete }}" style="padding:6px 9px;background:transparent;border:1px solid rgba(196,30,58,.25);color:#c44a5e;border-radius:3px;font-size:12px;cursor:pointer">✕</button>
+                  <button onClick="{{ c.onDelete }}" aria-label="Excluir relógio {{ c.name }}" style="padding:6px 9px;background:transparent;border:1px solid rgba(196,30,58,.25);color:#c44a5e;border-radius:3px;font-size:12px;cursor:pointer">✕</button>
                 </div>
               </div>
             </sc-for>
+            <sc-if value="{{ noClocksAll }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:14px 6px">Nenhum relógio nesta mesa. Use ＋ Novo relógio para medir uma ameaça, um objetivo ou uma investigação.</div></sc-if>
           </div>
         </sc-if>
         <!-- ESTRESSE -->
@@ -659,12 +665,13 @@
                 </div>
                 <div style="display:flex;align-items:center;gap:8px">
                   <span style="font-size:10px;letter-spacing:.06em;color:#7e7a70;flex:1">◷ {{ b.clockName }}</span>
-                  <button onClick="{{ b.onDec }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer">−</button>
-                  <button onClick="{{ b.onInc }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid {{ b.col }}66;color: {{ b.col }};font-size:14px;cursor:pointer">+</button>
-                  <button onClick="{{ b.onDelete }}" style="width:26px;height:24px;border-radius:3px;background:transparent;border:1px solid rgba(196,30,58,.25);color:#c44a5e;font-size:12px;cursor:pointer">✕</button>
+                  <button onClick="{{ b.onDec }}" aria-label="Reduzir barra {{ b.name }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;font-size:14px;cursor:pointer">−</button>
+                  <button onClick="{{ b.onInc }}" aria-label="Aumentar barra {{ b.name }}" style="width:26px;height:24px;border-radius:3px;background:#1a1820;border:1px solid {{ b.col }}66;color: {{ b.col }};font-size:14px;cursor:pointer">+</button>
+                  <button onClick="{{ b.onDelete }}" aria-label="Excluir barra {{ b.name }}" style="width:26px;height:24px;border-radius:3px;background:transparent;border:1px solid rgba(196,30,58,.25);color:#c44a5e;font-size:12px;cursor:pointer">✕</button>
                 </div>
               </div>
             </sc-for>
+            <sc-if value="{{ noStressBars }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:14px 6px">Nenhuma barra de estresse. Crie uma para acompanhar a pressão sobre um personagem.</div></sc-if>
           </div>
         </sc-if>
         <!-- PISTAS: somente leitura. O status muda pelos relogios de investigacao, -->
@@ -732,7 +739,7 @@
                 <span style="font-size:13px;color:#e9e3d4">{{ w.name }}</span>
                 <span style="font-size:11px;color:#a07f4a;font-family:'Cormorant Garamond';font-style:italic">Personalizado</span>
               </button>
-              <button onClick="{{ w.onDelete }}" style="padding:11px 11px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#8d887c;border-radius:4px;font-size:12px;cursor:pointer" style-hover="border-color:rgba(196,30,58,.4);color:#c44a5e">✕</button>
+              <button onClick="{{ w.onDelete }}" aria-label="Excluir ferimento {{ w.name }} da biblioteca" style="padding:11px 11px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#8d887c;border-radius:4px;font-size:12px;cursor:pointer" style-hover="border-color:rgba(196,30,58,.4);color:#c44a5e">✕</button>
             </div>
           </sc-for>
 
@@ -787,7 +794,7 @@
                 <span style="font-size:13px;color:#e9e3d4">⚑ {{ c.name }}</span>
                 <span style="font-size:11px;color:#a07f4a;font-family:'Cormorant Garamond';font-style:italic">Personalizada</span>
               </button>
-              <button onClick="{{ c.onDelete }}" style="padding:11px 11px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#8d887c;border-radius:4px;font-size:12px;cursor:pointer" style-hover="border-color:rgba(196,30,58,.4);color:#c44a5e">✕</button>
+              <button onClick="{{ c.onDelete }}" aria-label="Excluir condição {{ c.name }} da biblioteca" style="padding:11px 11px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#8d887c;border-radius:4px;font-size:12px;cursor:pointer" style-hover="border-color:rgba(196,30,58,.4);color:#c44a5e">✕</button>
             </div>
           </sc-for>
 
@@ -954,6 +961,8 @@
             <button onClick="{{ addLibrary }}" disabled="{{ libAddDisabled }}" style="width:100%;padding:9px;background: {{ libAddBg }};color: {{ libAddCol }};border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor: {{ libAddCursor }}">＋ Cadastrar {{ libKindLabel }}</button>
           </div>
           <!-- list -->
+          <!-- Etapa 6: busca no acervo. Filtra so o que este Mestre ja tem na biblioteca. -->
+          <input type="search" value="{{ libSearch }}" onInput="{{ onLibSearch }}" placeholder="Buscar na biblioteca" aria-label="Buscar na biblioteca" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;margin-bottom:10px"/>
           <div style="display:flex;flex-direction:column;gap:8px">
             <sc-for list="{{ libraryList }}" as="l" hint-placeholder-count="4">
               <div style="display:flex;gap:11px;align-items:center;padding:11px 13px;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:5px">
@@ -961,6 +970,7 @@
                 <div style="flex:1"><div style="font-size:13px;color:#e9e3d4">{{ l.name }} <sc-if value="{{ l.hasBonus }}"><span style="font-family:'Space Mono';color:#e0c179;font-size:12px">+{{ l.bonus }}</span></sc-if></div><sc-if value="{{ l.hasDesc }}"><div style="font-size:11px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic">{{ l.desc }}</div></sc-if></div>
               </div>
             </sc-for>
+            <sc-if value="{{ libNoResults }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:14px 6px">Nada encontrado para “{{ libSearch }}”.</div></sc-if>
           </div>
         </sc-if>
       </div>
@@ -1002,12 +1012,12 @@
 
 <!-- ========================= JOGADOR · LOBBY (aguardando mestre) ========================= -->
 <sc-if value="{{ isJLobby }}" data-screen-label="Jogador Lobby">
-<dc-import name="JLobby" joinTableType="{{ joinTableType }}" joinTableName="{{ joinTableName }}" myCharAccent="{{ myCharAccent }}" myCharInitial="{{ myCharInitial }}" myCharName="{{ myCharName }}" myCharSensLabel="{{ myCharSensLabel }}" lobbyPlayerCount="{{ lobbyPlayerCount }}" noLobbyPlayers="{{ noLobbyPlayers }}" lobbyPlayers="{{ lobbyPlayers }}" mySheetLabel="{{ mySheetLabel }}" mySheetCol="{{ mySheetCol }}" leaveTable="{{ leaveTable }}"/>
+<dc-import name="JLobby" needsSheet="{{ needsSheet }}" toWizard="{{ toWizard }}" errJogador="{{ errJogador }}" hasErrJogador="{{ hasErrJogador }}" dismissErrJogador="{{ dismissErrJogador }}" retryJogador="{{ retryJogador }}" joinTableType="{{ joinTableType }}" joinTableName="{{ joinTableName }}" myCharAccent="{{ myCharAccent }}" myCharInitial="{{ myCharInitial }}" myCharName="{{ myCharName }}" myCharSensLabel="{{ myCharSensLabel }}" lobbyPlayerCount="{{ lobbyPlayerCount }}" noLobbyPlayers="{{ noLobbyPlayers }}" lobbyPlayers="{{ lobbyPlayers }}" mySheetLabel="{{ mySheetLabel }}" mySheetCol="{{ mySheetCol }}" leaveTable="{{ leaveTable }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · WIZARD ========================= -->
 <sc-if value="{{ isJWizard }}" data-screen-label="Jogador Wizard">
-<dc-import name="JWizard" wizMaxW="{{ wizMaxW }}" stepDots="{{ stepDots }}" wizStep="{{ wizStep }}" stepTitle="{{ stepTitle }}" step1="{{ step1 }}" onWizName="{{ onWizName }}" wiz="{{ wiz }}" onWizChar="{{ onWizChar }}" onWizAge="{{ onWizAge }}" onWizOrigin="{{ onWizOrigin }}" onWizAppear="{{ onWizAppear }}" onWizClothes="{{ onWizClothes }}" onWizPers="{{ onWizPers }}" step2="{{ step2 }}" pxBase="{{ pxBase }}" pxImgA="{{ pxImgA }}" pxImgB="{{ pxImgB }}" pxRedOp="{{ pxRedOp }}" pxBlueOp="{{ pxBlueOp }}" pxMagOp="{{ pxMagOp }}" pxSteelOp="{{ pxSteelOp }}" pxColor="{{ pxColor }}" pxGlow="{{ pxGlow }}" embers="{{ embers }}" skyline="{{ skyline }}" wizDesktop="{{ wizDesktop }}" sensList="{{ sensList }}" wizMobile="{{ wizMobile }}" showManifest="{{ showManifest }}" onWizManifest="{{ onWizManifest }}" manifestLabel="{{ manifestLabel }}" step3="{{ step3 }}" weakHeader="{{ weakHeader }}" weakSubtitle="{{ weakSubtitle }}" isHumano="{{ isHumano }}" onWizMarks="{{ onWizMarks }}" isSensitive="{{ isSensitive }}" weakCountColor="{{ weakCountColor }}" weakCount="{{ weakCount }}" weakOpts="{{ weakOpts }}" step4="{{ step4 }}" poolColor="{{ poolColor }}" poolLeft="{{ poolLeft }}" attrView="{{ attrView }}" step5="{{ step5 }}" skillColor="{{ skillColor }}" skillLeft="{{ skillLeft }}" skillGroups="{{ skillGroups }}" step6="{{ step6 }}" onWizHistory="{{ onWizHistory }}" historyPrompts="{{ historyPrompts }}" step7="{{ step7 }}" sumName="{{ sumName }}" sumSensColor="{{ sumSensColor }}" sumSens="{{ sumSens }}" sumPlayerName="{{ sumPlayerName }}" sumAge="{{ sumAge }}" sumOrigin="{{ sumOrigin }}" sumPersonality="{{ sumPersonality }}" sumAppearance="{{ sumAppearance }}" sumClothes="{{ sumClothes }}" sumBonus="{{ sumBonus }}" sumIsHumano="{{ sumIsHumano }}" sumManifest="{{ sumManifest }}" sumAttrs="{{ sumAttrs }}" sumHasSkills="{{ sumHasSkills }}" sumSkills="{{ sumSkills }}" sumHasWeak="{{ sumHasWeak }}" sumWeak="{{ sumWeak }}" sumHasHistory="{{ sumHasHistory }}" sumHistory="{{ sumHistory }}" narrative="{{ narrative }}" wizPrev="{{ wizPrev }}" wizNext="{{ wizNext }}" nextDisabled="{{ nextDisabled }}" nextBg="{{ nextBg }}" nextCol="{{ nextCol }}" nextCursor="{{ nextCursor }}" nextLabel="{{ nextLabel }}"/>
+<dc-import name="JWizard" wizRestored="{{ wizRestored }}" discardWizDraft="{{ discardWizDraft }}" dismissWizRestored="{{ dismissWizRestored }}" errFicha="{{ errFicha }}" hasErrFicha="{{ hasErrFicha }}" dismissErrFicha="{{ dismissErrFicha }}" wizMaxW="{{ wizMaxW }}" stepDots="{{ stepDots }}" wizStep="{{ wizStep }}" stepTitle="{{ stepTitle }}" step1="{{ step1 }}" onWizName="{{ onWizName }}" wiz="{{ wiz }}" onWizChar="{{ onWizChar }}" onWizAge="{{ onWizAge }}" onWizOrigin="{{ onWizOrigin }}" onWizAppear="{{ onWizAppear }}" onWizClothes="{{ onWizClothes }}" onWizPers="{{ onWizPers }}" step2="{{ step2 }}" pxBase="{{ pxBase }}" pxImgA="{{ pxImgA }}" pxImgB="{{ pxImgB }}" pxRedOp="{{ pxRedOp }}" pxBlueOp="{{ pxBlueOp }}" pxMagOp="{{ pxMagOp }}" pxSteelOp="{{ pxSteelOp }}" pxColor="{{ pxColor }}" pxGlow="{{ pxGlow }}" embers="{{ embers }}" skyline="{{ skyline }}" wizDesktop="{{ wizDesktop }}" sensList="{{ sensList }}" wizMobile="{{ wizMobile }}" showManifest="{{ showManifest }}" onWizManifest="{{ onWizManifest }}" manifestLabel="{{ manifestLabel }}" step3="{{ step3 }}" weakHeader="{{ weakHeader }}" weakSubtitle="{{ weakSubtitle }}" isHumano="{{ isHumano }}" onWizMarks="{{ onWizMarks }}" isSensitive="{{ isSensitive }}" weakCountColor="{{ weakCountColor }}" weakCount="{{ weakCount }}" weakOpts="{{ weakOpts }}" step4="{{ step4 }}" poolColor="{{ poolColor }}" poolLeft="{{ poolLeft }}" attrView="{{ attrView }}" step5="{{ step5 }}" skillColor="{{ skillColor }}" skillLeft="{{ skillLeft }}" skillGroups="{{ skillGroups }}" step6="{{ step6 }}" onWizHistory="{{ onWizHistory }}" historyPrompts="{{ historyPrompts }}" step7="{{ step7 }}" sumName="{{ sumName }}" sumSensColor="{{ sumSensColor }}" sumSens="{{ sumSens }}" sumPlayerName="{{ sumPlayerName }}" sumAge="{{ sumAge }}" sumOrigin="{{ sumOrigin }}" sumPersonality="{{ sumPersonality }}" sumAppearance="{{ sumAppearance }}" sumClothes="{{ sumClothes }}" sumBonus="{{ sumBonus }}" sumIsHumano="{{ sumIsHumano }}" sumManifest="{{ sumManifest }}" sumAttrs="{{ sumAttrs }}" sumHasSkills="{{ sumHasSkills }}" sumSkills="{{ sumSkills }}" sumHasWeak="{{ sumHasWeak }}" sumWeak="{{ sumWeak }}" sumHasHistory="{{ sumHasHistory }}" sumHistory="{{ sumHistory }}" narrative="{{ narrative }}" wizPrev="{{ wizPrev }}" wizNext="{{ wizNext }}" nextDisabled="{{ nextDisabled }}" nextBg="{{ nextBg }}" nextCol="{{ nextCol }}" nextCursor="{{ nextCursor }}" nextLabel="{{ nextLabel }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · INTRO ========================= -->
@@ -1045,6 +1055,9 @@
         <div style="width: {{ hdrAvatar }};height: {{ hdrAvatar }};border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:22px;color:#efe8d8;background: {{ selfAvatarBg }};border:2px solid #c41e3a;box-shadow:0 0 18px rgba(196,30,58,.25)">{{ selfAvatarInitial }}</div>
         <div style="min-width:0">
           <div style="font-family:'Cinzel';font-weight:700;font-size: {{ hdrNameSize }};color:#efe8d8;line-height:1.15;overflow-wrap:anywhere">{{ self.char }}</div>
+          <!-- Etapa 6: perda de conexao visivel sempre, nao so quando ha relogios. Sinal real
+               (falha na leitura da sessao); nao existe selo de "conectado" ficticio. -->
+          <sc-if value="{{ sessionStale }}"><div role="status" style="display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:11px;letter-spacing:.06em;color:#8d887c;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:3px 10px">Reconectando… mostrando o último estado recebido</div></sc-if>
           <div style="font-size:13px;color:#a39e90;margin-top:4px">Sensibilidade: <span style="color: {{ selfSens.accent }}">{{ selfSens.label }}</span></div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:7px">
             <sc-for list="{{ selfConditions }}" as="c" hint-placeholder-count="2"><span style="font-size:12px;color: {{ c.col }};padding:4px 10px;border:1px solid {{ c.col }}55;border-radius:20px">{{ c.icon }} {{ c.label }}</span></sc-for>
@@ -1123,11 +1136,11 @@
             <!-- Somente leitura: nenhum controle de avancar/reduzir/revelar/excluir. -->
             <!-- A secao inteira desaparece quando nao ha relogio permitido, para nao -->
             <!-- anunciar a existencia de relogios secretos do Mestre. -->
-            <sc-if value="{{ hasPlayerClocks }}">
+            <sc-if value="{{ hasMyClocks }}">
               <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:14px;margin-top:14px">
                 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
                   <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e">Relógios</div>
-                  <sc-if value="{{ sessionStale }}"><span style="font-size:10px;letter-spacing:.06em;color:#8d887c;border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:3px 9px">Reconectando…</span></sc-if>
+
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px">
                   <sc-for list="{{ playerClocks }}" as="c" hint-placeholder-count="3">
@@ -1237,6 +1250,7 @@
                     <div style="flex:1"><div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7e7a70;margin-bottom:3px">{{ e.icon }} {{ e.t }}</div><div style="font-family:'Cormorant Garamond';font-size:16px;line-height:1.4;color:#cdc6b6">{{ e.txt }}</div></div>
                   </div>
                 </sc-for>
+                <sc-if value="{{ noLogEntries }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:14px 6px">O diário registra os acontecimentos que a mesa pode ver. Ele começa a encher quando a cena andar.</div></sc-if>
               </div>
             </div>
           </sc-if>
@@ -1368,6 +1382,7 @@
                   <div style="flex:1"><div style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">{{ n.name }}</div><div style="font-size:12px;color: {{ n.acc }}">{{ n.faction }}</div><p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:5px 0 0;line-height:1.4">{{ n.desc }}</p></div>
                 </div>
               </sc-for>
+              <sc-if value="{{ noNpcsKnown }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:14px 6px">Nenhum personagem conhecido ainda. Eles aparecem aqui quando o Mestre os apresentar ao grupo.</div></sc-if>
             </div>
           </sc-if>
           <!-- INVENTÁRIO -->
@@ -1401,7 +1416,7 @@
                       <div style="display:flex;align-items:center;gap:11px;background:#fbf6ea;border:1px solid rgba(122,90,46,.25);border-radius:3px;padding:12px 14px;box-shadow:0 2px 6px rgba(60,40,10,.1)">
                         <span style="font-size:16px;color:#7a5a2e">{{ o.icon }}</span>
                         <div style="flex:1"><div style="font-size:14px;color:#2a2014;font-weight:600">{{ o.name }} <sc-if value="{{ o.hasBonus }}"><span style="font-family:'Space Mono';color:#9a6a1a">+{{ o.bonus }}</span></sc-if></div><sc-if value="{{ o.hasDesc }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#6a543a">{{ o.desc }}</div></sc-if></div>
-                        <button onClick="{{ o.onRemove }}" style="font-size:13px;color:#a04a3a;background:transparent;border:none;cursor:pointer">✕</button>
+                        <button onClick="{{ o.onRemove }}" aria-label="Remover {{ o.name }} do inventário" style="font-size:13px;color:#a04a3a;background:transparent;border:none;cursor:pointer">✕</button>
                       </div>
                     </sc-for>
                     <sc-if value="{{ noOwned }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:14px 0">{{ emptyStuffMsg }}</div></sc-if>
@@ -1492,7 +1507,7 @@
         <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#c6a35e">Gerenciar Mesa</div>
         <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ sessionTitle }}</div>
       </div>
-      <button onClick="{{ closeManage }}" style="width:30px;height:30px;flex-shrink:0;border-radius:50%;background:transparent;border:1px solid rgba(255,255,255,.12);color:#a39e90;font-size:15px;cursor:pointer" style-hover="border-color:rgba(255,255,255,.35);color:#e9e3d4">✕</button>
+      <button onClick="{{ closeManage }}" aria-label="Fechar" style="width:30px;height:30px;flex-shrink:0;border-radius:50%;background:transparent;border:1px solid rgba(255,255,255,.12);color:#a39e90;font-size:15px;cursor:pointer" style-hover="border-color:rgba(255,255,255,.35);color:#e9e3d4">✕</button>
     </div>
 
     <div style="padding:20px 24px 24px">
@@ -1595,7 +1610,7 @@
     <!-- hero with photo -->
     <div style="height:200px;position:relative;background:radial-gradient(110% 130% at 50% 0%, {{ charDetail.surf }}, #0c0a10);display:flex;align-items:flex-end">
       <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 20%, {{ charDetail.glow }}, transparent 70%);opacity:.5"></div>
-      <button onClick="{{ closeChar }}" style="position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;background:rgba(8,8,12,.6);border:1px solid rgba(255,255,255,.14);color:#cfc7b4;font-size:15px;cursor:pointer;z-index:3" style-hover="color:#e9e3d4;border-color:rgba(255,255,255,.4)">✕</button>
+      <button onClick="{{ closeChar }}" aria-label="Fechar ficha" style="position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;background:rgba(8,8,12,.6);border:1px solid rgba(255,255,255,.14);color:#cfc7b4;font-size:15px;cursor:pointer;z-index:3" style-hover="color:#e9e3d4;border-color:rgba(255,255,255,.4)">✕</button>
       <!-- photo / avatar with edit -->
       <label style="position:relative;margin:0 0 -42px 26px;cursor:pointer;display:block">
         <div style="width:96px;height:96px;border-radius:50%;background: {{ charDetail.avatarBg }};border:2px solid {{ charDetail.acc }};box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:36px;color:#efe8d8;overflow:hidden">{{ charDetail.avatarInitial }}</div>
@@ -1676,7 +1691,7 @@
     <!-- hero -->
     <div style="height:160px;position:relative;background:radial-gradient(110% 130% at 50% 0%, {{ playerCard.surf }}, #0c0a10);display:flex;align-items:flex-end">
       <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 20%, {{ playerCard.glow }}, transparent 70%);opacity:.5"></div>
-      <button onClick="{{ closePlayerCard }}" style="position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;background:rgba(8,8,12,.6);border:1px solid rgba(255,255,255,.14);color:#cfc7b4;font-size:15px;cursor:pointer;z-index:3" style-hover="color:#e9e3d4;border-color:rgba(255,255,255,.4)">✕</button>
+      <button onClick="{{ closePlayerCard }}" aria-label="Fechar ficha do jogador" style="position:absolute;top:14px;right:14px;width:32px;height:32px;border-radius:50%;background:rgba(8,8,12,.6);border:1px solid rgba(255,255,255,.14);color:#cfc7b4;font-size:15px;cursor:pointer;z-index:3" style-hover="color:#e9e3d4;border-color:rgba(255,255,255,.4)">✕</button>
       <div style="position:relative;margin:0 0 -38px 26px">
         <div style="width:88px;height:88px;border-radius:50%;background: {{ playerCard.avatarBg }};border:2px solid {{ playerCard.acc }};box-shadow:0 10px 30px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:34px;color:#efe8d8;overflow:hidden">{{ playerCard.avatarInitial }}</div>
       </div>
@@ -1777,7 +1792,7 @@ class Component extends DCLogic {
     tables:[],
     players:[],
     clocks:[],
-    sessionStale:false, clockBump:{}, groupOpenId:null,
+    sessionStale:false, clockBump:{}, groupOpenId:null, actionErrors:{},
     activeTableId:null, saveStatus:'idle', saveError:'', reconnected:false, statusBusy:false, tableStatus:null, tableGone:false, accountLib:null,
     clockDraft:{name:'',seg:8,type:'Investigação',scope:'mesa',playerId:'',visMode:'todos'}, showClockForm:false,
     stressBars:[],
@@ -1997,10 +2012,18 @@ class Component extends DCLogic {
   // com chave e canal separados por mesa.
   _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
-  _flashActionError(msg){
+  // Etapa 6: alem do aviso flutuante (some em 4,5 s), o erro com contexto fica junto da
+  // acao que falhou ate ela dar certo ou ate o usuario dispensar. ctx: teste, consequencia,
+  // lobby, ficha, jogador. Bloqueios ja exibidos ao vivo (ex.: "escolha a pericia") nao usam ctx.
+  _flashActionError(msg,ctx){
     clearTimeout(this._actionErrT);
-    this.setState({actionError:msg});
+    this.setState(s=>({actionError:msg,actionErrors:ctx?{...(s.actionErrors||{}),[ctx]:msg}:(s.actionErrors||{})}));
     this._actionErrT=setTimeout(()=>this.setState({actionError:''}),4500);
+  }
+  retryConsequence(){ const c=this._lastCons; if(!c) return; this._consequence(c.pid,c.action,c.payload,c.logEntry); }
+  _clearActionError(ctx){
+    if(!(this.state.actionErrors||{})[ctx]) return;
+    this.setState(s=>{ const e={...(s.actionErrors||{})}; delete e[ctx]; return {actionErrors:e}; });
   }
   _isLocalTableId(id){ return typeof id==='string' && /^t\d+$/.test(id); }
   _isRemoteCtx(){ const s=this.state; return !!(s.memberId || (s.activeTableId && !this._isLocalTableId(s.activeTableId))); }
@@ -2187,6 +2210,7 @@ class Component extends DCLogic {
     this._tsSaveT=this._retryT=this._loadRetryT=null; this._loadedFor=null; this._dirtySince=0;
   }
   componentDidUpdate(){
+    if(this.state.screen==='j_wizard'){ clearTimeout(this._wizDraftT); this._wizDraftT=setTimeout(()=>this._saveWizDraft(),400); }
     this._syncParallax();
     if(!this._ready) return;
     if(!this._isRemoteCtx()){ clearTimeout(this._saveT); this._saveT=setTimeout(()=>this._saveSession(),400); }
@@ -2264,7 +2288,12 @@ class Component extends DCLogic {
       age:cd.age||'',origin:cd.origin||'',appearance:cd.appearance||'',clothes:cd.clothes||'',personality:cd.personality||'',manifest:cd.manifest||'',marks:cd.marks||'',
       history:cd.history||'',wounds:Array.isArray(mbr.wounds)?mbr.wounds:[],conditions:Array.isArray(mbr.conditions)?mbr.conditions:[]};
   }
+  // Etapa 6: cada escolha explicita de contexto (entrar com codigo, escolher papel, sair,
+  // abrir outra mesa, sair da conta) incrementa _ctxGen. Uma retomada automatica que
+  // termina DEPOIS disso descarta o proprio resultado em vez de sobrescrever a escolha.
+  _bumpCtx(){ this._ctxGen=(this._ctxGen||0)+1; }
   async _tryResumeMembership(){
+    const gen=this._ctxGen||0;
     let saved=null;
     try{
       const tab=sessionStorage.getItem('afterdark:tabTable');
@@ -2277,6 +2306,7 @@ class Component extends DCLogic {
       // Vínculo antigo de visitante sem token não passa na autorização e cai no
       // ramo de erro abaixo — o jogador precisa entrar de novo pelo código.
       const {data,error}=await this.sb.rpc('player_get_state',{p_member_id:saved.memberId,p_token:saved.token||null});
+      if((this._ctxGen||0)!==gen) return;   // o usuario escolheu outro contexto enquanto esperava
       const mbr=data&&data.member;
       if(error||!mbr||!mbr.id){
         // Só descarta o vínculo quando o banco RECUSA (vínculo inválido/removido). Falha de
@@ -2293,8 +2323,16 @@ class Component extends DCLogic {
       }));
       if(status==='Em andamento'||/^Pausada/.test(status||'')||status==='Encerrada'){
         await this._loadTableSession(saved.tableId,false);
+        if((this._ctxGen||0)!==gen) return;
         this.setState({screen:'j_panel',nav:[]});
         this._startJogadorSessionPoll(saved.tableId);
+      } else if(!mbr.char_name){
+        // Ainda sem ficha (ex.: F5 no meio da criacao): volta ao wizard, que recupera o
+        // rascunho. Antes caia no lobby, que nao tinha como criar a ficha.
+        // (sem polling aqui: como no fluxo normal, ele comeca ao concluir a ficha, senao o
+        // inicio da sessao arrancaria o jogador do wizard ainda sem ficha)
+        this.setState({nav:[]});
+        this.startCharWizard();
       } else {
         this.setState({screen:'j_lobby',nav:[]});
         this._startPlayerPolling(saved.tableId);
@@ -2409,9 +2447,10 @@ class Component extends DCLogic {
       this._startBusy=false; this.setState({startBusy:false});
       if(error){
         const m=error.message||'';
-        this._flashActionError(/players_not_approved/.test(m)?'Há jogadores ainda não aprovados. Aprove todos antes de iniciar.':/no_players/.test(m)?'Nenhum jogador na mesa.':'Não foi possível iniciar a sessão. Verifique sua conexão e tente novamente.');
+        this._flashActionError(/players_not_approved/.test(m)?'Há jogadores ainda não aprovados. Aprove todos antes de iniciar.':/no_players/.test(m)?'Nenhum jogador na mesa.':'Não foi possível iniciar a sessão. Verifique sua conexão e tente novamente.','lobby');
         return;
       }
+      this._clearActionError('lobby');
       this._startMemberPolling();
       this.setState(st=>({tables:st.tables.map(t=>t.id===row.id?{...t,status:'Em andamento'}:t)}));
       await this._loadTableSession(row.id,true);
@@ -2512,7 +2551,7 @@ class Component extends DCLogic {
   }
   reset(){ clearInterval(this._ri); this.setState({screen:this.state.auth.loggedIn?'profile':'landing',nav:[],role:null,mode:null,oneshot:null,sceneMode:null,roll:null,rolling:false,pRoll:null,wizStep:1}); }
   setHomeVar(v){ this.setState({homeVar:v}); }
-  pickRole(r){ if(r==='mestre'){ this.go('m_tablename',{role:r}); } else { this.go('j_join',{role:r}); } }
+  pickRole(r){ this._bumpCtx(); if(r==='mestre'){ this.go('m_tablename',{role:r}); } else { this.go('j_join',{role:r}); } }
   pickMode(m){ this.go(m==='capitulos'?'m_chapters':'m_oneshots',{mode:m}); }
   pickOneshot(k){ this.setState({oneshot:k}); }
 
@@ -2583,6 +2622,8 @@ class Component extends DCLogic {
   }
   goAfterReset(){ this.setState({screen:this.state.auth.loggedIn?'profile':'landing',nav:[]}); }
   async logout(){
+    this._bumpCtx();
+    this._clearAllWizDrafts();   // computador compartilhado: nenhum rascunho sobra apos sair
     if(this._loggingOut) return;
     const s0=this.state, tid=s0.activeTableId;
     // Mestre: a mesa precisa estar salva antes de sair (não depende do fechamento da aba).
@@ -2608,6 +2649,7 @@ class Component extends DCLogic {
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
   async openTable(t){
+    this._bumpCtx();
     if(this._opening) return;
     const prev=this.state.activeTableId;
     if(prev && prev!==t.id){
@@ -2692,13 +2734,27 @@ class Component extends DCLogic {
     this.setState({joinTableId:null,joinTableName:'',joinTableType:'',memberId:null,memberToken:null,pending:null,pRoll:null,pSend:null,pendingCount:0,selfApproved:false,selfSheetReady:false,tableStatus:null,tableGone:false,players:[],...this._blankTableSession(),joinCode:'',joinName:'',screen:this.state.auth.loggedIn?'start':'landing',nav:[]});
   }
   async leaveTable(){
-    this._stopAllPolling();
+    if(this._leaveBusy) return;
     const id=this.state.memberId;
-    if(this.sb && id){ const {error}=await this.sb.rpc('player_leave_table',{p_member_id:id,p_token:this.state.memberToken||null}); if(error) this._flashActionError('Não foi possível sair da mesa agora. Tente novamente em instantes.'); }
+    if(this.sb && id){
+      let error=null;
+      // Antes, a falha mostrava o aviso e seguia em frente: o jogador sumia da tela mas
+      // continuava membro no banco. Agora ele fica na mesa, com o erro e nova tentativa.
+      this._leaveBusy=true;
+      try{ ({error}=await this.sb.rpc('player_leave_table',{p_member_id:id,p_token:this.state.memberToken||null})); }catch(e){ error=e; }
+      this._leaveBusy=false;
+      if(error){ this._lastPlayerAction='leave'; this._flashActionError('Não foi possível sair da mesa agora. Tente novamente em instantes.','jogador'); return; }
+    }
+    // So para os pollings depois que a saida foi confirmada: em falha, a tela segue viva.
+    this._bumpCtx();
+    this._clearWizDraft(this._playerDraftKey());   // o rascunho DESTA mesa
+    this._stopAllPolling();
+    this._clearActionError('jogador');
     this._forgetMembership(this.state.joinTableId);
     this.setState({joinTableId:null,joinTableName:'',joinTableType:'',memberId:null,memberToken:null,pending:null,pRoll:null,pSend:null,pendingCount:0,selfApproved:false,selfSheetReady:false,tableStatus:null,tableGone:false,players:[],...this._blankTableSession(),joinCode:'',joinName:'',screen:this.state.auth.loggedIn?'start':'landing',nav:[]});
   }
   async joinByCode(){
+    this._bumpCtx();
     const code=(this.state.joinCode||'').trim().toUpperCase();
     if(!code){ return; }
     // 1. Verifica mesa local (mestre sem conta no mesmo dispositivo)
@@ -2807,7 +2863,8 @@ class Component extends DCLogic {
     let error=null;
     try{ ({error}=await this.sb.rpc('player_set_ready',{p_member_id:s.memberId,p_token:s.memberToken||null,p_ready:next})); }catch(e){ error=e; }
     this._readyBusy=false;
-    if(error){ this._flashActionError('Não foi possível atualizar sua prontidão. Tente novamente.'); return; }
+    if(error){ this._lastPlayerAction='ready'; this._flashActionError('Não foi possível atualizar sua prontidão. Tente novamente.','jogador'); return; }
+    this._clearActionError('jogador');
     this.setState(st=>({selfSheetReady:next,selfApproved:next?st.selfApproved:false}));
   }
   // Mestre: aprovação persistida e separada de "ficha concluída".
@@ -2817,7 +2874,8 @@ class Component extends DCLogic {
     let error=null;
     try{ ({error}=await this.sb.rpc('master_set_approval',{p_member_id:id,p_approved:true})); }catch(e){ error=e; }
     this._approveBusy=null; this._membersVer++;
-    if(error){ this._flashActionError(/sheet_not_ready/.test(error.message||'')?'Esse jogador ainda não concluiu a ficha.':'Não foi possível aprovar o jogador. Tente novamente.'); return; }
+    if(error){ this._flashActionError(/sheet_not_ready/.test(error.message||'')?'Esse jogador ainda não concluiu a ficha.':'Não foi possível aprovar o jogador. Tente novamente.','lobby'); return; }
+    this._clearActionError('lobby');
     this.setState(s=>({players:s.players.map(p=>p.id===id?{...p,approved:true,status:'pronto'}:p)}));
   }
   // Mestre: remove um membro do lobby (ex.: quem saiu sem concluir). Pede confirmação em 2 cliques.
@@ -2828,7 +2886,8 @@ class Component extends DCLogic {
     this._membersVer=(this._membersVer||0)+1;
     const {error}=await this.sb.from('table_members').delete().eq('id',id);
     this._membersVer++;
-    if(error){ this._flashActionError('Não foi possível remover o jogador. Tente novamente.'); return; }
+    if(error){ this._flashActionError('Não foi possível remover o jogador. Tente novamente.','lobby'); return; }
+    this._clearActionError('lobby');
     this.setState(s=>({players:s.players.filter(p=>p.id!==id)}));
   }
 
@@ -3063,10 +3122,10 @@ class Component extends DCLogic {
     if(error||!data||!data.ok){
       this.setState({testSending:false});
       const m=(error&&error.message)||'';
-      this._flashActionError(/invalid_skill_for_attr/.test(m)?'O banco recusou o teste: a perícia não pertence ao atributo escolhido.':/target_without_sheet/.test(m)?`${p.char} ainda não tem ficha na mesa.`:/target_not_in_table/.test(m)?'Esse jogador não está mais na mesa.':'Não foi possível enviar o teste. Verifique sua conexão e tente novamente.');
+      this._flashActionError(/invalid_skill_for_attr/.test(m)?'O banco recusou o teste: a perícia não pertence ao atributo escolhido.':/target_without_sheet/.test(m)?`${p.char} ainda não tem ficha na mesa.`:/target_not_in_table/.test(m)?'Esse jogador não está mais na mesa.':'Não foi possível enviar o teste. Verifique sua conexão e tente novamente.','teste');
       return;
     }
-    this._sendKey=null;
+    this._sendKey=null; this._clearActionError('teste');
     clearTimeout(this._sentOkT); this._sentOkT=setTimeout(()=>this.setState({testSentOk:false}),4000);
     this.setState(st=>({testSending:false,testSentOk:true,testSentTo:p.char,
       sentReqs:data.duplicate?st.sentReqs:[{id:data.id,target_member_id:p.id,kind:s.testMode,params,status:'pendente',result:null,created_at:new Date().toISOString()},...st.sentReqs],
@@ -3079,7 +3138,8 @@ class Component extends DCLogic {
     let error=null;
     try{ ({error}=await this.sb.rpc('master_cancel_request',{p_request_id:id})); }catch(e){ error=e; }
     this._cancelBusy=null;
-    if(error){ this._flashActionError('Não foi possível cancelar o teste. Tente novamente.'); return; }
+    if(error){ this._flashActionError('Não foi possível cancelar o teste. Tente novamente.','teste'); return; }
+    this._clearActionError('teste');
     this.setState(st=>({sentReqs:st.sentReqs.map(r=>r.id===id&&r.status==='pendente'?{...r,status:'cancelado'}:r)}));
   }
   // ---- solicitações de teste: lado do mestre ----
@@ -3146,7 +3206,7 @@ class Component extends DCLogic {
   // ação reaproveita a chave 'op', então o servidor não duplica o ferimento.
   async _consequence(pid,action,payload,logEntry){
     if(!pid) return false;
-    if(!this.sb||!this.state.auth.loggedIn){ this._flashActionError('Entre com sua conta para registrar consequências na mesa.'); return false; }
+    if(!this.sb||!this.state.auth.loggedIn){ this._flashActionError('Entre com sua conta para registrar consequências na mesa.','consequencia'); return false; }
     const key=pid+'|'+action+'|'+JSON.stringify(payload);
     this._consBusy=this._consBusy||{}; this._consOps=this._consOps||{};
     if(this._consBusy[key]) return false;
@@ -3157,8 +3217,8 @@ class Component extends DCLogic {
     let data=null,error=null;
     try{ ({data,error}=await this.sb.rpc('master_member_consequence',{p_member_id:pid,p_action:action,p_payload:body})); }catch(e){ error=e; }
     delete this._consBusy[key]; this._membersVer++;
-    if(error||!data||!data.ok){ this._flashActionError('Não foi possível salvar a alteração no personagem. Verifique sua conexão e tente novamente.'); return false; }
-    delete this._consOps[key];
+    if(error||!data||!data.ok){ this._lastCons={pid,action,payload,logEntry}; this._flashActionError('Não foi possível salvar a alteração no personagem. Verifique sua conexão e tente novamente.','consequencia'); return false; }
+    delete this._consOps[key]; this._lastCons=null; this._clearActionError('consequencia');
     // Consequência é visível à mesa: os jogadores veem ferimentos e condições uns dos outros.
     this.setState(s=>({players:s.players.map(x=>x.id===pid?{...x,wounds:Array.isArray(data.wounds)?data.wounds:[],conditions:Array.isArray(data.conditions)?data.conditions:[]}:x),log:logEntry?[{...logEntry,vis:'todos'},...s.log]:s.log}));
     return true;
@@ -3404,9 +3464,10 @@ class Component extends DCLogic {
     this._sheetBusy=false;
     if(error||!data||!data.ok){
       const auth=error&&/not_authorized/.test(error.message||'');
-      this._flashActionError(auth?'Seu vínculo com a mesa expirou. Entre novamente com o código de convite.':'Não foi possível salvar sua ficha na mesa. Verifique sua conexão e tente novamente.');
+      this._flashActionError(auth?'Seu vínculo com a mesa expirou. Entre novamente com o código de convite.':'Não foi possível salvar sua ficha na mesa. Verifique sua conexão e tente novamente.','ficha');
       return false;
     }
+    this._clearActionError('ficha');
     this.setState({selfSheetReady:true,selfApproved:false});
     return true;
   }
@@ -3420,6 +3481,7 @@ class Component extends DCLogic {
       if(!(await this._submitSheet(w.name||s.auth.name||'Jogador',charName,charData))) return;
     }
     const tid=this.state.joinTableId;
+    this._clearWizDraft(); this.setState({wizRestored:false});
     this.setState(st=>({screen:'j_lobby',nav:[...st.nav,'j_wizard'],self:this._selfFromMember({char_name:charName,char_data:charData,wounds:[],conditions:[]},st.self)}));
     this._startPlayerPolling(tid);
   }
@@ -3429,8 +3491,13 @@ class Component extends DCLogic {
     const name=w.charName||'Novo Personagem';
     const chData={...this._charDataFromWizard(w,attrs,name),role:w.personality||(w.sens==='humano'?'Humano Comum':'Sensitivo'),usedIn:null,photo:null,bio:w.history||''};
     if(this.sb && this.state.auth.loggedIn){
-      const {data,error}=await this.sb.from('characters').insert({name,data:chData}).select().single();
-      if(error||!data){ this._flashActionError('Não foi possível salvar o personagem. Verifique sua conexão e tente novamente.'); return; }
+      if(this._charBusy) return;   // clique duplo nao insere dois personagens
+      this._charBusy=true;
+      let data=null,error=null;
+      try{ ({data,error}=await this.sb.from('characters').insert({name,data:chData}).select().single()); }catch(e){ error=e; }
+      this._charBusy=false;
+      if(error||!data){ this._flashActionError('Não foi possível salvar o personagem. Verifique sua conexão e tente novamente.','ficha'); return; }
+      this._clearActionError('ficha'); this._clearWizDraft(); this.setState({wizRestored:false});
       this.setState(s=>({characters:[...s.characters,{...data.data,id:data.id}],screen:'profile',nav:[],profileTab:'personagens',wizStep:1}));
       return;
     }
@@ -3460,8 +3527,54 @@ class Component extends DCLogic {
   toggleGroupCard(id){ this.setState(s=>({groupOpenId:s.groupOpenId===id?null:id})); }
   closeGroupCard(){ this.setState({groupOpenId:null}); }
   clearFocus(){ this.setState({playerFocus:null}); }
-  createCharProfile(){ this.setState({wizReturn:'profile',wizStep:1,wiz:{name:this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
-  startCharWizard(){ this.setState({wizReturn:'player',wizStep:1,wiz:{name:this.state.joinName||this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); }
+  createCharProfile(){ this.setState({wizReturn:'profile',wizStep:1,wiz:{name:this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); this._restoreWizDraft(); }
+  // ---- Etapa 6: rascunho da criacao de personagem, recuperado apos F5 ----
+  // Escopo: quem esta criando (conta, ou o vinculo do visitante) + onde (perfil ou a mesa).
+  // Fica so no navegador da propria pessoa (localStorage), nunca no estado da mesa.
+  // Limpo ao concluir, ao descartar, ao sair da mesa e ao sair da conta.
+  _wizDraftKey(){
+    const s=this.state, a=s.auth||{};
+    if(s.wizReturn==='profile') return (a.loggedIn&&a.id)?`afterdark:wizDraft:u:${a.id}:perfil`:null;
+    return this._playerDraftKey();
+  }
+  _playerDraftKey(){
+    const s=this.state, a=s.auth||{};
+    const who=(a.loggedIn&&a.id)?`u:${a.id}`:(s.memberId?`v:${s.memberId}`:null);
+    return (who&&s.joinTableId)?`afterdark:wizDraft:${who}:mesa:${s.joinTableId}`:null;
+  }
+  _restoreWizDraft(){
+    // O rascunho fica preso ao contexto em que o wizard COMECOU: mesmo que mesa ou vinculo
+    // mudem com o wizard aberto, o conteudo nunca e gravado na chave de outro contexto.
+    const k=this._wizDraftKey(); this._wizDraftCtx=k; this._lastWizDraft=null;
+    let d=null; try{ d=k?JSON.parse(localStorage.getItem(k)||'null'):null; }catch(e){}
+    if(!d||!d.wiz||d.v!==1){ this.setState({wizRestored:false}); return; }
+    this._lastWizDraft=JSON.stringify({wiz:d.wiz,wizStep:d.wizStep});
+    this.setState({wiz:d.wiz,wizStep:Math.min(7,Math.max(1,Number(d.wizStep)||1)),wizRestored:true});
+  }
+  _saveWizDraft(){
+    const s=this.state; if(s.screen!=='j_wizard'||!s.wiz) return;
+    const k=this._wizDraftCtx; if(!k) return;
+    const w=s.wiz;
+    // nao grava um rascunho vazio (so o nome do jogador preenchido de fabrica)
+    const temConteudo=!!(w.charName||w.sens||w.history||w.age||w.origin||w.appearance||w.clothes||w.personality||w.manifest||w.marks
+      ||(w.weaknesses||[]).length||Object.keys(w.skills||{}).length||s.wizStep>1);
+    if(!temConteudo) return;
+    // Compara so o CONTEUDO (sem o horario): redesenhos sem mudanca nao regravam. Antes, o
+    // horario fazia toda renderizacao gravar de novo, e uma aba antiga recriava o rascunho
+    // apagado pelo logout em outra aba.
+    const sig=JSON.stringify({wiz:w,wizStep:s.wizStep});
+    if(sig===this._lastWizDraft) return; this._lastWizDraft=sig;
+    try{ localStorage.setItem(k,JSON.stringify({v:1,wiz:w,wizStep:s.wizStep,at:Date.now()})); }catch(e){}
+  }
+  _clearWizDraft(k){ try{ localStorage.removeItem(k||this._wizDraftCtx||this._wizDraftKey()||''); }catch(e){} this._lastWizDraft=null; }
+  _clearAllWizDrafts(){ try{ Object.keys(localStorage).filter(k=>k.startsWith('afterdark:wizDraft:')).forEach(k=>localStorage.removeItem(k)); }catch(e){} }
+  // "Descartar e comecar de novo"
+  discardWizDraft(){
+    this._clearWizDraft(); this.setState({wizRestored:false});
+    if(this.state.wizReturn==='profile') this.createCharProfile(); else this.startCharWizard();
+  }
+  dismissWizRestored(){ this.setState({wizRestored:false}); }
+  startCharWizard(){ this.setState({wizReturn:'player',wizStep:1,wiz:{name:this.state.joinName||this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); this._restoreWizDraft(); }
   async _selectSavedChar(c){
     const s=this.state;
     const charData=this._charDataFromProfile(c);
@@ -3542,7 +3655,7 @@ class Component extends DCLogic {
   // Visibilidade de uma barra: 'todos' (mesa), 'titular' (so o dono e o Mestre) ou
   // 'mestre'. Barra antiga sem o campo assume 'titular' — padrao conservador: nunca
   // revela para a mesa algo que o Mestre nao marcou como publico.
-  STRESS_VIS = {todos:'Visível a todos',titular:'Visível só ao titular',mestre:'Oculto p/ jogadores'};
+  STRESS_VIS = {todos:'Todos',titular:'Só titular',mestre:'Só mestre'};
   _normStress(b){
     const max=Math.max(1,Math.min(24,Number(b.max)||4));
     const level=Math.max(0,Math.min(max,Number(b.level)||0));
@@ -3630,10 +3743,12 @@ class Component extends DCLogic {
       return {...v,
       onAdv:()=>this.advanceClock(c.id,1), onDec:()=>this.advanceClock(c.id,-1), onReveal:()=>this.revealClock(c.id), onDelete:()=>this.deleteClock(c.id),
       // Rótulos distinguem os três estados reais: público, individual e oculto.
-      visLabel:hidden?'Oculto p/ jogadores':(isPlayer?'Visível só ao titular':'Visível a todos'),
+      // Etapa 6: o mesmo vocabulario em toda a interface: Todos / Só titular / Só mestre.
+      visText:hidden?'Só mestre':(isPlayer?'Só titular':'Todos'),
+      visLabel:hidden?'Só mestre':(isPlayer?'Só titular':'Todos'),
       revealLabel:hidden?'Revelar':'Ocultar',
       isPlayer, ownerName:isPlayer?playerName(c.playerId):'', ownerCol:isPlayer?(this.SENS_ACCENT[(s.players.find(p=>p.id===c.playerId)||{}).sens]||'#b9a06a'):'#c6a35e',
-      scopeLabel:(isPlayer?('Jogador · '+(semTitular?'sem titular':playerName(c.playerId))):'Mesa')+' · '+(hidden?'oculto':(isPlayer?'visível ao titular':'visível')),
+      scopeLabel:(isPlayer?('Jogador · '+(semTitular?'sem titular':playerName(c.playerId))):'Mesa')+' · '+(hidden?'Só mestre':(isPlayer?'Só titular':'Todos')),
       warnLabel:semTitular&&!hidden?'Escolha o jogador: sem titular, ninguém vê este relógio.':''
     }; });
     const clocksMesa=clocksAll.filter(c=>c.scope!=='player');
@@ -3852,7 +3967,7 @@ class Component extends DCLogic {
     const clockSugg=[{name:'A ameaça se aproxima',type:'Ameaça'},{name:'Investigação do caso',type:'Investigação'},{name:'A tensão transborda',type:'Tensão'},{name:'O ritual se completa',type:'Ritual'},{name:'Perda de controle',type:'Perda de Controle'},{name:'Perseguição',type:'Perseguição'}];
     const clockSuggestions=clockSugg.map(g=>({name:g.name,type:g.type,col:this.CLOCK_THEME[g.type]||'#c6a35e',onClick:()=>this.useClockSuggestion(g.name,g.type)}));
     const segOptions=[4,6,8,10,12].map(v=>({v,sel:cd.seg===v,onClick:()=>this.setClockDraft('seg',v),bg:cd.seg===v?'#c6a35e':'#13121a',border:cd.seg===v?'#c6a35e':'rgba(255,255,255,.12)',col:cd.seg===v?'#0b0b10':'#cfc7b4'}));
-    const visModeOptions=[['todos','Mesa inteira'],['mestre','Apenas Mestre'],['jogador','Jogador específico'],['parcial','Parcialmente revelado'],['avancar','Revelar ao avançar'],['completar','Revelar ao completar']].map(([v,l])=>({v,l,sel:(cd.visMode||'todos')===v,onClick:()=>this.setClockDraft('visMode',v),bg:(cd.visMode||'todos')===v?'rgba(198,163,94,.16)':'#13121a',border:(cd.visMode||'todos')===v?'#c6a35e':'rgba(255,255,255,.12)',col:(cd.visMode||'todos')===v?'#e0c179':'#a39e90'}));
+    const visModeOptions=[['todos','Todos'],['mestre','Só mestre'],['jogador','Só titular'],['parcial','Parcialmente revelado'],['avancar','Revelar ao avançar'],['completar','Revelar ao completar']].map(([v,l])=>({v,l,sel:(cd.visMode||'todos')===v,onClick:()=>this.setClockDraft('visMode',v),bg:(cd.visMode||'todos')===v?'rgba(198,163,94,.16)':'#13121a',border:(cd.visMode||'todos')===v?'#c6a35e':'rgba(255,255,255,.12)',col:(cd.visMode||'todos')===v?'#e0c179':'#a39e90'}));
     const clockTypes=Object.keys(this.CLOCK_THEME).map(v=>({v}));
     const clockScopeIsPlayer=cd.visMode==='jogador';
     const clockNameOk=!!(cd.name||'').trim();
@@ -3880,7 +3995,9 @@ class Component extends DCLogic {
     const nt=s.narrativa;
     const narrativaPassages=this.NARRATIVA_PADRAO.map((p,i)=>({...p, num:i+1}));
     const narrativaPad=((window.AfterdarkData||{}).narrativaPadrao)||{};
-    const libraryList=(libIsWeapons?s.library.weapons:s.library.items).map(e=>({...e, icon:libIsWeapons?'⚔':'◈', iconCol:libIsWeapons?'#c44a5e':'#c6a35e', hasBonus:libIsWeapons&&e.bonus>0, hasDesc:!!e.desc}));
+    const libNorm=(x)=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(),
+      libQ=libNorm(s.libSearch),
+      libraryList=(libIsWeapons?s.library.weapons:s.library.items).filter(e=>!libQ||libNorm(e.name+' '+(e.desc||'')).includes(libQ)).map(e=>({...e, icon:libIsWeapons?'⚔':'◈', iconCol:libIsWeapons?'#c44a5e':'#c6a35e', hasBonus:libIsWeapons&&e.bonus>0, hasDesc:!!e.desc}));
     const bonusOptions=[0,1,2,3].map(v=>({v}));
     const libNameOk=!!(ld.name||'').trim();
 
@@ -4135,7 +4252,7 @@ class Component extends DCLogic {
       stressFormBtnLabel:s.showStressForm?'✕ Fechar':'＋ Nova barra', stressFormBtnCol:s.showStressForm?'#c44a5e':'#e0c179',
       stressDraft:s.stressDraft, onStressName:(e)=>this.setStressDraft('name',e.target.value), onStressPlayer:(e)=>this.setStressDraft('playerId',e.target.value), onStressClock:(e)=>this.setStressDraft('clockId',e.target.value),
       stressDraftClockOptions, maxOptions, stressList,
-      stressVisOptions:[['todos','Todos'],['titular','Titular'],['mestre','Só Mestre']].map(([v,l])=>{
+      stressVisOptions:[['todos','Todos'],['titular','Só titular'],['mestre','Só mestre']].map(([v,l])=>{
         const sel=(s.stressDraft.vis||'titular')===v;
         return {v,l,onClick:()=>this.setStressDraft('vis',v),
           bg:sel?'rgba(198,163,94,.16)':'#13121a',border:sel?'#c6a35e':'rgba(255,255,255,.12)',col:sel?'#e0c179':'#a39e90'};
@@ -4160,7 +4277,7 @@ class Component extends DCLogic {
       playerMenuOpen:s.playerMenuOpen, togglePlayerMenu:()=>this.togglePlayerMenu(), closePlayerMenu:()=>this.closePlayerMenu(),
       playerMenu, fabIcon:s.playerMenuOpen?'✕':'☰', pendingDot, activeTabLabel:tabLabels[s.playerTab]||'Mesa',
       playerMapPins, pendingFormula,
-      playerClocks, hasPlayerClocks:playerClocks.length>0, sessionStale:s.sessionStale,
+      playerClocks, hasMyClocks:playerClocks.length>0, sessionStale:s.sessionStale,
       // Ponto 3: status da mesa e conexão (jogador)
       tblOvShow:(screen==='j_panel'||screen==='j_lobby')&&!!(s.tableGone||s.tableStatus==='Encerrada'||(screen==='j_panel'&&/^Pausada/.test(s.tableStatus||''))),
       tblOvIcon:s.tableGone?'⚠':s.tableStatus==='Encerrada'?'✦':'❚❚',
@@ -4258,6 +4375,20 @@ class Component extends DCLogic {
       masterLogMaxH:s.masterLogOpen?'260px':'none',
       masterLogHasMore:s.log.length>3,
       masterLogMoreLabel:s.masterLogOpen?'Recolher':`Ver todos os ${s.log.length} registros`,
+      // ---- erros persistentes por contexto (Etapa 6) ----
+      ...(()=>{ const E=s.actionErrors||{}, o={};
+        [['Teste','teste'],['Cons','consequencia'],['Lobby','lobby'],['Ficha','ficha'],['Jogador','jogador']].forEach(([k,c])=>{
+          o['err'+k]=E[c]||''; o['hasErr'+k]=!!E[c]; o['dismissErr'+k]=()=>this._clearActionError(c); });
+        o.retryTeste=()=>this.sendTest(); o.retryCons=()=>this.retryConsequence();
+        o.retryJogador=()=>(this._lastPlayerAction==='leave'?this.leaveTable():this.toggleReady());
+        return o; })(),
+      wizRestored:!!s.wizRestored, discardWizDraft:()=>this.discardWizDraft(), dismissWizRestored:()=>this.dismissWizRestored(),
+      needsSheet:!s.self||!s.self.char,
+      // estados vazios com proximo passo (sem revelar quantidade/existencia de segredos)
+      noLogEntries:!(s.log||[]).length, noNpcsKnown:!(s.npcs||[]).some(n=>(n.reveal||1)>=3),
+      noClocksAll:!(s.clocks||[]).length, noStressBars:!(s.stressBars||[]).length,
+      libSearch:s.libSearch||'', onLibSearch:(e)=>this.setState({libSearch:e.target.value}),
+      libNoResults:!!(s.libSearch||'').trim()&&libraryList.length===0,
       toolGroups, showToolTabs, toolPistas:s.masterTool==='pistas',
       cluesMaster:clues.map(k=>({...k,
         statusLabel:({oculta:'Oculta',encontrada:'Encontrada',analisada:'Analisada',
