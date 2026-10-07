@@ -12,6 +12,13 @@
     <button onClick="{{ startSession }}" disabled="{{ startSessionDisabled }}" style="padding:15px 34px;background: {{ startSessionBg }};color: {{ startSessionCol }};border:none;border-radius:2px;font:700 12px/1 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor: {{ startSessionCursor }};transition:.25s;box-shadow:0 0 0 1px {{ startSessionBg }}" style-hover="filter:brightness(1.18);box-shadow:0 0 30px {{ sessTheme.glow }}">{{ startSessionLabel }}</button>
   </div>
   <sc-if value="{{ startBlockReason }}"><p style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8d887c;margin:-18px 0 18px;text-align:right">{{ startBlockReason }}</p></sc-if>
+  <!-- Etapa 7: o que falta para iniciar, em numeros (a guarda real segue no banco) -->
+  <div role="status" style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px">
+    <span style="font-size:12px;letter-spacing:.04em;color:#7fae8f;border:1px solid rgba(127,174,143,.4);border-radius:20px;padding:6px 12px">✓ Aprovados {{ lobbyApproved }} de {{ lobbyTotal }}</span>
+    <sc-if value="{{ lobbyHasAwaiting }}"><span style="font-size:12px;letter-spacing:.04em;color:#d2a23a;border:1px solid #d2a23a59;border-radius:20px;padding:6px 12px">Ficha concluída, aguardando sua aprovação: {{ lobbyAwaiting }}</span></sc-if>
+    <sc-if value="{{ lobbyHasNoSheet }}"><span style="font-size:12px;letter-spacing:.04em;color:#a39e90;border:1px solid rgba(255,255,255,.14);border-radius:20px;padding:6px 12px">Ainda sem ficha: {{ lobbyNoSheet }}</span></sc-if>
+    <sc-if value="{{ lobbyAllApproved }}"><span style="font-size:12px;letter-spacing:.04em;color:#e0c179;border:1px solid rgba(198,166,100,.4);border-radius:20px;padding:6px 12px">Tudo pronto para iniciar</span></sc-if>
+  </div>
 <sc-if value="{{ hasErrLobby }}"><div role="alert" style="margin:0 0 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:6px"><span style="font-size:14px;color:#e08a8a;flex-shrink:0">⚠</span><span style="flex:1;min-width:160px;font-size:13px;color:#e9e3d4">{{ errLobby }}</span><button onClick="{{ dismissErrLobby }}" aria-label="Dispensar aviso" style="flex-shrink:0;background:transparent;border:none;color:#8d887c;font-size:14px;cursor:pointer;min-width:36px;min-height:36px">✕</button></div></sc-if>
 
   <div style="display:flex;gap:24px;flex-wrap:wrap">

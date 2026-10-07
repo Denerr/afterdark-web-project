@@ -51,44 +51,55 @@
     </div>
   </sc-if>
 
-  <!-- MESAS -->
+  <!-- MESAS · Etapa 7: secoes por prioridade; abrir/continuar separado das acoes destrutivas -->
   <sc-if value="{{ profileMesas }}">
     <div style="display:flex;flex-direction:column;gap:14px">
-      <sc-for list="{{ tablesView }}" as="t" hint-placeholder-count="3">
-        <div style="display:flex;align-items:center;gap:18px;border-radius:10px;border:1px solid {{ t.border }};border-left:3px solid {{ t.acc }};background:#13121a;padding:18px 22px;transition:.25s;opacity: {{ t.rowOpacity }}">
+      <sc-if value="{{ noTables }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#8a7350;text-align:center;padding:10px 6px">Você ainda não tem mesas. Crie uma como Mestre ou entre com o código de um convite.</div></sc-if>
+      <sc-for list="{{ tabsList }}" as="t" hint-placeholder-count="3">
+        <sc-if value="{{ t.headerPlain }}"><div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin:6px 0 -4px">{{ t.label }}</div></sc-if>
+        <sc-if value="{{ t.headerToggle }}"><button onClick="{{ t.onToggle }}" style="align-self:flex-start;display:flex;gap:8px;align-items:center;background:transparent;border:none;padding:6px 0;margin:6px 0 -4px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;cursor:pointer;min-height:36px">{{ t.label }} <span style="color:#c6a35e">{{ t.caret }}</span></button></sc-if>
+        <sc-if value="{{ t.isTable }}">
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px 18px;border-radius:10px;border:1px solid {{ t.border }};border-left:3px solid {{ t.acc }};background:#13121a;padding:18px 22px;transition:.25s;opacity: {{ t.rowOpacity }}">
           <div style="width:52px;height:52px;border-radius:8px;flex-shrink:0;background:radial-gradient(120% 120% at 30% 0%, {{ t.surf }}, #0c0a10);border:1px solid {{ t.acc }}55;display:flex;align-items:center;justify-content:center;font-size:20px;color: {{ t.acc }}">{{ t.icon }}</div>
-          <div style="flex:1;min-width:0">
+          <div style="flex:1;min-width:180px">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px;flex-wrap:wrap">
-              <span style="font-family:'Cinzel';font-weight:600;font-size:20px;color:#efe8d8">{{ t.name }}</span>
+              <span style="font-family:'Cinzel';font-weight:600;font-size:20px;color:#efe8d8;overflow-wrap:anywhere">{{ t.name }}</span>
               <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background: {{ t.roleBg }};color: {{ t.roleCol }};border:1px solid {{ t.roleBorder }}">{{ t.roleLabel }}</span>
-              <sc-if value="{{ t.isArchived }}"><span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:#8d887c;border:1px solid rgba(255,255,255,.14)">Inativa</span></sc-if>
+              <sc-if value="{{ t.isArchived }}"><span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:#8d887c;border:1px solid rgba(255,255,255,.14)">Arquivada</span></sc-if>
             </div>
             <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90">{{ t.type }} · {{ t.faction }} · {{ t.status }}</div>
           </div>
           <sc-if value="{{ t.showActive }}">
-            <div style="display:flex;gap:8px;flex-shrink:0;align-items:center">
-              <span onClick="{{ t.onOpen }}" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#e0c179;cursor:pointer" style-hover="color:#e0c179">{{ t.cta }} →</span>
-              <button onClick="{{ t.onArchive }}" style="padding:7px 12px;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:5px;color:#c44a5e;font-size:11px;letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(196,30,58,.6)">Excluir</button>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto">
+              <button onClick="{{ t.onOpen }}" style="padding:11px 18px;background: {{ t.ctaBg }};border: {{ t.ctaBorder }};border-radius:5px;color: {{ t.ctaCol }};font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;min-height:44px">{{ t.cta }} →</button>
+              <button onClick="{{ t.onToggleManage }}" style="padding:11px 14px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#a39e90;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:44px">{{ t.manageLabel }}</button>
             </div>
+            <sc-if value="{{ t.manageOpen }}">
+              <div style="flex-basis:100%;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)">
+                <span style="flex:1;min-width:180px;font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8d887c">Arquivar tira a mesa desta lista. Dá para restaurar depois, em Arquivadas.</span>
+                <button onClick="{{ t.onArchive }}" style="padding:9px 14px;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:5px;color:#c44a5e;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:40px" style-hover="border-color:rgba(196,30,58,.6)">Arquivar mesa</button>
+              </div>
+            </sc-if>
           </sc-if>
           <sc-if value="{{ t.showArchived }}">
-            <div style="display:flex;gap:8px;flex-shrink:0">
-              <button onClick="{{ t.onRestore }}" style="padding:7px 12px;background:transparent;border:1px solid rgba(198,166,100,.35);border-radius:5px;color:#e0c179;font-size:11px;letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(198,166,100,.7)">Restaurar</button>
-              <button onClick="{{ t.onAskHardDelete }}" style="padding:7px 12px;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:5px;color:#c44a5e;font-size:11px;letter-spacing:.06em;cursor:pointer" style-hover="border-color:rgba(196,30,58,.6)">Excluir definitivamente</button>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:auto">
+              <button onClick="{{ t.onRestore }}" style="padding:9px 14px;background:transparent;border:1px solid rgba(198,166,100,.35);border-radius:5px;color:#e0c179;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:40px" style-hover="border-color:rgba(198,166,100,.7)">Restaurar</button>
+              <button onClick="{{ t.onAskHardDelete }}" style="padding:9px 14px;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:5px;color:#c44a5e;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:40px" style-hover="border-color:rgba(196,30,58,.6)">Excluir definitivamente</button>
             </div>
           </sc-if>
           <sc-if value="{{ t.showConfirmDelete }}">
-            <div style="display:flex;gap:8px;flex-shrink:0;align-items:center">
-              <span style="font-size:12px;color:#a39e90;font-family:'Cormorant Garamond';font-style:italic">Apagar de vez?</span>
-              <button onClick="{{ t.onCancelHardDelete }}" style="padding:7px 12px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#cfc7b4;font-size:11px;letter-spacing:.06em;cursor:pointer">Cancelar</button>
-              <button onClick="{{ t.onConfirmHardDelete }}" style="padding:7px 12px;background:#c41e3a;border:none;border-radius:5px;color:#fff;font-size:11px;letter-spacing:.06em;cursor:pointer" style-hover="background:#d6324c">Confirmar</button>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto">
+              <span style="font-size:12px;color:#a39e90;font-family:'Cormorant Garamond';font-style:italic">Apagar de vez? Não dá para desfazer.</span>
+              <button onClick="{{ t.onCancelHardDelete }}" style="padding:9px 14px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#cfc7b4;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:40px">Cancelar</button>
+              <button onClick="{{ t.onConfirmHardDelete }}" style="padding:9px 14px;background:#c41e3a;border:none;border-radius:5px;color:#fff;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:40px" style-hover="background:#d6324c">Confirmar exclusão</button>
             </div>
           </sc-if>
         </div>
+        </sc-if>
       </sc-for>
-      <div onClick="{{ goStart }}" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;border:1.5px dashed rgba(198,166,100,.3);border-radius:10px;color:#cfc7b4;transition:.25s" style-hover="border-color:rgba(224,193,121,.6);color:#e9e3d4">
+      <button onClick="{{ goStart }}" style="cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;padding:18px;background:transparent;border:1.5px dashed rgba(198,166,100,.3);border-radius:10px;color:#cfc7b4;transition:.25s;min-height:44px" style-hover="border-color:rgba(224,193,121,.6);color:#e9e3d4">
         <span style="font-size:18px;color:#e0c179">+</span><span style="font-family:'Cinzel';font-weight:600;font-size:15px">Criar ou entrar em uma nova mesa</span>
-      </div>
+      </button>
     </div>
   </sc-if>
 </div>

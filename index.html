@@ -121,7 +121,7 @@
 
 <!-- ========================= LANDING (deslogado) ========================= -->
 <sc-if value="{{ isLanding }}" hint-placeholder-val="{{ true }}" data-screen-label="Landing">
-<dc-import name="Landing" goRoleSelect="{{ goRoleSelect }}" goJogador="{{ goJogador }}" goRegister="{{ goRegister }}"/>
+<dc-import name="Landing" goRoleSelect="{{ goRoleSelect }}" goJogador="{{ goJogador }}" goMyTables="{{ goMyTables }}" goRegister="{{ goRegister }}" goLogin="{{ goLogin }}"/>
 </sc-if>
 
 <!-- ========================= CADASTRO ========================= -->
@@ -151,7 +151,7 @@
 
 <!-- ========================= PERFIL ========================= -->
 <sc-if value="{{ isProfile }}" data-screen-label="Perfil">
-<dc-import name="Perfil" userName="{{ userName }}" goStart="{{ goStart }}" onProfilePers="{{ onProfilePers }}" tabPersUnder="{{ tabPersUnder }}" tabPersCol="{{ tabPersCol }}" charCount="{{ charCount }}" onProfileMesas="{{ onProfileMesas }}" tabMesasUnder="{{ tabMesasUnder }}" tabMesasCol="{{ tabMesasCol }}" tableCount="{{ tableCount }}" profilePers="{{ profilePers }}" createCharProfile="{{ createCharProfile }}" charactersView="{{ charactersView }}" profileMesas="{{ profileMesas }}" tablesView="{{ tablesView }}"/>
+<dc-import name="Perfil" userName="{{ userName }}" goStart="{{ goStart }}" onProfilePers="{{ onProfilePers }}" tabPersUnder="{{ tabPersUnder }}" tabPersCol="{{ tabPersCol }}" charCount="{{ charCount }}" onProfileMesas="{{ onProfileMesas }}" tabMesasUnder="{{ tabMesasUnder }}" tabMesasCol="{{ tabMesasCol }}" tableCount="{{ tableCount }}" profilePers="{{ profilePers }}" createCharProfile="{{ createCharProfile }}" charactersView="{{ charactersView }}" profileMesas="{{ profileMesas }}" tablesView="{{ tablesView }}" tabsList="{{ tabsList }}" noTables="{{ noTables }}"/>
 </sc-if>
 
 <!-- ========================= INÍCIO (Hora de começar) ========================= -->
@@ -186,7 +186,7 @@
 
 <!-- ========================= MESTRE · LOBBY ========================= -->
 <sc-if value="{{ isMLobby }}" data-screen-label="Mestre Lobby">
-<dc-import name="MLobby" errLobby="{{ errLobby }}" hasErrLobby="{{ hasErrLobby }}" dismissErrLobby="{{ dismissErrLobby }}" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" startSessionDisabled="{{ startSessionDisabled }}" startBlockReason="{{ startBlockReason }}" startSessionLabel="{{ startSessionLabel }}" startSessionBg="{{ startSessionBg }}" startSessionCol="{{ startSessionCol }}" startSessionCursor="{{ startSessionCursor }}" tableCode="{{ tableCode }}" lobbyInviteLink="{{ lobbyInviteLink }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" lobbyNoAuth="{{ lobbyNoAuth }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
+<dc-import name="MLobby" lobbyTotal="{{ lobbyTotal }}" lobbyApproved="{{ lobbyApproved }}" lobbyAwaiting="{{ lobbyAwaiting }}" lobbyNoSheet="{{ lobbyNoSheet }}" lobbyHasAwaiting="{{ lobbyHasAwaiting }}" lobbyHasNoSheet="{{ lobbyHasNoSheet }}" lobbyAllApproved="{{ lobbyAllApproved }}" errLobby="{{ errLobby }}" hasErrLobby="{{ hasErrLobby }}" dismissErrLobby="{{ dismissErrLobby }}" sessTheme="{{ sessTheme }}" sessName="{{ sessName }}" startSession="{{ startSession }}" startSessionDisabled="{{ startSessionDisabled }}" startBlockReason="{{ startBlockReason }}" startSessionLabel="{{ startSessionLabel }}" startSessionBg="{{ startSessionBg }}" startSessionCol="{{ startSessionCol }}" startSessionCursor="{{ startSessionCursor }}" tableCode="{{ tableCode }}" lobbyInviteLink="{{ lobbyInviteLink }}" onCopyCode="{{ onCopyCode }}" copyCodeBg="{{ copyCodeBg }}" copyCodeCol="{{ copyCodeCol }}" copyCodeLabel="{{ copyCodeLabel }}" onCopyLink="{{ onCopyLink }}" copyLinkBg="{{ copyLinkBg }}" copyLinkCol="{{ copyLinkCol }}" copyLinkLabel="{{ copyLinkLabel }}" lobbyCopiedMsg="{{ lobbyCopiedMsg }}" lobbyNoAuth="{{ lobbyNoAuth }}" qr="{{ qr }}" readyCount="{{ readyCount }}" total="{{ total }}" players="{{ players }}"/>
 </sc-if>
 
 <!-- ========================= MESTRE · SESSÃO (PAINEL) ========================= -->
@@ -2551,6 +2551,9 @@ class Component extends DCLogic {
   }
   reset(){ clearInterval(this._ri); this.setState({screen:this.state.auth.loggedIn?'profile':'landing',nav:[],role:null,mode:null,oneshot:null,sceneMode:null,roll:null,rolling:false,pRoll:null,wizStep:1}); }
   setHomeVar(v){ this.setState({homeVar:v}); }
+  // Etapa 7: "Criar ou acessar minhas mesas". Com conta, vai direto a lista de mesas do
+  // Perfil; sem conta, comeca uma mesa nova (o Mestre pode jogar sem conta neste aparelho).
+  goMyTables(){ if(this.state.auth.loggedIn){ this.setState({profileTab:'mesas'}); this.go('profile'); } else this.pickRole('mestre'); }
   pickRole(r){ this._bumpCtx(); if(r==='mestre'){ this.go('m_tablename',{role:r}); } else { this.go('j_join',{role:r}); } }
   pickMode(m){ this.go(m==='capitulos'?'m_chapters':'m_oneshots',{mode:m}); }
   pickOneshot(k){ this.setState({oneshot:k}); }
@@ -3933,13 +3936,33 @@ class Component extends DCLogic {
       const isM=t.role==='mestre'; const isArchived=!!t.archived; const isPendingDelete=s.pendingHardDeleteId===t.id;
       return {...t, icon:tIcon[t.theme]||'◈', acc:tAcc[t.theme]||'#b9a06a', surf:tSurf[t.theme]||'#1a2733', border:'rgba(255,255,255,.08)',
         roleLabel:isM?'Mestre':'Jogador', roleBg:isM?'rgba(198,163,94,.14)':'rgba(196,30,58,.14)', roleCol:isM?'#e0c179':'#e07a8a', roleBorder:isM?'rgba(198,166,100,.4)':'rgba(196,30,58,.4)',
-        cta:isM?'Continuar':'Entrar', onOpen:()=>this.openTable(t),
+        // Etapa 7: mesa em andamento/pausada vem primeiro, com "Continuar" como acao principal
+        ...(()=>{ const st=t.status||''; const emJogo=!isArchived&&(st==='Em andamento'||/^Pausada/.test(st));
+          return {emJogo, rank:isArchived?3:(emJogo?(st==='Em andamento'?0:1):2),
+            cta:emJogo?'Continuar':(st==='Aguardando jogadores'?'Abrir lobby':'Abrir'),
+            ctaBg:emJogo?'#c6a35e':'transparent', ctaCol:emJogo?'#0b0b10':'#e0c179',
+            ctaBorder:emJogo?'1px solid #c6a35e':'1px solid rgba(198,166,100,.35)'}; })(),
+        onOpen:()=>this.openTable(t), isTable:true,
+        manageOpen:s.profileManageId===t.id, manageLabel:s.profileManageId===t.id?'Fechar':'Gerenciar',
+        onToggleManage:()=>this.setState(st=>({profileManageId:st.profileManageId===t.id?null:t.id})),
         rowOpacity:isArchived?'.55':'1', isArchived,
         showActive:!isArchived, showArchived:isArchived&&!isPendingDelete, showConfirmDelete:isPendingDelete,
         onArchive:()=>this.archiveTable(t), onRestore:()=>this.restoreTable(t),
         onAskHardDelete:()=>this.askHardDeleteTable(t), onCancelHardDelete:()=>this.cancelHardDeleteTable(), onConfirmHardDelete:()=>this.confirmHardDeleteTable(t)
       };
     });
+    // Lista unica com cabecalhos de secao: Em jogo / Outras mesas / Arquivadas (recolhida).
+    const tabsList=(()=>{ const out=[], H=(label,extra)=>out.push({isHeader:true,isTable:false,label,...(extra||{})});
+      const em=tablesView.filter(x=>x.emJogo).sort((a,b)=>a.rank-b.rank);
+      const outras=tablesView.filter(x=>!x.isArchived&&!x.emJogo);
+      const arq=tablesView.filter(x=>x.isArchived);
+      if(em.length){ H('Em jogo · continue de onde parou'); em.forEach(x=>out.push(x)); }
+      if(outras.length){ H(em.length?'Outras mesas':'Suas mesas'); outras.forEach(x=>out.push(x)); }
+      if(arq.length){ H(`Arquivadas (${arq.length})`,{isToggle:true,caret:s.profileArchOpen?'▴':'▾',
+        onToggle:()=>this.setState(st=>({profileArchOpen:!st.profileArchOpen}))});
+        if(s.profileArchOpen) arq.forEach(x=>out.push(x)); }
+      out.forEach(x=>{ x.headerPlain=x.isHeader&&!x.isToggle; x.headerToggle=x.isHeader&&!!x.isToggle; });
+      return out; })();
     const pPers=s.profileTab==='personagens', pMesas=s.profileTab==='mesas';
     const regValid=this.regValid();
     const emailTouched=s.reg.email.length>0;
@@ -4220,7 +4243,7 @@ class Component extends DCLogic {
       topProfileBg:screen==='profile'?'rgba(198,163,94,.16)':'transparent', topProfileCol:screen==='profile'?'#e9e3d4':'#cfc7b4',
       sceneMode:sm, hasScene:!!sm, sceneAcc, sceneSurf, sceneGlow, sceneAccBorder:sceneAcc+'55',
       setHomeA:()=>this.setHomeVar('A'), setHomeB:()=>this.setHomeVar('B'),
-      goMestre:()=>this.pickRole('mestre'), goJogador:()=>this.pickRole('jogador'),
+      goMestre:()=>this.pickRole('mestre'), goJogador:()=>this.pickRole('jogador'), goMyTables:()=>this.goMyTables(),
       back:()=>this.back(), reset:()=>this.reset(),
       pickCap:()=>this.pickMode('capitulos'), pickOne:()=>this.pickMode('oneshots'),
       toLobby:()=>{ this.saveCurrentTable().then(r=>{ if(!r.ok) return; this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>this.startGameSession(), closeScene:()=>this.closeScene(),
@@ -4389,6 +4412,16 @@ class Component extends DCLogic {
       noClocksAll:!(s.clocks||[]).length, noStressBars:!(s.stressBars||[]).length,
       libSearch:s.libSearch||'', onLibSearch:(e)=>this.setState({libSearch:e.target.value}),
       libNoResults:!!(s.libSearch||'').trim()&&libraryList.length===0,
+      tabsList, noTables:!s.tables.length,
+      // Etapa 7: o que falta para iniciar, em numeros. So leitura: a guarda real continua no
+      // banco (master_start_session) e em _startGate.
+      lobbyTotal:s.players.length,
+      lobbyApproved:s.players.filter(p=>p.approved).length,
+      lobbyAwaiting:s.players.filter(p=>!p.approved&&p.sheetReady).length,
+      lobbyNoSheet:s.players.filter(p=>!p.approved&&!p.sheetReady).length,
+      lobbyHasAwaiting:s.players.some(p=>!p.approved&&p.sheetReady),
+      lobbyHasNoSheet:s.players.some(p=>!p.approved&&!p.sheetReady),
+      lobbyAllApproved:s.players.length>0&&s.players.every(p=>p.approved),
       toolGroups, showToolTabs, toolPistas:s.masterTool==='pistas',
       cluesMaster:clues.map(k=>({...k,
         statusLabel:({oculta:'Oculta',encontrada:'Encontrada',analisada:'Analisada',
@@ -4417,11 +4450,11 @@ class Component extends DCLogic {
       savedCharsForJoin:s.characters.map(c=>({name:c.name,sensLabel:this.SENS[c.sens]?this.SENS[c.sens].label:'Sensitivo',onSelect:()=>this._selectSavedChar(c)})),
       noSavedChars:s.characters.length===0,
       // player lobby
-      mySheetLabel:s.selfApproved?'✓ Aprovado':(s.selfSheetReady?'Aguardando aprovação':'Ficha pendente'), mySheetCol:s.selfApproved?'#7fae8f':'#d2a23a',
+      mySheetLabel:s.selfApproved?'✓ Aprovada pelo Mestre':(s.selfSheetReady?'Ficha concluída · aguardando o Mestre':'Ficha pendente'), mySheetCol:s.selfApproved?'#7fae8f':'#d2a23a',
       myCharName:s.self.char||'Personagem', myCharInitial:(s.self.char||'?')[0].toUpperCase(),
       myCharAccent:this.SENS_ACCENT[s.self.sens]||'#c6a35e',
       myCharSensLabel:s.self.sens&&this.SENS[s.self.sens]?this.SENS[s.self.sens].label:'Sensitivo',
-      lobbyPlayers:s.players.map(m=>{ const isMine=m.id===s.memberId; const acc=this.SENS_ACCENT[m.sens]||'#b9a06a'; const statusLabel={pronto:'Aprovado',aguardando:'Aguardando aprovação',conectando:'Conectando',escolhendo:'Escolhendo',criando:'Criando ficha'}; return { ...m, initial:m.char&&m.char!=='—'?m.char[0].toUpperCase():'?', acc, border:isMine?'rgba(198,166,100,.4)':'rgba(255,255,255,.07)', isMe:isMine, statusLabel:m.approved?'Aprovado':(statusLabel[m.status]||m.status), statusCol:m.approved?'#7fae8f':'#a39e90' }; }),
+      lobbyPlayers:s.players.map(m=>{ const isMine=m.id===s.memberId; const acc=this.SENS_ACCENT[m.sens]||'#b9a06a'; const statusLabel={pronto:'Aprovado',aguardando:'Aguardando aprovação',conectando:'Conectando',escolhendo:'Escolhendo',criando:'Criando ficha'}; return { ...m, initial:m.char&&m.char!=='—'?m.char[0].toUpperCase():'?', acc, border:isMine?'rgba(198,166,100,.4)':'rgba(255,255,255,.07)', isMe:isMine, statusLabel:m.approved?'Aprovado pelo Mestre':(m.sheetReady?'Ficha concluída · aguardando o Mestre':(statusLabel[m.status]||m.status)), statusCol:m.approved?'#7fae8f':(m.sheetReady?'#d2a23a':'#a39e90') }; }),
       lobbyPlayerCount:s.players.length,
       noLobbyPlayers:s.players.length===0,
       leaveTable:()=>this.leaveTable(),
