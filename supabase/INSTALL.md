@@ -21,7 +21,8 @@ As migrações são **incrementais e dependentes de ordem**. Algumas corrigem po
 12. migration_session_persistence.sql       <- Ponto 3
 13. migration_skill_pairs.sql               <- UI Etapa 5: par atributo/perícia
 14. migration_identity.sql                  <- Pós-sessão Etapa 0: identidade e aba Mesas
-15. migration_equipment_photo.sql           <- Pós-sessão Etapa 1: equipamento e foto (último)
+15. migration_equipment_photo.sql           <- Pós-sessão Etapa 1: equipamento e foto
+16. migration_scenes.sql                    <- Pós-sessão Etapa 2: NPCs, pistas e cenas (último)
 ```
 
 Todas são idempotentes: rodar de novo não duplica objeto.
@@ -42,7 +43,7 @@ cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql \
     migration_archive_table.sql migration_profiles.sql \
     migration_requests_consequences.sql migration_rls_p2.sql \
     migration_player_projection.sql migration_session_persistence.sql \
-    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql > /tmp/all.sql
+    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql migration_scenes.sql > /tmp/all.sql
 
 docker cp /tmp/all.sql adpg:/tmp/all.sql
 docker exec adpg psql -U postgres -q -f /tmp/all.sql
@@ -86,6 +87,11 @@ Para um banco que já tem a `migration_identity.sql`, basta `migration_equipment
 `photo`, `photo_rev`), cria `member_equip`, `member_set_photo` e `member_photos` e
 substitui `player_get_state`/`player_get_lobby` (só ganham campos). **Ordem: aplicar a
 migração ANTES de publicar o `index.html` da Etapa 1.**
+
+Para um banco que já tem a `migration_equipment_photo.sql`, basta `migration_scenes.sql`
+(Pós-sessão, Etapa 2). Ela só substitui `player_get_session`: NPCs e pistas chegam ao
+jogador sem as notas privadas, a lista de cenas não chega e a cena ativa compartilhada vem
+em `activeScene`. **Ordem: aplicar ANTES do deploy** (o site novo cria notas privadas).
 
 O índice `table_members_one_per_account` (uma participação por conta e mesa) só é criado
 quando não há duplicata. Havendo, a migração termina com um WARNING e não cria o índice:
@@ -145,7 +151,7 @@ docker rm -f adpg
 ```
 
 Esperado: **52** no Ponto 1, **73** no Ponto 2, **24** no 2B (relógios/estresse),
-**32** no Ponto 3, **16** na UI Etapa 5 e **51** na Etapa 0 pós-sessão (`pos0_tests`) e **35** na Etapa 1 (`pos1_tests`). O `run_all.sh` também roda a paridade
+**32** no Ponto 3, **16** na UI Etapa 5 e **51** na Etapa 0 pós-sessão (`pos0_tests`) **35** na Etapa 1 (`pos1_tests`) e **10** na Etapa 2 (`pos2_tests`). O `run_all.sh` também roda a paridade
 catálogo × banco (`node tests/parity_skills.js`, 24 perícias).
 
 `pos0_tests` também precisa de `migration_identity.sql` copiada para `/tmp/mig.sql` no

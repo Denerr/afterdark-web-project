@@ -38,6 +38,7 @@
 <script src="src/data/adventures.js"></script>
 <script src="src/data/themes.js"></script>
 <script src="src/data/equipment.js"></script>
+<script src="src/data/maps.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 </helmet>
@@ -276,11 +277,12 @@
         <sc-if value="{{ stageIsCena }}">
           <div style="position:absolute;top:16px;left:18px;display:flex;gap:8px">
             <span style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color: {{ sessTheme.acc }};padding:5px 11px;border:1px solid {{ sessTheme.acc }};border-radius:20px;background:rgba(8,8,12,.5)">Cena Ativa</span>
-            <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#cfc7b4;padding:5px 11px;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:rgba(8,8,12,.5)">Alta Vesper</span>
+            <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#cfc7b4;padding:5px 11px;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:rgba(8,8,12,.5)">{{ stageSceneBadge }}</span>
           </div>
           <div style="position:absolute;left:0;right:0;bottom:0;padding:24px 26px;background:linear-gradient(180deg,transparent,rgba(8,8,12,.94))">
             <div style="font-family:'Cinzel';font-weight:600;font-size:26px;color:#efe8d8;margin-bottom:8px">{{ stageSceneTitle }}</div>
-            <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.55;color:#cdc6b6;margin:0 0 16px;max-width:620px">{{ stageSceneDesc }}</p>
+            <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.55;color:#cdc6b6;margin:0 0 10px;max-width:620px;white-space:pre-line">{{ stageSceneDesc }}</p>
+            <sc-if value="{{ stageHasScene }}"><div style="font-size:12px;color:#8d887c;margin:0 0 14px">Presentes: {{ stagePresent }}</div></sc-if>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <button onClick="{{ onSceneIntro }}" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#0b0b10;background: {{ sessTheme.acc }};border:none;border-radius:2px;padding:9px 16px;cursor:pointer" style-hover="filter:brightness(1.15)">▸ Modo Cena</button>
               <button onClick="{{ onSceneNpc }}" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cfc7b4;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:2px;padding:9px 16px;cursor:pointer" style-hover="border-color:rgba(255,255,255,.4)">Revelar NPC</button>
@@ -290,18 +292,13 @@
 
         <!-- MAPA view -->
         <sc-if value="{{ stageIsMapa }}">
-          <div style="position:absolute;top:16px;left:18px"><span style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#e0c179;padding:5px 11px;border:1px solid rgba(198,166,100,.4);border-radius:20px;background:rgba(8,8,12,.5)">Mapa · Alta Vesper</span></div>
-          <div style="position:absolute;inset:0;background:radial-gradient(70% 70% at 50% 45%, rgba(40,36,52,.5), transparent 75%)"></div>
-          <sc-for list="{{ mapPins }}" as="m" hint-placeholder-count="4">
-            <div style="position:absolute;top: {{ m.top }};left: {{ m.left }};display:flex;flex-direction:column;align-items:center;gap:5px;transform:translate(-50%,-50%)">
-              <div style="width: {{ m.size }};height: {{ m.size }};border-radius:50%;background: {{ m.color }};box-shadow:0 0 16px {{ m.glow }};border:1px solid rgba(255,255,255,.3)"></div>
-              <span style="font-size:10px;color:#cdc6b6;white-space:nowrap;background:rgba(8,8,12,.6);padding:2px 7px;border-radius:8px">{{ m.label }}</span>
-            </div>
-          </sc-for>
-          <div style="position:absolute;left:0;right:0;bottom:0;padding:18px 24px;background:linear-gradient(180deg,transparent,rgba(8,8,12,.9))">
-            <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#cdc6b6">Distrito de Alta Vesper</div>
-            <div style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic">Toque num ponto para conduzir a cena até lá.</div>
-          </div>
+          <sc-if value="{{ stageMap.hasMap }}">
+            <div role="img" aria-label="Mapa: {{ stageMapName }}" style="position:absolute;inset:0;width:100%;height:100%;background:#0c0a10;background-image: {{ stageMap.bg }};background-size:contain;background-repeat:no-repeat;background-position:center"></div>
+            <sc-if value="{{ stageMap.loading }}"><div role="status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8d887c;background:rgba(8,8,12,.4)">Carregando mapa…</div></sc-if>
+            <sc-if value="{{ stageMap.error }}"><div role="alert" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;font-size:13px;color:#e08a8a;background:rgba(8,8,12,.85)">Não foi possível carregar o mapa.<button onClick="{{ stageMap.onRetry }}" style="padding:8px 14px;min-height:40px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:5px;color:#e0c179;font-size:11px;cursor:pointer">Tentar de novo</button></div></sc-if>
+          </sc-if>
+          <sc-if value="{{ stageMap.noMap }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#8d887c">{{ stageNoMapText }}</div></sc-if>
+          <sc-if value="{{ stageMap.hasMap }}"><div style="position:absolute;top:16px;left:18px"><span style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#e0c179;padding:5px 11px;border:1px solid rgba(198,166,100,.4);border-radius:20px;background:rgba(8,8,12,.5)">Mapa · {{ stageMapName }}</span></div></sc-if>
         </sc-if>
 
         <!-- NPC dialogue layer -->
@@ -674,29 +671,57 @@
             <sc-if value="{{ noStressBars }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:14px 6px">Nenhuma barra de estresse. Crie uma para acompanhar a pressão sobre um personagem.</div></sc-if>
           </div>
         </sc-if>
-        <!-- PISTAS: somente leitura. O status muda pelos relogios de investigacao, -->
-        <!-- nao por edicao manual, entao nao ha controle aqui. -->
+        <!-- PISTAS · Etapa 2 pos-sessao: cadastro/edicao; criar nao compartilha. Relogios de -->
+        <!-- investigacao continuam revelando pistas ocultas ao completar. -->
         <sc-if value="{{ toolPistas }}">
-          <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;margin-bottom:12px">Pistas</div>
-          <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 14px">Uma pista oculta é revelada quando um relógio de Investigação se completa.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
+            <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e">Pistas</div>
+            <button onClick="{{ newClue }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(198,166,100,.4);color:#e0c179">＋ Nova pista</button>
+          </div>
+          <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 14px">Uma pista nova fica oculta. Compartilhe quando o grupo a encontrar — ou deixe que um relógio de Investigação a revele.</p>
+          <sc-if value="{{ hasContentMsg }}"><div role="status" style="font-size:12px;color:#7fae8f;margin:0 0 12px">{{ contentMsg }}</div></sc-if>
+          <sc-if value="{{ clueFormOpen }}">
+            <div style="background:#0e0d12;border:1px solid rgba(198,166,100,.25);border-radius:6px;padding:14px;margin:0 0 14px;animation:slideDown .3s ease">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c6a35e;margin-bottom:12px">Pista</div>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Título <span style="color:#c44a5e">*</span></label>
+              <input value="{{ clueForm.name }}" onInput="{{ onClueName }}" placeholder="Ex.: Bilhete rasgado" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px"/>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Conteúdo (o grupo vê quando compartilhada)</label>
+              <textarea value="{{ clueForm.txt }}" onInput="{{ onClueTxt }}" placeholder="O que a pista diz" rows="3" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Notas privadas do Mestre</label>
+              <textarea value="{{ clueForm.notes }}" onInput="{{ onClueNotes }}" placeholder="Só você vê" rows="3" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
+
+              <sc-if value="{{ clueFormErr }}"><div role="alert" style="font-size:12px;color:#e08a8a;margin:0 0 10px">{{ clueForm.err }}</div></sc-if>
+              <div style="display:flex;gap:8px">
+                <button onClick="{{ saveClue }}" disabled="{{ contentSaving }}" style="flex:1;padding:11px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor:pointer;min-height:44px">{{ contentSaveLabel }}</button>
+                <button onClick="{{ closeClueForm }}" style="padding:11px 14px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:44px">Cancelar</button>
+              </div>
+            </div>
+          </sc-if>
           <sc-if value="{{ hasClues }}">
             <div style="display:flex;flex-direction:column;gap:9px">
               <sc-for list="{{ cluesMaster }}" as="k" hint-placeholder-count="3">
                 <div style="background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-left:3px solid {{ k.sColor }};border-radius:4px;padding:11px 13px">
                   <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-                    <span style="font-size:13px;color:#e9e3d4;flex:1;min-width:0">{{ k.name }}</span>
+                    <span style="font-size:13px;color:#e9e3d4;flex:1;min-width:0;overflow-wrap:anywhere">{{ k.name }}</span>
                     <span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color: {{ k.sColor }}">{{ k.statusLabel }}</span>
                   </div>
                   <sc-if value="{{ k.hasTxt }}">
                     <div style="font-family:'Cormorant Garamond';font-size:15px;color:#b9b2a2;margin-top:6px">{{ k.txt }}</div>
                   </sc-if>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+                    <button onClick="{{ k.onShare }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">{{ k.shareLabel }}</button>
+                    <button onClick="{{ k.onEdit }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">✎ Editar</button>
+                    <sc-if value="{{ k.noDelAsk }}"><button onClick="{{ k.onAskDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:3px;padding:6px 9px;cursor:pointer;color:#c44a5e;min-height:32px">Excluir</button></sc-if>
+                    <sc-if value="{{ k.delAsk }}"><button onClick="{{ k.onDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:#c41e3a;border:none;border-radius:3px;padding:6px 9px;cursor:pointer;color:#fff;min-height:32px">Confirmar exclusão</button><button onClick="{{ k.onCancelDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Cancelar</button></sc-if>
+                  </div>
                 </div>
               </sc-for>
             </div>
           </sc-if>
           <sc-if value="{{ noCluesMaster }}">
-            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:16px 0">Nenhuma pista neste roteiro ainda.</div>
+            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:16px 0">Nenhuma pista cadastrada. Crie a primeira em "＋ Nova pista".</div>
           </sc-if>
+        </sc-if>
         </sc-if>
         <!-- FERIMENTOS -->
         <sc-if value="{{ toolFerimentos }}">
@@ -808,31 +833,104 @@
             </div>
           </sc-if>
         </sc-if>
-        <!-- NPCS -->
+        <!-- NPCS · Etapa 2 pos-sessao: cadastro e edicao; criar nao revela ao grupo -->
         <sc-if value="{{ toolNpcs }}">
-          <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;margin-bottom:16px">NPCs</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
+            <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e">NPCs</div>
+            <button onClick="{{ newNpc }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(198,166,100,.4);color:#e0c179">＋ Novo NPC</button>
+          </div>
+          <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 12px">Um NPC novo fica só com você. "Revelar" o aproxima do grupo; a partir de "Apelido" ele aparece aos jogadores.</p>
+          <sc-if value="{{ hasContentMsg }}"><div role="status" style="font-size:12px;color:#7fae8f;margin:0 0 12px">{{ contentMsg }}</div></sc-if>
+          <sc-if value="{{ npcFormOpen }}">
+            <div style="background:#0e0d12;border:1px solid rgba(198,166,100,.25);border-radius:6px;padding:14px;margin:0 0 14px;animation:slideDown .3s ease">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c6a35e;margin-bottom:12px">NPC</div>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Nome <span style="color:#c44a5e">*</span></label>
+              <input value="{{ npcForm.name }}" onInput="{{ onNpcName }}" placeholder="Ex.: Madame Rubra" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px"/>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Facção</label>
+              <input value="{{ npcForm.faction }}" onInput="{{ onNpcFaction }}" placeholder="Opcional" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px"/>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Descrição (o grupo vê quando revelado)</label>
+              <textarea value="{{ npcForm.desc }}" onInput="{{ onNpcDesc }}" placeholder="Quem é, como se apresenta" rows="3" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Notas privadas do Mestre</label>
+              <textarea value="{{ npcForm.notes }}" onInput="{{ onNpcNotes }}" placeholder="Só você vê" rows="3" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
+
+              <sc-if value="{{ npcFormErr }}"><div role="alert" style="font-size:12px;color:#e08a8a;margin:0 0 10px">{{ npcForm.err }}</div></sc-if>
+              <div style="display:flex;gap:8px">
+                <button onClick="{{ saveNpc }}" disabled="{{ contentSaving }}" style="flex:1;padding:11px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor:pointer;min-height:44px">{{ contentSaveLabel }}</button>
+                <button onClick="{{ closeNpcForm }}" style="padding:11px 14px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:44px">Cancelar</button>
+              </div>
+            </div>
+          </sc-if>
           <div style="display:flex;flex-direction:column;gap:10px">
             <sc-for list="{{ npcs }}" as="n" hint-placeholder-count="4">
-              <div style="display:flex;gap:11px;align-items:center;padding:11px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:4px">
-                <div style="width:38px;height:38px;border-radius:4px;flex-shrink:0;background:radial-gradient(circle at 50% 30%, {{ n.surf }}, #0a0a0e);border:1px solid {{ n.acc }};filter: {{ n.imgFilter }}"></div>
-                <div style="flex:1"><div style="font-size:13px;color:#e9e3d4">{{ n.name }}</div><div style="font-size:11px;color:#7e7a70">{{ n.faction }} · {{ n.rLabel }}</div></div>
-                <div style="display:flex;flex-direction:column;gap:5px">
-                  <button onClick="{{ n.onReveal }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color: {{ n.acc }};background:transparent;border:1px solid {{ n.acc }}55;border-radius:3px;padding:5px 9px;cursor:pointer">Revelar</button>
-                  <button onClick="{{ n.onDialogue }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:#0b0b10;background: {{ n.acc }};border:none;border-radius:3px;padding:5px 9px;cursor:pointer">☻ Diálogo</button>
+              <div style="padding:11px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:4px">
+                <div style="display:flex;gap:11px;align-items:center">
+                  <div style="width:38px;height:38px;border-radius:4px;flex-shrink:0;background:radial-gradient(circle at 50% 30%, {{ n.surf }}, #0a0a0e);border:1px solid {{ n.acc }};filter: {{ n.imgFilter }}"></div>
+                  <div style="flex:1;min-width:0"><div style="font-size:13px;color:#e9e3d4;overflow-wrap:anywhere">{{ n.name }}</div><div style="font-size:11px;color:#7e7a70">{{ n.rLabel }} · {{ n.sharedLabel }}</div></div>
+                </div>
+                <sc-if value="{{ n.hasDesc }}"><div style="font-family:'Cormorant Garamond';font-size:14px;color:#b9b2a2;margin-top:6px">{{ n.desc }}</div></sc-if>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:9px">
+                  <button onClick="{{ n.onReveal }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;color: {{ n.acc }};border-color: {{ n.acc }}55">Revelar</button>
+                  <sc-if value="{{ n.canHide }}"><button onClick="{{ n.onHide }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Ocultar</button></sc-if>
+                  <button onClick="{{ n.onDialogue }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">☻ Diálogo</button>
+                  <button onClick="{{ n.onEdit }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">✎ Editar</button>
+                  <sc-if value="{{ n.noDelAsk }}"><button onClick="{{ n.onAskDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:3px;padding:6px 9px;cursor:pointer;color:#c44a5e;min-height:32px">Excluir</button></sc-if>
+                  <sc-if value="{{ n.delAsk }}"><button onClick="{{ n.onDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:#c41e3a;border:none;border-radius:3px;padding:6px 9px;cursor:pointer;color:#fff;min-height:32px">Confirmar exclusão</button><button onClick="{{ n.onCancelDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Cancelar</button></sc-if>
                 </div>
               </div>
             </sc-for>
           </div>
         </sc-if>
-        <!-- CENAS -->
+        <!-- CENAS · Etapa 2 pos-sessao: cadastro, ativacao e compartilhamento -->
         <sc-if value="{{ toolCenas }}">
-          <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;margin-bottom:16px">Cenas</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
+            <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e">Cenas</div>
+            <button onClick="{{ newScene }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(198,166,100,.4);color:#e0c179">＋ Nova cena</button>
+          </div>
+          <sc-if value="{{ hasContentMsg }}"><div role="status" style="font-size:12px;color:#7fae8f;margin:0 0 12px">{{ contentMsg }}</div></sc-if>
+          <sc-if value="{{ sceneFormOpen }}">
+            <div style="background:#0e0d12;border:1px solid rgba(198,166,100,.25);border-radius:6px;padding:14px;margin:0 0 14px;animation:slideDown .3s ease">
+              <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#c6a35e;margin-bottom:12px">Cena</div>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Título <span style="color:#c44a5e">*</span></label>
+              <input value="{{ sceneForm.title }}" onInput="{{ onSceneTitle }}" placeholder="Ex.: Salão de Leilões" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px"/>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Descrição (o que os jogadores veem)</label>
+              <textarea value="{{ sceneForm.desc }}" onInput="{{ onSceneDesc }}" placeholder="O que o grupo percebe ao chegar" rows="4" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Notas privadas do Mestre</label>
+              <textarea value="{{ sceneForm.notes }}" onInput="{{ onSceneNotes }}" placeholder="Só você vê" rows="3" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Personagens presentes</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+                <sc-for list="{{ scenePresentOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.onToggle }}" aria-pressed="{{ o.on }}" style="padding:6px 11px;min-height:34px;border-radius:16px;font-size:12px;cursor:pointer;background:transparent;border:1px solid rgba(198,166,100,.35);color:#cdc6b6"><sc-if value="{{ o.on }}"><span style="color:#7fae8f">✓ </span></sc-if>{{ o.label }}</button></sc-for>
+              </div>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Mapa</label>
+              <select value="{{ sceneForm.mapId }}" onChange="{{ onSceneMap }}" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px">
+                <sc-for list="{{ sceneMapOptions }}" as="m" hint-placeholder-count="2"><option value="{{ m.id }}">{{ m.name }}</option></sc-for>
+              </select>
+              <sc-if value="{{ noMapsYet }}"><div style="font-size:11px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:-4px 0 10px">Os mapas padrão serão adicionados em breve. A cena funciona sem mapa.</div></sc-if>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#cdc6b6;margin-bottom:12px;cursor:pointer"><input type="checkbox" checked="{{ sceneForm.shared }}" onChange="{{ onSceneShared }}"/> Compartilhar com os jogadores (título, descrição, presentes e mapa)</label>
+
+              <sc-if value="{{ sceneFormErr }}"><div role="alert" style="font-size:12px;color:#e08a8a;margin:0 0 10px">{{ sceneForm.err }}</div></sc-if>
+              <div style="display:flex;gap:8px">
+                <button onClick="{{ saveScene }}" disabled="{{ contentSaving }}" style="flex:1;padding:11px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor:pointer;min-height:44px">{{ contentSaveLabel }}</button>
+                <button onClick="{{ closeSceneForm }}" style="padding:11px 14px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:44px">Cancelar</button>
+              </div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ noScenes }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:16px 0">Nenhuma cena cadastrada. Crie a primeira em "＋ Nova cena".</div></sc-if>
           <div style="display:flex;flex-direction:column;gap:9px">
-            <sc-for list="{{ sceneList }}" as="sc" hint-placeholder-count="4">
-              <button onClick="{{ sc.onClick }}" style="text-align:left;padding:12px 14px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:4px;cursor:pointer" style-hover="border-color:rgba(198,166,100,.4)">
-                <div style="font-size:13px;color:#e9e3d4;margin-bottom:3px">{{ sc.title }}</div>
-                <div style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic">{{ sc.sub }}</div>
-              </button>
+            <sc-for list="{{ scenesView }}" as="sc" hint-placeholder-count="3">
+              <div style="padding:12px 14px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-left:3px solid {{ sc.activeBg }};border-radius:4px">
+                <div style="display:flex;align-items:center;gap:8px;justify-content:space-between">
+                  <div style="font-size:13px;color:#e9e3d4;overflow-wrap:anywhere;min-width:0">{{ sc.title }}</div>
+                  <button onClick="{{ sc.onActivate }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;background: {{ sc.activeBg }};color: {{ sc.activeCol }};border-color:rgba(198,166,100,.45)">{{ sc.activeLabel }}</button>
+                </div>
+                <div style="font-size:11px;color:#8d887c;margin-top:4px">{{ sc.shareLabel }} · {{ sc.mapLine }}</div>
+                <div style="font-size:12px;color:#b9b2a2;font-family:'Cormorant Garamond';font-style:italic;margin-top:3px">Presentes: {{ sc.presentLine }}</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+                  <button onClick="{{ sc.onShare }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">{{ sc.shareBtn }}</button>
+                  <button onClick="{{ sc.onEdit }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">✎ Editar</button>
+                  <sc-if value="{{ sc.noDelAsk }}"><button onClick="{{ sc.onAskDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:3px;padding:6px 9px;cursor:pointer;color:#c44a5e;min-height:32px">Excluir</button></sc-if>
+                  <sc-if value="{{ sc.delAsk }}"><button onClick="{{ sc.onDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:#c41e3a;border:none;border-radius:3px;padding:6px 9px;cursor:pointer;color:#fff;min-height:32px">Confirmar exclusão</button><button onClick="{{ sc.onCancelDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Cancelar</button></sc-if>
+                </div>
+              </div>
             </sc-for>
           </div>
         </sc-if>
@@ -1116,19 +1214,13 @@
           <sc-if value="{{ centerIsMapa }}">
             <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:14px">
               <div style="position:relative;height:440px;border-radius:9px;overflow:hidden;background:radial-gradient(80% 80% at 50% 40%, #1a1622, #0c0a10);border:1px solid rgba(198,166,100,.15)">
-                <div style="position:absolute;inset:0;background:radial-gradient(70% 70% at 50% 45%, rgba(40,36,52,.4), transparent 75%)"></div>
-                <sc-for list="{{ playerMapPins }}" as="m" hint-placeholder-count="4">
-                  <div style="position:absolute;top: {{ m.top }};left: {{ m.left }};transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:5px">
-                    <div style="width: {{ m.size }};height: {{ m.size }};border-radius:50%;background: {{ m.color }};box-shadow:0 0 16px {{ m.glow }};border:1px solid rgba(255,255,255,.3)"></div>
-                    <span style="font-size:10px;color: {{ m.labelCol }};white-space:nowrap;background:rgba(8,8,12,.55);padding:2px 7px;border-radius:8px">{{ m.label }}</span>
-                  </div>
-                </sc-for>
-                <div style="position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;padding:18px;background:linear-gradient(180deg,transparent,rgba(8,8,12,.85))">
-                  <div>
-                    <div style="font-family:'Cinzel';font-weight:600;font-size:18px;color:#efe8d8">Alta Vesper — área liberada</div>
-                    <div style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic">O Mestre libera o mapa conforme você avança.</div>
-                  </div>
-                </div>
+                <sc-if value="{{ pMap.hasMap }}">
+                  <div role="img" aria-label="Mapa: {{ pMapName }}" style="position:absolute;inset:0;width:100%;height:100%;background:#0c0a10;background-image: {{ pMap.bg }};background-size:contain;background-repeat:no-repeat;background-position:center"></div>
+                  <sc-if value="{{ pMap.loading }}"><div role="status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8d887c;background:rgba(8,8,12,.4)">Carregando mapa…</div></sc-if>
+                  <sc-if value="{{ pMap.error }}"><div role="alert" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;font-size:13px;color:#e08a8a;background:rgba(8,8,12,.85)">Não foi possível carregar o mapa.<button onClick="{{ pMap.onRetry }}" style="padding:8px 14px;min-height:40px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:5px;color:#e0c179;font-size:11px;cursor:pointer">Tentar de novo</button></div></sc-if>
+                </sc-if>
+                <sc-if value="{{ pMap.noMap }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#8d887c">{{ pNoMapText }}</div></sc-if>
+                <sc-if value="{{ pMap.hasMap }}"><div style="position:absolute;left:0;right:0;bottom:0;padding:14px 18px;background:linear-gradient(180deg,transparent,rgba(8,8,12,.85))"><div style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">{{ pMapName }}</div></div></sc-if>
               </div>
             </div>
 
@@ -1166,13 +1258,17 @@
                 <div style="position:absolute;top:14px;left:16px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#e07a8a;padding:5px 11px;border:1px solid rgba(196,30,58,.45);border-radius:20px;background:rgba(8,6,8,.5)">Cena Atual</div>
               </div>
               <div style="background:#100c0e;padding:22px">
-                <div style="font-family:'Cinzel';font-weight:600;font-size:22px;color:#efe8d8;margin-bottom:4px">{{ scene.local }}</div>
-                <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#c44a5e;margin-bottom:14px">{{ scene.clima }}</div>
-                <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.6;color:#cdc6b6;margin:0 0 18px">{{ scene.desc }}</p>
-                <div style="display:flex;gap:10px;align-items:center;padding:12px 14px;background:#1a0e12;border:1px solid rgba(196,30,58,.2);border-radius:8px">
-                  <div style="width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 50% 30%,#3a1620,#16080b);border:1px solid #c41e3a"></div>
-                  <div><div style="font-size:11px;color:#7e7a70;letter-spacing:.1em;text-transform:uppercase">NPC em cena</div><div style="font-size:15px;color:#e9e3d4">{{ scene.npc }}</div></div>
-                </div>
+                <sc-if value="{{ pHasScene }}">
+                  <div style="font-family:'Cinzel';font-weight:600;font-size:22px;color:#efe8d8;margin-bottom:10px;overflow-wrap:anywhere">{{ pScene.title }}</div>
+                  <sc-if value="{{ pSceneHasDesc }}"><p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.6;color:#cdc6b6;margin:0 0 18px;white-space:pre-line">{{ pSceneDesc }}</p></sc-if>
+                  <sc-if value="{{ pHasPresent }}">
+                    <div style="padding:12px 14px;background:#1a0e12;border:1px solid rgba(196,30,58,.2);border-radius:8px">
+                      <div style="font-size:11px;color:#7e7a70;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px">Em cena</div>
+                      <div style="font-size:15px;color:#e9e3d4">{{ pPresentLine }}</div>
+                    </div>
+                  </sc-if>
+                </sc-if>
+                <sc-if value="{{ pNoScene }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:17px;color:#8d887c">O Mestre ainda não abriu uma cena.</div></sc-if>
               </div>
             </div>
           </sc-if>
@@ -1813,7 +1909,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -2043,7 +2139,7 @@ class Component extends DCLogic {
   // cache/BroadcastChannel NÃO aplica nem grava nada (antes eram globais e uma mesa ou
   // aba sobrescrevia a outra). Fica apenas para a mesa local de quem joga sem conta,
   // com chave e canal separados por mesa.
-  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library']; }
+  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library','scenes','activeSceneId']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
   // Etapa 6: alem do aviso flutuante (some em 4,5 s), o erro com contexto fica junto da
   // acao que falhou ate ela dar certo ou ate o usuario dispensar. ctx: teste, consequencia,
@@ -2086,7 +2182,7 @@ class Component extends DCLogic {
   // ---- estado da sessão de jogo por mesa (Supabase) ----
   _blankTableSession(){
     const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)?JSON.parse(JSON.stringify(window.AfterdarkData.catalog)):{weapons:[],items:[]};
-    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat};
+    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null};
   }
   async _loadTableSession(tableId,isOwner){
     const base=this._blankTableSession();
@@ -3268,7 +3364,100 @@ class Component extends DCLogic {
     })}));
   }
   openScene(p){ this.setState({sceneMode:p}); }
-  revealNpc(id){ this.setState(s=>({npcs:s.npcs.map(n=>n.id===id?{...n,reveal:Math.min(4,n.reveal+1)}:n)})); }
+  revealNpc(id){ this.setState(s=>({npcs:s.npcs.map(n=>n.id===id?{...n,reveal:Math.min(4,(n.reveal||1)+1)}:n)})); }
+  // ---- Etapa 2 pos-sessao: cadastro do Mestre (NPCs, pistas, cenas) ----
+  // Tudo vai no estado da sessao, gravado pelo salvamento do Mestre. O formulario so fecha
+  // depois que o banco confirma; em falha, fica aberto com o texto digitado.
+  get MAPS(){ return (window.AfterdarkData||{}).maps || []; }
+  hideNpc(id){ this.setState(s=>({npcs:s.npcs.map(n=>n.id===id?{...n,reveal:1}:n)})); }
+  toggleClueShare(id){ this.setState(s=>({clues:s.clues.map(k=>k.id===id?{...k,status:k.status==='oculta'?'compartilhada':'oculta'}:k)})); }
+  openContentForm(kind,item){
+    const blank={npc:{id:null,name:'',desc:'',notes:'',faction:''},clue:{id:null,name:'',txt:'',notes:''},
+      scene:{id:null,title:'',desc:'',notes:'',present:[],mapId:'',shared:true}}[kind];
+    const f=item?{...blank,...item,present:Array.isArray(item.present)?item.present.map(x=>({...x})):[]}:blank;
+    if(kind==='clue'&&f.txt==='—') f.txt='';
+    this.setState({[kind+'Form']:{...f,err:''},contentMsg:'',contentDel:null});
+  }
+  closeContentForm(kind){ this.setState({[kind+'Form']:null}); }
+  setContentField(kind,k,v){ this.setState(s=>({[kind+'Form']:{...s[kind+'Form'],[k]:v,err:''}})); }
+  toggleScenePresent(kind,id){
+    this.setState(s=>{ const f=s.sceneForm; if(!f) return s; const has=f.present.some(p=>p.kind===kind&&p.id===id);
+      return {sceneForm:{...f,present:has?f.present.filter(p=>!(p.kind===kind&&p.id===id)):[...f.present,{kind,id}]}}; });
+  }
+  async _commitContent(label,formKey){
+    const tid=this.state.activeTableId;
+    this.setState({contentSaving:formKey||label});
+    let ok=true;
+    if(this._canSaveRemote(tid)){ const sv=await this._flushSave(tid); ok=!!sv.ok; }
+    this.setState({contentSaving:null});
+    if(!ok){
+      if(formKey) this.setState(s=>({[formKey]:s[formKey]?{...s[formKey],err:'Não foi possível salvar agora. O texto continua aqui — tente de novo.'}:s[formKey]}));
+      else this._flashActionError('Não foi possível salvar agora. A alteração continua aqui e será salva quando a conexão voltar.');
+      return false;
+    }
+    if(formKey) this.setState({[formKey]:null});
+    this.setState({contentMsg:'✓ '+label});
+    clearTimeout(this._contentMsgT); this._contentMsgT=setTimeout(()=>this.setState({contentMsg:''}),2500);
+    return true;
+  }
+  async saveContent(kind){
+    const s=this.state, f=s[kind+'Form']; if(!f||s.contentSaving) return;
+    const req=kind==='scene'?f.title:f.name;
+    if(!String(req||'').trim()){ this.setState({[kind+'Form']:{...f,err:kind==='npc'?'Informe o nome do NPC.':kind==='clue'?'Informe o título da pista.':'Informe o título da cena.'}}); return; }
+    const id=f.id||(({npc:'n',clue:'k',scene:'s'})[kind]+this._uuid().replace(/-/g,'').slice(0,10));
+    const T=v=>String(v||'').trim();
+    if(kind==='npc'){
+      this.setState(st=>{ const ex=st.npcs.find(n=>n.id===id);
+        const e={...(ex||{theme:'human',reveal:1}),id,name:T(f.name).slice(0,80),desc:T(f.desc).slice(0,2000),notes:T(f.notes).slice(0,4000),faction:T(f.faction).slice(0,60)};
+        return {npcs:ex?st.npcs.map(n=>n.id===id?e:n):[...st.npcs,e],npcForm:{...f,id}}; });
+    } else if(kind==='clue'){
+      this.setState(st=>{ const ex=st.clues.find(k=>k.id===id);
+        const e={...(ex||{status:'oculta'}),id,name:T(f.name).slice(0,120),txt:T(f.txt).slice(0,4000),notes:T(f.notes).slice(0,4000)};
+        return {clues:ex?st.clues.map(k=>k.id===id?e:k):[...st.clues,e],clueForm:{...f,id}}; });
+    } else {
+      this.setState(st=>{ const ex=st.scenes.find(x=>x.id===id);
+        const e={...(ex||{}),id,title:T(f.title).slice(0,120),desc:T(f.desc).slice(0,4000),notes:T(f.notes).slice(0,4000),
+          present:(f.present||[]).slice(0,40),mapId:f.mapId||null,shared:!!f.shared};
+        return {scenes:ex?st.scenes.map(x=>x.id===id?e:x):[...st.scenes,e],sceneForm:{...f,id}}; });
+    }
+    await this._commitContent(f.id?'Alterações salvas':(kind==='npc'?'NPC cadastrado':kind==='clue'?'Pista cadastrada':'Cena cadastrada'),kind+'Form');
+  }
+  askDeleteContent(kind,id){ this.setState({contentDel:kind+':'+id}); }
+  cancelDeleteContent(){ this.setState({contentDel:null}); }
+  async deleteContent(kind,id){
+    if(this.state.contentDel!==kind+':'+id) return;
+    if(kind==='npc') this.setState(s=>({npcs:s.npcs.filter(n=>n.id!==id)}));
+    else if(kind==='clue') this.setState(s=>({clues:s.clues.filter(k=>k.id!==id)}));
+    else this.setState(s=>({scenes:s.scenes.filter(x=>x.id!==id),activeSceneId:s.activeSceneId===id?null:s.activeSceneId}));
+    this.setState({contentDel:null});
+    await this._commitContent('Excluído');
+  }
+  async activateScene(id){
+    this.setState(s=>({activeSceneId:s.activeSceneId===id?null:id}));
+    await this._commitContent(this.state.activeSceneId?'Cena ativada':'Cena desativada');
+  }
+  async toggleSceneShare(id){
+    this.setState(s=>({scenes:s.scenes.map(x=>x.id===id?{...x,shared:!x.shared}:x)}));
+    await this._commitContent('Compartilhamento salvo');
+  }
+  retryMap(src){ this.setState(s=>({mapLoad:{...s.mapLoad,[src]:{status:'loading',n:((s.mapLoad[src]||{}).n||0)+1}}})); }
+  _mapView(mapId){
+    const m=mapId?this.MAPS.find(x=>x.id===mapId):null;
+    if(!m) return {hasMap:false,noMap:true,missing:!!mapId,src:'',name:''};
+    const st=(this.state.mapLoad||{})[m.src]||{status:'loading',n:0};
+    const src=m.src+(st.n?((m.src.includes('?')?'&':'?')+'r='+st.n):'');
+    // carrega fora da renderizacao (Image) para ter os estados de carregando/erro/ok
+    this._mapReq=this._mapReq||{};
+    if(st.status==='loading'&&!this._mapReq[src]){
+      this._mapReq[src]=true;
+      const im=new Image();
+      im.onload=()=>this.setState(s=>({mapLoad:{...s.mapLoad,[m.src]:{n:st.n,status:'ok'}}}));
+      im.onerror=()=>{ delete this._mapReq[src]; this.setState(s=>({mapLoad:{...s.mapLoad,[m.src]:{n:st.n,status:'error'}}})); };
+      im.src=src;
+    }
+    return {hasMap:true,noMap:false,missing:false,name:m.name,src,bg:st.status==='ok'?`url("${src}")`:'none',loading:st.status==='loading',error:st.status==='error',
+      onRetry:()=>this.retryMap(m.src)};
+  }
   closeScene(){ this.setState({sceneMode:null}); }
 
   // ---- center stage: cena/mapa + NPC em diálogo ----
@@ -4196,7 +4385,10 @@ class Component extends DCLogic {
     const decorate=(r)=> r? {...r, gColor:gradeColor[r.grade]||'#c6a35e', isCombat:r.mode==='combate', isGeneral:r.mode!=='combate', marginLabel:(r.margin>=0?'+':'')+r.margin, marginPos:Math.max(0,r.margin||0), ...glowTier(r.grade), diceView:r.dice.map(d=>({d,...diceColor(d,r)}))} : null;
 
     const npcLines={n1:'Sangue antigo reconhece sangue antigo. Você não devia estar aqui.',n2:'Tudo tem um preço, querido. A questão é se você pode pagar.',n3:'Esse cheiro... vocês trouxeram problema para as docas.',n4:'A ordem pública é frágil. Não me obriguem a restaurá-la.'};
-    const npcs=s.npcs.map(n=>{ const th=this.THEME[n.theme]; const rl={1:'Silhueta desconhecida',2:'Nome oculto',3:'Apelido',4:'Retrato completo'}; return {...n, acc:th.acc, surf:th.surf, glow:th.glow, rLabel:rl[n.reveal]||'—', imgFilter:n.reveal<=2?'blur(5px) brightness(.55)':'none', onReveal:()=>this.revealNpc(n.id), onDialogue:()=>this.showNpcDialogue(n.id), known:n.reveal>=3, line:npcLines[n.id]||'…' }; });
+    const npcs=s.npcs.map(n=>{ const th=this.THEME[n.theme]||this.THEME.human||{}; const rl={1:'Silhueta desconhecida',2:'Nome oculto',3:'Apelido',4:'Retrato completo'}; return {...n, acc:th.acc, surf:th.surf, glow:th.glow, rLabel:rl[n.reveal]||'—', imgFilter:n.reveal<=2?'blur(5px) brightness(.55)':'none', onReveal:()=>this.revealNpc(n.id), onDialogue:()=>this.showNpcDialogue(n.id), known:n.reveal>=3, line:n.desc||npcLines[n.id]||'…',
+      hasDesc:!!n.desc, canHide:(n.reveal||1)>1, onHide:()=>this.hideNpc(n.id), onEdit:()=>this.openContentForm('npc',n),
+      delAsk:s.contentDel==='npc:'+n.id, noDelAsk:s.contentDel!=='npc:'+n.id, onAskDel:()=>this.askDeleteContent('npc',n.id), onDel:()=>this.deleteContent('npc',n.id), onCancelDel:()=>this.cancelDeleteContent(),
+      sharedLabel:(n.reveal||1)>=3?'Visível ao grupo':'Só o Mestre vê' }; });
     const activeNpcObj=s.activeNpc?npcs.find(n=>n.id===s.activeNpc):null;
     const clueColor={oculta:'#7e7a70',encontrada:'#c6a35e',analisada:'#7fae8f',compartilhada:'#7ea6d4',perdida:'#c0473f',destruida:'#8a1f1f'};
     const clues=s.clues.map(k=>({...k, sColor:clueColor[k.status]||'#7e7a70'}));
@@ -4266,6 +4458,18 @@ class Component extends DCLogic {
     const condPresets=this.CONDICOES.map(c=>({...c, applied:cActive.includes(c.name), appliedOpacity:cActive.includes(c.name)?'.4':'1', onClick:()=>this.applyCondition(condTargetId,c.name)}));
     const condCustom=s.condLib.map(nm=>({name:nm, col:'#c6a35e', applied:cActive.includes(nm), appliedOpacity:cActive.includes(nm)?'.4':'1', onApply:()=>this.applyCondition(condTargetId,nm), onDelete:()=>this.deleteCondType(nm)}));
 
+    // Etapa 2 pos-sessao: cenas cadastradas pelo Mestre (antes: lista fixa de exemplo)
+    const charOfId=id=>{ const p=s.players.find(x=>x.id===id); return p&&p.char&&p.char!=='—'?p.char:null; };
+    const npcOfId=id=>{ const n=s.npcs.find(x=>x.id===id); return n?n.name:null; };
+    const presentNames=list=>(list||[]).map(p=>p.kind==='pc'?charOfId(p.id):npcOfId(p.id)).filter(Boolean);
+    const scenesView=(s.scenes||[]).map(x=>{ const act=s.activeSceneId===x.id; const mp=x.mapId?this.MAPS.find(m=>m.id===x.mapId):null;
+      return {...x, active:act, activeLabel:act?'✓ Ativa':'Ativar', activeBg:act?'#c6a35e':'transparent', activeCol:act?'#0b0b10':'#e0c179',
+        presentLine:presentNames(x.present).join(', ')||'Ninguém marcado', mapLine:mp?mp.name:(x.mapId?'Mapa indisponível':'Sem mapa'),
+        shareLabel:x.shared?'Compartilhada':'Só o Mestre', shareBtn:x.shared?'Deixar só para mim':'Compartilhar', onShare:()=>this.toggleSceneShare(x.id),
+        onActivate:()=>this.activateScene(x.id), onEdit:()=>this.openContentForm('scene',x),
+        delAsk:s.contentDel==='scene:'+x.id, noDelAsk:s.contentDel!=='scene:'+x.id, onAskDel:()=>this.askDeleteContent('scene',x.id), onDel:()=>this.deleteContent('scene',x.id), onCancelDel:()=>this.cancelDeleteContent()}; });
+    const actScene=(s.scenes||[]).find(x=>x.id===s.activeSceneId)||null;
+    const actMap=this._mapView(actScene&&actScene.mapId);
     const sceneList=[{title:'Salão de Leilões',sub:'Cena ativa · Alta Vesper'},{title:'Cofres da Sociedade Rubra',sub:'Investigação · sangue falso'},{title:'Beco dos Fundos',sub:'Fuga possível'},{title:'Camarote Privado',sub:'NPC misterioso'}].map(sc=>({...sc, onClick:()=>this.openScene({title:'Modo Cena',sub:sc.title,acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:'A cena muda — '+sc.sub+'. O Mestre conduz o grupo para um novo momento da noite em Saint Vesper.'}) }));
     const libList=[['⚖','Regras rápidas de teste e dificuldade'],['☰','Facções de Saint Vesper'],['◉','Mapa completo da cidade'],['✦','NPCs importantes'],['◷','Tabelas de relógios'],['✎','Anotações da campanha']].map(([icon,txt])=>({icon,txt}));
     const historyPrompts=[{q:'O que seu personagem perdeu?'},{q:'Quem ele teme encontrar em Saint Vesper?'},{q:'Qual segredo ele nunca contou?'},{q:'O que ele viu que não deveria ter visto?'}];
@@ -4498,12 +4702,11 @@ class Component extends DCLogic {
         onToggle:()=>this.toggleGroupCard(p.id),
         cardBorder:(s.groupOpenId===p.id)?acc:'rgba(255,255,255,.07)'};
     });
-    const playerMapPins=[
-      {top:'42%',left:'36%',label:'◉ Você está aqui',color:'#c41e3a',glow:'rgba(196,30,58,.6)',size:'15px',labelCol:'#e07a8a'},
-      {top:'60%',left:'60%',label:'Docas',color:'#7ea6d4',glow:'rgba(126,166,212,.45)',size:'11px',labelCol:'#a9c4e0'},
-      {top:'30%',left:'62%',label:'Cofres',color:'#c6a35e',glow:'rgba(198,163,94,.45)',size:'10px',labelCol:'#d6c79a'},
-      {top:'68%',left:'33%',label:'Beco',color:'#9b9588',glow:'rgba(155,149,136,.4)',size:'9px',labelCol:'#b3ada0'}
-    ];
+    const playerMapPins=[];
+    const pAct=s.activeScene&&s.activeScene.title?s.activeScene:null;
+    const pMap=this._mapView(pAct&&pAct.mapId);
+    const pPresent=pAct?[...(pAct.presentPcs||[]).map(id=>charOfId(id)).filter(Boolean),...(pAct.presentNpcs||[]).map(id=>npcOfId(id)).filter(Boolean)]:[];
+    if(pAct&&pAct.presentUnknown>0) pPresent.push(pAct.presentUnknown===1?'uma figura não identificada':`${pAct.presentUnknown} figuras não identificadas`);
     // self avatar + health
     const selfPhoto=photoOf(s.memberId);
     const selfAvatarBg=selfPhoto?`center/cover url(${selfPhoto})`:'#1c1a24';
@@ -4652,10 +4855,13 @@ class Component extends DCLogic {
       back:()=>this.back(), reset:()=>this.reset(),
       pickCap:()=>this.pickMode('capitulos'), pickOne:()=>this.pickMode('oneshots'),
       toLobby:()=>{ this.saveCurrentTable().then(r=>{ if(!r.ok) return; this._startMemberPolling(); this.go('m_lobby'); }); }, startSession:()=>this.startGameSession(), closeScene:()=>this.closeScene(),
-      onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:sel?sel.title:sessionTitle,acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:sel?sel.summary:'A cena se revela diante do grupo, e o Mestre conduz a narrativa.'}),
+      onSceneIntro:()=>this.openScene({title:'Modo Cena',sub:actScene?actScene.title:(sel?sel.title:sessionTitle),acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:actScene?(actScene.desc||actScene.title):(sel?sel.summary:'A cena se revela diante do grupo, e o Mestre conduz a narrativa.')}),
       onSceneNpc:()=>this.openScene({title:'NPC Revelado',sub:sel?sel.ref:'Figura misteriosa',acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:sel?`${sel.ref} se aproxima, como quem já decidiu o desfecho da noite — sua ligação com ${sel.faction} não é mais segredo.`:'Uma figura observa do canto da sala, atenta a cada movimento do grupo.'}),
       showMSessTabs:pNarrow||mMid, mSessCols, showPlayersColM, showCenterColM, showToolsColM, mSessTabs,
-      stageSceneTitle:sel?sel.title:'Cena Atual', stageSceneDesc:sel?sel.summary:'A cena começa a se revelar diante do grupo.',
+      stageSceneTitle:actScene?actScene.title:'Nenhuma cena ativa', stageSceneDesc:actScene?(actScene.desc||'Sem descrição.'):'Cadastre uma cena em Cenas e ative-a para mostrá-la aqui e aos jogadores.',
+      stageSceneBadge:actScene?(actScene.shared?'Compartilhada':'Só o Mestre vê'):'—', stageHasScene:!!actScene,
+      stagePresent:actScene?(presentNames(actScene.present).join(', ')||'Ninguém marcado'):'', stageMap:actMap, stageMapName:actMap.hasMap?actMap.name:'',
+      stageNoMapText:actScene?(actMap.missing?'O mapa desta cena não está mais disponível.':'Esta cena não tem mapa.'):'Ative uma cena com mapa para vê-lo aqui.',
       oneshotList, chaptersView, selChapter, sessTheme, sessName, centerBorder:'rgba(198,166,100,.18)',
       // master stage
       stageSurf:sessTheme.surf, stageGlow:sessTheme.glow,
@@ -4705,6 +4911,9 @@ class Component extends DCLogic {
       playerMenuOpen:s.playerMenuOpen, togglePlayerMenu:()=>this.togglePlayerMenu(), closePlayerMenu:()=>this.closePlayerMenu(),
       playerMenu, fabIcon:s.playerMenuOpen?'✕':'☰', pendingDot, activeTabLabel:tabLabels[s.playerTab]||'Mesa',
       playerMapPins, pendingFormula,
+      pScene:pAct||{}, pHasScene:!!pAct, pNoScene:!pAct, pSceneDesc:pAct?(pAct.desc||''):'', pSceneHasDesc:!!(pAct&&pAct.desc),
+      pPresentLine:pPresent.join(', '), pHasPresent:pPresent.length>0, pMap, pMapName:pMap.hasMap?pMap.name:'',
+      pNoMapText:pAct?(pMap.missing?'O mapa desta cena não está disponível.':'Esta cena não tem mapa.'):'O Mestre ainda não mostrou um mapa.',
       playerClocks, hasMyClocks:playerClocks.length>0, sessionStale:s.sessionStale,
       // Ponto 3: status da mesa e conexão (jogador)
       tblOvShow:(screen==='j_panel'||screen==='j_lobby')&&!!(s.tableGone||s.tableStatus==='Encerrada'||(screen==='j_panel'&&/^Pausada/.test(s.tableStatus||''))),
@@ -4766,6 +4975,21 @@ class Component extends DCLogic {
       skillGeralBorder:this._pairOk(s.testDraft.attrKey,s.testDraft.skillKey)?'rgba(255,255,255,.1)':'#c41e3a',
       skillCombatBorder:this._pairOk(s.testDraft.combatAttr,s.testDraft.combatSkill)?'rgba(255,255,255,.1)':'#c41e3a',
       rollMasterBlocked:!!this._pairBlock(), diffOptions, combatWeapons, woundLevels, sceneList, libList,
+      scenesView, hasScenes:scenesView.length>0, noScenes:scenesView.length===0, contentMsg:s.contentMsg, hasContentMsg:!!s.contentMsg,
+      npcForm:s.npcForm||{}, npcFormOpen:!!s.npcForm, clueForm:s.clueForm||{}, clueFormOpen:!!s.clueForm, sceneForm:s.sceneForm||{}, sceneFormOpen:!!s.sceneForm,
+      npcFormErr:!!(s.npcForm&&s.npcForm.err), clueFormErr:!!(s.clueForm&&s.clueForm.err), sceneFormErr:!!(s.sceneForm&&s.sceneForm.err),
+      contentSaveLabel:s.contentSaving?'Salvando…':'Salvar', contentSaving:!!s.contentSaving,
+      newNpc:()=>this.openContentForm('npc'), newClue:()=>this.openContentForm('clue'), newScene:()=>this.openContentForm('scene'),
+      saveNpc:()=>this.saveContent('npc'), saveClue:()=>this.saveContent('clue'), saveScene:()=>this.saveContent('scene'),
+      closeNpcForm:()=>this.closeContentForm('npc'), closeClueForm:()=>this.closeContentForm('clue'), closeSceneForm:()=>this.closeContentForm('scene'),
+      onNpcName:e=>this.setContentField('npc','name',e.target.value), onNpcDesc:e=>this.setContentField('npc','desc',e.target.value), onNpcNotes:e=>this.setContentField('npc','notes',e.target.value), onNpcFaction:e=>this.setContentField('npc','faction',e.target.value),
+      onClueName:e=>this.setContentField('clue','name',e.target.value), onClueTxt:e=>this.setContentField('clue','txt',e.target.value), onClueNotes:e=>this.setContentField('clue','notes',e.target.value),
+      onSceneTitle:e=>this.setContentField('scene','title',e.target.value), onSceneDesc:e=>this.setContentField('scene','desc',e.target.value), onSceneNotes:e=>this.setContentField('scene','notes',e.target.value),
+      onSceneMap:e=>this.setContentField('scene','mapId',e.target.value), onSceneShared:e=>this.setContentField('scene','shared',!!e.target.checked),
+      sceneMapOptions:[{id:'',name:'Sem mapa'},...this.MAPS.map(m=>({id:m.id,name:m.name}))].map(m=>({...m,sel:((s.sceneForm||{}).mapId||'')===m.id})),
+      noMapsYet:this.MAPS.length===0,
+      scenePresentOpts:s.sceneForm?[...s.players.filter(p=>p.char&&p.char!=='—').map(p=>({kind:'pc',id:p.id,label:p.char+' (jogador)'})),...s.npcs.map(n=>({kind:'npc',id:n.id,label:n.name+' (NPC)'}))]
+        .map(o=>({...o,on:(s.sceneForm.present||[]).some(p=>p.kind===o.kind&&p.id===o.id),onToggle:()=>this.toggleScenePresent(o.kind,o.id)})):[],
       woundPlayerOptions, woundTargetId, woundTargetName, woundTargetNick, woundCustom, currentWounds,
       hasCurrentWounds:currentWounds.length>0, noCurrentWounds:currentWounds.length===0, hasCustomWounds:woundCustom.length>0,
       showWoundForm:s.showWoundForm, woundDraft:s.woundDraft,
@@ -4838,7 +5062,9 @@ class Component extends DCLogic {
       lobbyHasNoSheet:s.players.some(p=>!p.approved&&!p.sheetReady),
       lobbyAllApproved:s.players.length>0&&s.players.every(p=>p.approved),
       toolGroups, showToolTabs, toolPistas:s.masterTool==='pistas',
-      cluesMaster:clues.map(k=>({...k,
+      cluesMaster:clues.map(k=>({...k, shareLabel:k.status==='oculta'?'Compartilhar':'Ocultar', onShare:()=>this.toggleClueShare(k.id),
+        hasNotes:!!k.notes, onEdit:()=>this.openContentForm('clue',k),
+        delAsk:s.contentDel==='clue:'+k.id, noDelAsk:s.contentDel!=='clue:'+k.id, onAskDel:()=>this.askDeleteContent('clue',k.id), onDel:()=>this.deleteContent('clue',k.id), onCancelDel:()=>this.cancelDeleteContent(),
         statusLabel:({oculta:'Oculta',encontrada:'Encontrada',analisada:'Analisada',
           compartilhada:'Compartilhada',perdida:'Perdida',destruida:'Destruída'})[k.status]||k.status,
         hasTxt:!!(k.txt&&k.txt!=='—')})),

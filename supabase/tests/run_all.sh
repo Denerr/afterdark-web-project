@@ -11,9 +11,9 @@ cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql \
     migration_archive_table.sql migration_profiles.sql \
     migration_requests_consequences.sql migration_rls_p2.sql \
     migration_player_projection.sql migration_session_persistence.sql \
-    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql > "$ALL"
+    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql migration_scenes.sql > "$ALL"
 fail=0
-for suite in ponto1_tests ponto2_tests ponto2b_tests ponto3_tests ponto5_tests pos0_tests pos1_tests; do
+for suite in ponto1_tests ponto2_tests ponto2b_tests ponto3_tests ponto5_tests pos0_tests pos1_tests pos2_tests; do
   docker rm -f adpg >/dev/null 2>&1
   docker run -d --name adpg -e POSTGRES_PASSWORD=pg postgres:15 >/dev/null
   until docker exec adpg pg_isready -U postgres >/dev/null 2>&1; do sleep 1; done
