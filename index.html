@@ -2268,7 +2268,11 @@ class Component extends DCLogic {
     // Mestre: biblioteca da conta mesclada + notas privadas da mesa. A referência "já
     // salvo" é o que veio do banco, então abrir a mesa não dispara gravação à toa; se a
     // mescla trouxe itens novos da conta, só essa diferença é gravada.
-    const savedRef=JSON.stringify({state:this._pickSync(next),notes:this._notesFromRemote(notes,false)});
+    // Etapa 5 pos-sessao: a referencia e o que o BANCO tem (antes era o estado padrao, com o
+    // catalogo embutido: numa mesa nova nada era gravado e o jogador via o catalogo vazio).
+    // Chave ausente no banco conta como diferenca e e gravada uma vez.
+    const remoteObj=(remote&&typeof remote==='object')?remote:{};
+    const savedRef=JSON.stringify({state:this._pickSync(remoteObj),notes:this._notesFromRemote(notes,false)});
     next.library=this._mergeLibrary(next.library,this.state.accountLib);
     Object.assign(next,this._notesFromRemote(notes,true));
     this._versions[tableId]=version;
