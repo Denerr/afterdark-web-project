@@ -13,11 +13,37 @@
     <sc-if value="{{ hasJoinError }}"><p style="font-size:12px;color:#e08a8a;margin:0 0 12px;text-align:center">{{ joinError }}</p></sc-if>
     <sc-if value="{{ !hasJoinError }}"><div style="height:20px"></div></sc-if>
     <button onClick="{{ toName }}" disabled="{{ joinBusy }}" style="width:100%;padding:14px;background:{{ joinBtnBg }};color:{{ joinBtnCol }};border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:{{ joinBtnCursor }};margin-bottom:18px" style-hover="background:#e0c179">{{ joinBtnLabel }}</button>
+    <sc-if value="{{ joinConflictShow }}">
+      <div role="alert" style="border:1px solid rgba(210,162,58,.3);border-radius:8px;padding:14px;margin:0 0 18px;background:rgba(210,162,58,.07)">
+        <p style="font-size:13px;line-height:1.5;color:#e9e3d4;margin:0 0 10px">Você já tem uma ficha em <b>{{ joinConflictTable }}</b> pela sua conta, e este navegador guarda outra, de quando entrou sem conta. Nenhuma das duas será apagada. Com qual quer entrar?</p>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button onClick="{{ chooseConflictAcc }}" style="padding:11px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:4px;color:#e0c179;font-size:12px;cursor:pointer;min-height:44px">Ficha da conta: {{ joinConflictAcc }}</button>
+          <sc-if value="{{ joinConflictHasLoc }}"><button onClick="{{ chooseConflictLoc }}" style="padding:11px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:12px;cursor:pointer;min-height:44px">Ficha deste navegador: {{ joinConflictLoc }}</button></sc-if>
+        </div>
+      </div>
+    </sc-if>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div><span style="font-size:11px;color:#6f6b61;letter-spacing:.1em">OU</span><div style="flex:1;height:1px;background:rgba(255,255,255,.08)"></div></div>
     <div style="display:flex;gap:10px">
       <button onClick="{{ toName }}" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(198,166,100,.25);border-radius:3px;color:#cfc7b4;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.55)">⛓ Por Link</button>
       <button onClick="{{ toName }}" style="flex:1;padding:12px;background:transparent;border:1px solid rgba(198,166,100,.25);border-radius:3px;color:#cfc7b4;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="border-color:rgba(198,166,100,.55)">▦ Ler QR</button>
     </div>
+    <sc-if value="{{ hasJoinTables }}">
+      <div style="margin-top:24px;padding-top:18px;border-top:1px solid rgba(255,255,255,.08)">
+        <div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin-bottom:10px">Mesas em que você joga</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ joinTables }}" as="t">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid rgba(255,255,255,.08);border-left:3px solid {{ t.acc }};border-radius:6px;padding:10px 12px">
+              <div style="flex:1;min-width:140px">
+                <div style="font-family:'Cinzel';font-weight:600;font-size:14px;color:#efe8d8;overflow-wrap:anywhere">{{ t.name }}</div>
+                <div style="font-size:12px;color:#a39e90">{{ t.charLine }}</div>
+              </div>
+              <sc-if value="{{ t.valid }}"><button onClick="{{ t.onEnter }}" style="padding:9px 12px;background:transparent;border:1px solid rgba(198,166,100,.35);border-radius:4px;color:#e0c179;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:40px">{{ t.cta }}</button></sc-if>
+              <sc-if value="{{ t.invalid }}"><button onClick="{{ t.onForget }}" style="padding:9px 12px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#a39e90;font-size:11px;cursor:pointer;min-height:40px">Remover da lista</button></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
   </div>
 </div>
 </x-dc>

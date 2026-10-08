@@ -56,6 +56,28 @@
     <div style="display:flex;flex-direction:column;gap:14px">
       <sc-if value="{{ noTables }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#8a7350;text-align:center;padding:10px 6px">Você ainda não tem mesas. Crie uma como Mestre ou entre com o código de um convite.</div></sc-if>
       <sc-for list="{{ tabsList }}" as="t" hint-placeholder-count="3">
+        <sc-if value="{{ t.headerMajor }}"><h3 style="font-family:'Cinzel';font-weight:600;font-size:17px;letter-spacing:.06em;color:#e0c179;margin:14px 0 0;padding-bottom:8px;border-bottom:1px solid rgba(198,166,100,.18)">{{ t.label }}</h3></sc-if>
+        <sc-if value="{{ t.isNote }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;padding:4px 2px">{{ t.label }}</div></sc-if>
+        <sc-if value="{{ t.isRetry }}"><div role="alert" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;font-size:13px;color:#e08a8a;padding:4px 2px">{{ t.label }} <button onClick="{{ t.onRetry }}" style="padding:8px 14px;background:transparent;border:1px solid rgba(198,166,100,.35);border-radius:5px;color:#e0c179;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:40px">Tentar de novo</button></div></sc-if>
+        <sc-if value="{{ t.isPlayerRow }}">
+        <div style="display:flex;align-items:center;flex-wrap:wrap;gap:14px 18px;border-radius:10px;border:1px solid rgba(255,255,255,.08);border-left:3px solid {{ t.acc }};background:#13121a;padding:18px 22px">
+          <div style="width:52px;height:52px;border-radius:8px;flex-shrink:0;background:radial-gradient(120% 120% at 30% 0%, {{ t.surf }}, #0c0a10);border:1px solid {{ t.acc }}55;display:flex;align-items:center;justify-content:center;font-size:20px;color: {{ t.acc }}">{{ t.icon }}</div>
+          <div style="flex:1;min-width:180px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:3px;flex-wrap:wrap">
+              <span style="font-family:'Cinzel';font-weight:600;font-size:20px;color:#efe8d8;overflow-wrap:anywhere">{{ t.name }}</span>
+              <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background:rgba(196,30,58,.14);color:#e07a8a;border:1px solid rgba(196,30,58,.4)">Jogador</span>
+              <sc-if value="{{ t.hasSource }}"><span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:12px;background:rgba(255,255,255,.06);color:#8d887c;border:1px solid rgba(255,255,255,.14)">{{ t.sourceLine }}</span></sc-if>
+            </div>
+            <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90">{{ t.charLine }}</div>
+            <sc-if value="{{ t.valid }}"><div style="font-size:12px;color:#8d887c;margin-top:2px">{{ t.statusLine }}</div></sc-if>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto">
+            <sc-if value="{{ t.valid }}"><button onClick="{{ t.onEnter }}" style="padding:11px 18px;background:transparent;border:1px solid rgba(198,166,100,.35);border-radius:5px;color:#e0c179;font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;min-height:44px">{{ t.cta }} →</button></sc-if>
+            <sc-if value="{{ t.canLink }}"><button onClick="{{ t.onLink }}" style="padding:11px 14px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#a39e90;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:44px">Vincular à minha conta</button></sc-if>
+            <sc-if value="{{ t.invalid }}"><button onClick="{{ t.onForget }}" style="padding:9px 14px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#a39e90;font-size:11px;letter-spacing:.06em;cursor:pointer;min-height:40px">Remover da lista</button></sc-if>
+          </div>
+        </div>
+        </sc-if>
         <sc-if value="{{ t.headerPlain }}"><div style="font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;margin:6px 0 -4px">{{ t.label }}</div></sc-if>
         <sc-if value="{{ t.headerToggle }}"><button onClick="{{ t.onToggle }}" style="align-self:flex-start;display:flex;gap:8px;align-items:center;background:transparent;border:none;padding:6px 0;margin:6px 0 -4px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#8d887c;cursor:pointer;min-height:36px">{{ t.label }} <span style="color:#c6a35e">{{ t.caret }}</span></button></sc-if>
         <sc-if value="{{ t.isTable }}">

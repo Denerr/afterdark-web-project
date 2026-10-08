@@ -982,7 +982,7 @@
 
 <!-- ========================= JOGADOR · ENTRAR ========================= -->
 <sc-if value="{{ isJJoin }}" data-screen-label="Jogador Entrar">
-<dc-import name="JJoin" joinCode="{{ joinCode }}" onJoinCode="{{ onJoinCode }}" joinInputBorder="{{ joinInputBorder }}" hasJoinError="{{ hasJoinError }}" joinError="{{ joinError }}" joinBusy="{{ joinBusy }}" joinBtnBg="{{ joinBtnBg }}" joinBtnCol="{{ joinBtnCol }}" joinBtnCursor="{{ joinBtnCursor }}" joinBtnLabel="{{ joinBtnLabel }}" toName="{{ toName }}"/>
+<dc-import name="JJoin" joinTables="{{ joinTables }}" hasJoinTables="{{ hasJoinTables }}" joinConflictShow="{{ joinConflictShow }}" joinConflictTable="{{ joinConflictTable }}" joinConflictAcc="{{ joinConflictAcc }}" joinConflictLoc="{{ joinConflictLoc }}" joinConflictHasLoc="{{ joinConflictHasLoc }}" chooseConflictAcc="{{ chooseConflictAcc }}" chooseConflictLoc="{{ chooseConflictLoc }}" joinCode="{{ joinCode }}" onJoinCode="{{ onJoinCode }}" joinInputBorder="{{ joinInputBorder }}" hasJoinError="{{ hasJoinError }}" joinError="{{ joinError }}" joinBusy="{{ joinBusy }}" joinBtnBg="{{ joinBtnBg }}" joinBtnCol="{{ joinBtnCol }}" joinBtnCursor="{{ joinBtnCursor }}" joinBtnLabel="{{ joinBtnLabel }}" toName="{{ toName }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · NOME ========================= -->
@@ -1780,7 +1780,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -2225,15 +2225,21 @@ class Component extends DCLogic {
     };
     if(!apply()){ let n=0; this._hydrateIv=setInterval(()=>{ if(apply()||++n>200) clearInterval(this._hydrateIv); },20); }
   }
+  // A entrada por codigo espera a sessao carregar: sem isso, um link aberto logo apos o
+  // carregamento seguia como visitante e criava outro participante para a conta.
+  _authReady(){ if(!this._authReadyP) this._authReadyP=new Promise(res=>{ this._authReadyRes=res; });
+    return Promise.race([this._authReadyP,new Promise(res=>setTimeout(res,4000))]); }
   _initAuth(){
+    this._authReady();
     const setup=()=>{
       if(!window.supabase) return false;
       const sb=this.sb;
-      sb.auth.getSession().then(({data})=>{ if(data&&data.session){ this._accessToken=data.session.access_token; this.setState({auth:this._authFromUser(data.session.user)}); this._loadUserData(); } });
+      sb.auth.getSession().then(({data})=>{ if(data&&data.session){ this._accessToken=data.session.access_token; this.setState({auth:this._authFromUser(data.session.user)}); this._loadUserData(); } })
+        .catch(()=>{}).then(()=>{ if(this._authReadyRes) this._authReadyRes(); });
       sb.auth.onAuthStateChange((event,session)=>{
         this._accessToken=session?session.access_token:null;
         this.setState({auth: session? this._authFromUser(session.user) : {loggedIn:false,name:'',email:'',phone:''}});
-        if(event==='SIGNED_IN'){ this._loadUserData(); this._resumePendingCode(); }
+        if(event==='SIGNED_IN'){ this._loadUserData(); if(!this._authFlow) this._resumePendingCode(); }
         if(event==='SIGNED_OUT') this.setState({characters:[],tables:[]});
         if(event==='PASSWORD_RECOVERY'){ this.setState({screen:'auth_reset',nav:[],resetDone:false,resetError:'',resetPass:{pass:'',pass2:''}}); }
       });
@@ -2245,7 +2251,14 @@ class Component extends DCLogic {
     try{
       const params=new URLSearchParams(window.location.search);
       const code=params.get('code');
-      if(code){ window.history.replaceState({},'',window.location.pathname); try{ localStorage.setItem('afterdark:pendingCode',code.toUpperCase()); }catch(e){} this.setState({joinCode:code.toUpperCase(),role:'jogador'}); this.go('j_join'); return true; }
+      if(code){ window.history.replaceState({},'',window.location.pathname);
+        const c=this._normCode(code); if(!c) return false;
+        this._setPendingCode(c);
+        this.setState({joinCode:c,role:'jogador'}); this.go('j_join'); this._loadPlayerTables();
+        // Ja participa desta mesa neste navegador: retoma o mesmo vinculo. Sem vinculo, so
+        // preenche o codigo -- abrir o link nao cria participante.
+        if(this._storedForCode(c)) this.joinByCode();
+        return true; }
     }catch(e){}
     return false;
   }
@@ -2259,6 +2272,36 @@ class Component extends DCLogic {
       localStorage.setItem('afterdark:memberships',JSON.stringify(all));
       localStorage.setItem('afterdark:activeMembership',JSON.stringify(m));
       sessionStorage.setItem('afterdark:tabTable',m.tableId);
+    }catch(e){}
+  }
+  // Etapa 0 pos-sessao: codigo de convite validado (so letras, numeros e hifen).
+  _normCode(c){ const v=String(c||'').trim().toUpperCase(); return /^[A-Z0-9][A-Z0-9-]{2,15}$/.test(v)?v:''; }
+  _setPendingCode(c){ try{ localStorage.setItem('afterdark:pendingCode',JSON.stringify({code:c,at:Date.now()})); }catch(e){} }
+  _pendingCode(){
+    try{
+      const raw=localStorage.getItem('afterdark:pendingCode'); if(!raw) return '';
+      let o=null; try{ o=JSON.parse(raw); }catch(e){ o={code:raw,at:Date.now()}; }
+      if(!o||!o.code||Date.now()-(o.at||0)>24*3600*1000){ localStorage.removeItem('afterdark:pendingCode'); return ''; }
+      return this._normCode(o.code);
+    }catch(e){ return ''; }
+  }
+  _clearPendingCode(){ try{ localStorage.removeItem('afterdark:pendingCode'); }catch(e){} }
+  _storedForCode(code){ const all=this._readMemberships(); return Object.values(all).find(m=>m&&m.code===code&&m.memberId)||null; }
+  // Credenciais de visitante deste navegador. O banco so reaproveita a que tiver o token
+  // certo E for da mesa do codigo; nome nunca serve de prova.
+  _credsList(){ return Object.values(this._readMemberships()).filter(m=>m&&m.memberId&&m.token).slice(0,50).map(m=>({member_id:m.memberId,token:m.token})); }
+  // Duas abas entrando ao mesmo tempo: uma espera a outra (o banco tambem trava por conta).
+  _withJoinLock(fn){ try{ if(navigator.locks&&navigator.locks.request) return navigator.locks.request('afterdark-join',fn); }catch(e){} return fn(); }
+  // Sair da conta: esquece os vinculos que a conta recupera sozinha (e os sem token, que
+  // nao valem sem login). Os de visitante continuam deste navegador.
+  _forgetAccountMemberships(){
+    try{
+      const all=this._readMemberships(); let tabGone=false; const tab=sessionStorage.getItem('afterdark:tabTable');
+      Object.keys(all).forEach(k=>{ const m=all[k]; if(!m||!m.token||m.acct){ delete all[k]; if(k===tab) tabGone=true; } });
+      localStorage.setItem('afterdark:memberships',JSON.stringify(all));
+      const last=JSON.parse(localStorage.getItem('afterdark:activeMembership')||'null');
+      if(last&&!all[last.tableId]) localStorage.removeItem('afterdark:activeMembership');
+      if(tabGone) sessionStorage.removeItem('afterdark:tabTable');
     }catch(e){}
   }
   _forgetMembership(tableId){
@@ -2301,18 +2344,23 @@ class Component extends DCLogic {
       if(!saved){ const raw=localStorage.getItem('afterdark:activeMembership'); if(raw) saved=JSON.parse(raw); }
     }catch(e){}
     if(!saved||!saved.tableId||!saved.memberId||!this.sb) return;
+    await this._enterMembership(saved,gen);
+  }
+  // Entra num vinculo ja existente, validado pelo banco. Devolve 'ok', 'gone' (o banco
+  // recusou: removido/mesa excluida), 'error' (rede) ou 'stale' (outro contexto escolhido).
+  async _enterMembership(saved,gen){
     try{
       // player_get_state valida token (ou auth.uid()) e já devolve o status da mesa.
       // Vínculo antigo de visitante sem token não passa na autorização e cai no
       // ramo de erro abaixo — o jogador precisa entrar de novo pelo código.
       const {data,error}=await this.sb.rpc('player_get_state',{p_member_id:saved.memberId,p_token:saved.token||null});
-      if((this._ctxGen||0)!==gen) return;   // o usuario escolheu outro contexto enquanto esperava
+      if((this._ctxGen||0)!==gen) return 'stale';   // o usuario escolheu outro contexto enquanto esperava
       const mbr=data&&data.member;
       if(error||!mbr||!mbr.id){
         // Só descarta o vínculo quando o banco RECUSA (vínculo inválido/removido). Falha de
         // rede mantém o vínculo para a próxima tentativa.
-        if(error&&/not_authorized|42501/.test((error.message||'')+(error.code||''))) this._forgetMembership(saved.tableId);
-        return;
+        if(error&&/not_authorized|42501/.test((error.message||'')+(error.code||''))){ this._forgetMembership(saved.tableId); return 'gone'; }
+        return 'error';
       }
       const status=data.table_status;
       this._rememberMembership(saved);
@@ -2323,7 +2371,7 @@ class Component extends DCLogic {
       }));
       if(status==='Em andamento'||/^Pausada/.test(status||'')||status==='Encerrada'){
         await this._loadTableSession(saved.tableId,false);
-        if((this._ctxGen||0)!==gen) return;
+        if((this._ctxGen||0)!==gen) return 'stale';
         this.setState({screen:'j_panel',nav:[]});
         this._startJogadorSessionPoll(saved.tableId);
       } else if(!mbr.char_name){
@@ -2337,16 +2385,105 @@ class Component extends DCLogic {
         this.setState({screen:'j_lobby',nav:[]});
         this._startPlayerPolling(saved.tableId);
       }
-    }catch(e){ console.error('resume membership failed:',e); }
+      return 'ok';
+    }catch(e){ console.error('resume membership failed:',e); return 'error'; }
   }
+  // Convite aberto antes do login: depois de entrar na conta, volta a tela do codigo. O
+  // codigo so e apagado quando a entrada da certo (antes era apagado aqui, e a entrada
+  // seguinte criava outro participante). Nao interrompe quem ja esta numa mesa.
   _resumePendingCode(){
+    const code=this._pendingCode(); if(!code) return false;
+    const s=this.state;
+    if(s.memberId||this._joinBusy||!/^(landing|start|profile|home|auth_login|auth_register|connect_gate|j_join)$/.test(s.screen)) return false;
+    this.setState({joinCode:code,role:'jogador',joinError:''});
+    if(s.screen!=='j_join') this.go('j_join');
+    this._loadPlayerTables();
+    if(this._storedForCode(code)||s.auth.loggedIn) this.joinByCode();
+    return true;
+  }
+  // Depois do login/cadastro: (1) visitante no meio de uma mesa -> vincula ESSA participacao
+  // a conta (token + sessao) e volta para a tela da mesa; (2) convite pendente -> segue a
+  // entrada; (3) senao, Perfil.
+  async _afterAuth(){
+    const s=this.state;
+    if(s.memberId&&s.joinTableId){
+      if(s.memberToken){ await this._linkMembership({tableId:s.joinTableId,memberId:s.memberId,token:s.memberToken},true); }
+      const nav=[...s.nav]; let scr=null;
+      while(nav.length){ const x=nav.pop(); if(!/^(auth_|connect_gate)/.test(x)){ scr=x; break; } }
+      this.setState({screen:scr||'j_lobby',nav});
+      return;
+    }
+    if(this._pendingCode()){ this.setState({screen:'start',nav:[]}); this._resumePendingCode(); return; }
+    this.setState({screen:'profile',nav:[],profileTab:'personagens'});
+  }
+  // Vincula uma participacao de visitante a conta. Exige o token do navegador e a sessao.
+  async _linkMembership(m,quiet){
+    if(!this.sb||!this.state.auth.loggedIn||!m||!m.token) return 'skip';
+    let data=null,error=null;
+    try{ ({data,error}=await this.sb.rpc('player_link_account',{p_member_id:m.memberId,p_token:m.token})); }catch(e){ error=e; }
+    const msg=error?((error.message||'')+(error.code||'')):'';
+    if(error){
+      if(/owner_cannot_join/.test(msg)){ if(!quiet) this._flashActionError('Você é o Mestre desta mesa: ela não pode ser vinculada como jogador.'); return 'owner'; }
+      if(/member_other_account/.test(msg)){ if(!quiet) this._flashActionError('Esta participação já pertence a outra conta.'); return 'other'; }
+      if(!quiet) this._flashActionError('Não foi possível vincular agora. Tente novamente.');
+      return 'error';
+    }
+    if(data&&data.conflict){
+      if(!quiet) this._flashActionError('Sua conta já tem uma ficha nesta mesa. As duas continuam separadas: escolha qual usar ao entrar.');
+      return 'conflict';
+    }
+    try{ const all=this._readMemberships(); if(all[m.tableId]&&all[m.tableId].memberId===m.memberId){ all[m.tableId].acct=true; localStorage.setItem('afterdark:memberships',JSON.stringify(all)); } }catch(e){}
+    return 'linked';
+  }
+  // ---- Aba Mesas: participacoes como jogador (conta + credenciais deste navegador) ----
+  async _loadPlayerTables(){
+    if(!this.sb) return;
+    const seq=(this._ptSeq=(this._ptSeq||0)+1);
+    const creds=this._credsList(), logged=this.state.auth.loggedIn;
+    if(!logged&&!creds.length){ this.setState({playerTables:[],playerTablesState:'ok'}); return; }
+    this.setState(st=>({playerTablesState:st.playerTablesState==='ok'?'ok':'loading'}));
     try{
-      const code=localStorage.getItem('afterdark:pendingCode');
-      if(!code) return;
-      localStorage.removeItem('afterdark:pendingCode');
-      this.setState({joinCode:code,role:'jogador'});
-      this.go('j_join');
-    }catch(e){}
+      const [acc,loc]=await Promise.all([
+        logged?this.sb.rpc('my_memberships'):Promise.resolve({data:[]}),
+        creds.length?this.sb.rpc('player_check_memberships',{p_creds:creds}):Promise.resolve({data:[]})
+      ]);
+      if(seq!==this._ptSeq) return;
+      if(acc.error||loc.error) throw (acc.error||loc.error);
+      const byMember={}; Object.values(this._readMemberships()).forEach(m=>{ if(m&&m.memberId) byMember[m.memberId]=m; });
+      const rows=[], seen=new Set();
+      (Array.isArray(acc.data)?acc.data:[]).forEach(r=>{ seen.add(r.member_id); rows.push({...r,valid:true,source:'conta',linked:true,token:(byMember[r.member_id]||{}).token||null}); });
+      (Array.isArray(loc.data)?loc.data:[]).forEach(r=>{
+        if(seen.has(r.member_id)) return; seen.add(r.member_id);
+        const lm=byMember[r.member_id]||{};
+        if(r.valid&&r.linked&&!r.mine) return;   // participacao de outra conta neste navegador: nao lista
+        rows.push({...r,source:'navegador',token:lm.token||null,table_id:r.table_id||lm.tableId,table_name:r.table_name||lm.tableName||'Mesa',table_type:r.table_type||lm.tableType||'One-shot'});
+      });
+      this.setState({playerTables:rows,playerTablesState:'ok'});
+    }catch(e){ if(seq===this._ptSeq) this.setState({playerTablesState:'error'}); }
+  }
+  async enterAsPlayer(r){
+    if(this._enteringPlayer||!r||!r.valid) return;
+    this._bumpCtx(); const gen=this._ctxGen;
+    const prev=this.state.activeTableId;
+    this._enteringPlayer=true; this.setState({enteringMemberId:r.member_id});
+    if(prev&&this._canSaveRemote(prev)){
+      const sv=await this._flushSave(prev);
+      if(!sv.ok){ this._enteringPlayer=false; this.setState({enteringMemberId:null}); this._flashActionError('Não foi possível salvar a mesa atual. Verifique a conexão antes de entrar em outra.'); return; }
+    }
+    this._stopAllPolling();
+    const saved={tableId:r.table_id,memberId:r.member_id,token:r.token||null,tableName:r.table_name,tableType:r.table_type||'One-shot',acct:r.source==='conta'};
+    this.setState({...this._blankTableSession(),activeTableId:null,role:'jogador',players:[],pending:null,pRoll:null,pSend:null,sentReqs:[],selfApproved:!!r.approved,selfSheetReady:!!r.sheet_ready});
+    const res=await this._enterMembership(saved,gen);
+    this._enteringPlayer=false; this.setState({enteringMemberId:null});
+    if(res==='gone'){ this._flashActionError('Esta participação não está mais disponível: o Mestre removeu o vínculo ou a mesa foi excluída.'); this._loadPlayerTables(); }
+    else if(res==='error'){ this._flashActionError('Não foi possível abrir a mesa agora. Verifique a conexão e tente novamente.'); }
+  }
+  forgetPlayerTable(r){ if(r&&r.table_id) this._forgetMembership(r.table_id); this._loadPlayerTables(); }
+  async linkPlayerTable(r){
+    if(this._linkBusy) return; this._linkBusy=true;
+    const res=await this._linkMembership({tableId:r.table_id,memberId:r.member_id,token:r.token});
+    this._linkBusy=false;
+    if(res==='linked') this._loadPlayerTables();
   }
   // Linha do banco -> membro na interface. Ferimentos, condições, ficha concluída e
   // aprovação vêm do banco (fonte de verdade), então o polling não apaga nada.
@@ -2520,6 +2657,7 @@ class Component extends DCLogic {
       this.sb.from('tables').select('id,name,type,faction,theme,status,invite_code,archived,created_at').order('created_at',{ascending:true})
     ]);
     this._loadAccountLib();
+    this._loadPlayerTables();
     if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
     if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,archived:!!r.archived,role:'mestre',target:'m_session'}))});
   }
@@ -2553,8 +2691,8 @@ class Component extends DCLogic {
   setHomeVar(v){ this.setState({homeVar:v}); }
   // Etapa 7: "Criar ou acessar minhas mesas". Com conta, vai direto a lista de mesas do
   // Perfil; sem conta, comeca uma mesa nova (o Mestre pode jogar sem conta neste aparelho).
-  goMyTables(){ if(this.state.auth.loggedIn){ this.setState({profileTab:'mesas'}); this.go('profile'); } else this.pickRole('mestre'); }
-  pickRole(r){ this._bumpCtx(); if(r==='mestre'){ this.go('m_tablename',{role:r}); } else { this.go('j_join',{role:r}); } }
+  goMyTables(){ if(this.state.auth.loggedIn){ this.setState({profileTab:'mesas'}); this.go('profile'); this._loadPlayerTables(); } else this.pickRole('mestre'); }
+  pickRole(r){ this._bumpCtx(); if(r==='mestre'){ this.go('m_tablename',{role:r}); } else { this.go('j_join',{role:r,joinConflict:null}); this._loadPlayerTables(); } }
   pickMode(m){ this.go(m==='capitulos'?'m_chapters':'m_oneshots',{mode:m}); }
   pickOneshot(k){ this.setState({oneshot:k}); }
 
@@ -2567,7 +2705,7 @@ class Component extends DCLogic {
   goProfile(){ if(this.state.auth.loggedIn){ this.setState({screen:'profile',nav:[]}); } else { this.setState({screen:'connect_gate',gateFrom:'perfil',nav:[]}); } }
   goStart(){ this.setState({screen:'start',nav:[]}); }
   goHome(){ this.setState({screen:this.state.auth.loggedIn?'start':'landing',nav:[]}); }
-  goMesas(){ if(this.state.auth.loggedIn){ this.setState({screen:'profile',profileTab:'mesas',nav:[]}); } else { this.setState({screen:'connect_gate',gateFrom:'mesas',nav:[]}); } }
+  goMesas(){ if(this.state.auth.loggedIn){ this.setState({screen:'profile',profileTab:'mesas',nav:[]}); this._loadPlayerTables(); } else { this.setState({screen:'connect_gate',gateFrom:'mesas',nav:[]}); } }
   goPersonagens(){ if(this.state.auth.loggedIn){ this.setState({screen:'profile',profileTab:'personagens',nav:[]}); } else { this.setState({screen:'connect_gate',gateFrom:'personagens',nav:[]}); } }
   goRoleSelect(){ this.go('home'); }
   setReg(k,v){ this.setState(s=>({reg:{...s.reg,[k]:v},regError:false,regErrorText:''})); }
@@ -2590,9 +2728,11 @@ class Component extends DCLogic {
     if(!this.sb){ this.setState({regError:true,regErrorText:'Serviço indisponível no momento. Tente recarregar a página.'}); return; }
     const r=this.state.reg;
     this.setState({authBusy:true,regError:false});
-    const {data,error}=await this.sb.auth.signUp({email:r.email,password:r.pass,options:{data:{name:r.name,phone:r.phone}}});
+    this._authFlow=true;
+    let data=null,error=null;
+    try{ ({data,error}=await this.sb.auth.signUp({email:r.email,password:r.pass,options:{data:{name:r.name,phone:r.phone}}})); }finally{ this._authFlow=false; }
     if(error){ this.setState({authBusy:false,regError:true,regErrorText:this._authErrorMsg(error)}); return; }
-    if(data.session){ this.setState({authBusy:false,auth:this._authFromUser(data.user),screen:'profile',nav:[],profileTab:'personagens',reg:{name:'',email:'',phone:'',pass:'',pass2:''}}); }
+    if(data.session){ this.setState({authBusy:false,auth:this._authFromUser(data.user),reg:{name:'',email:'',phone:'',pass:'',pass2:''}}); await this._afterAuth(); }
     else { this.setState({authBusy:false,regSent:true}); }
   }
   async submitLogin(){
@@ -2600,10 +2740,15 @@ class Component extends DCLogic {
     if(!l.email||!l.pass){ this.setState({loginError:'Informe email e senha para entrar.'}); return; }
     if(!this.sb){ this.setState({loginError:'Serviço indisponível no momento. Tente recarregar a página.'}); return; }
     this.setState({authBusy:true,loginError:false});
-    await this.sb.auth.signOut();
-    const {data,error}=await this.sb.auth.signInWithPassword({email:l.email,password:l.pass});
+    this._authFlow=true;
+    let data=null,error=null;
+    try{
+      await this.sb.auth.signOut();
+      ({data,error}=await this.sb.auth.signInWithPassword({email:l.email,password:l.pass}));
+    }finally{ this._authFlow=false; }
     if(error){ this.setState({authBusy:false,loginError:this._authErrorMsg(error)}); return; }
-    this.setState({authBusy:false,auth:this._authFromUser(data.user),screen:'profile',nav:[],profileTab:'personagens',login:{email:'',pass:''}});
+    this.setState({authBusy:false,auth:this._authFromUser(data.user),login:{email:'',pass:''}});
+    await this._afterAuth();
   }
   async submitForgot(){
     if(!this.state.forgot.email) return;
@@ -2639,16 +2784,15 @@ class Component extends DCLogic {
       }
     }
     this._stopAllPolling();
-    this._forgetMembership(s0.joinTableId);
-    if(this.sb){
-      if(s0.memberId){ this.sb.rpc('player_leave_table',{p_member_id:s0.memberId,p_token:s0.memberToken||null}).then(()=>{}); }
-      await this.sb.auth.signOut();
-    }
+    // Etapa 0 pos-sessao: sair da conta NAO e sair da mesa. Antes chamava
+    // player_leave_table e apagava a participacao; a ficha sumia no proximo login.
+    this._forgetAccountMemberships();
+    if(this.sb){ await this.sb.auth.signOut(); }
     this._accessToken=null;
     this.setState({auth:{loggedIn:false,name:'',email:'',phone:''},screen:'landing',nav:[],login:{email:'',pass:''},reg:{name:'',email:'',phone:'',pass:'',pass2:''},memberId:null,memberToken:null,pending:null,pRoll:null,pSend:null,sentReqs:[],players:[],
-      activeTableId:null,saveStatus:'idle',saveError:'',tables:[],characters:[],accountLib:null,tableStatus:null,tableGone:false,joinTableId:null,woundLib:[],condLib:[],...this._blankTableSession()},()=>{ this._uid=null; this.loadWoundLib(); this.loadCondLib(); });
+      activeTableId:null,saveStatus:'idle',saveError:'',tables:[],characters:[],accountLib:null,tableStatus:null,tableGone:false,joinTableId:null,joinConflict:null,playerTables:[],playerTablesState:'idle',woundLib:[],condLib:[],...this._blankTableSession()},()=>{ this._uid=null; this.loadWoundLib(); this.loadCondLib(); });
   }
-  setProfileTab(t){ this.setState({profileTab:t}); }
+  setProfileTab(t){ this.setState({profileTab:t}); if(t==='mesas') this._loadPlayerTables(); }
   setTableName(v){ this.setState({tableName:v}); }
   tableNameNext(){ if(!this.state.tableName.trim()) return; this.go('m_mode'); }
   async openTable(t){
@@ -2757,6 +2901,9 @@ class Component extends DCLogic {
     this.setState({joinTableId:null,joinTableName:'',joinTableType:'',memberId:null,memberToken:null,pending:null,pRoll:null,pSend:null,pendingCount:0,selfApproved:false,selfSheetReady:false,tableStatus:null,tableGone:false,players:[],...this._blankTableSession(),joinCode:'',joinName:'',screen:this.state.auth.loggedIn?'start':'landing',nav:[]});
   }
   async joinByCode(){
+    // Entrada ja em andamento (clique repetido, ou o SIGNED_IN do carregamento retomando o
+    // convite): ignora ANTES de trocar o contexto, senao a primeira entrada era descartada.
+    if(this._joinBusy) return;
     this._bumpCtx();
     const code=(this.state.joinCode||'').trim().toUpperCase();
     if(!code){ return; }
@@ -2774,21 +2921,71 @@ class Component extends DCLogic {
     }catch(e){}
     // 2. Verifica no Supabase (mestre logado)
     if(this.sb){
-      if(this.state.joinBusy) return;
-      this.setState({joinBusy:true,joinError:''});
-      // Cria o vínculo no banco e recebe o token secreto do membro (exibido uma única vez).
-      let data=null,error=null;
-      try{ ({data,error}=await this.sb.rpc('join_table_by_code',{p_code:code,p_player_name:this.state.auth.name||''}).single()); }catch(e){ error=e; }
-      this.setState({joinBusy:false});
+      if(this.state.joinBusy||this._joinBusy) return;
+      this._joinBusy=true; this.setState({joinBusy:true,joinError:'',joinConflict:null});
+      const gen=this._ctxGen||0;
+      // Etapa 0 pos-sessao: a entrada e repetivel. O banco reaproveita a credencial deste
+      // navegador (token) ou a participacao da conta; so cria membro quando nao ha nenhum.
+      let data=null,error=null,saved=null;
+      await this._authReady();
+      try{
+        await this._withJoinLock(async()=>{
+          // dentro da trava: le as credenciais de novo (outra aba pode ter acabado de gravar)
+          try{ ({data,error}=await this.sb.rpc('join_table_by_code',{p_code:code,p_player_name:this.state.auth.name||'',p_creds:this._credsList()}).single()); }catch(e){ error=e; }
+          if(!error&&data&&!data.conflict_member_id) saved=this._applyJoin(data,code);
+        });
+      }catch(e){ error=error||e; }
+      this._joinBusy=false; this.setState({joinBusy:false});
       if(error||!data){
-        const notFound=error&&/invalid_code/.test(error.message||'');
-        this.setState({joinError:notFound?'Código não encontrado. Verifique se o Mestre está conectado e a mesa foi criada.':'Não foi possível entrar na mesa agora. Verifique sua conexão e tente novamente.'});
+        const m=(error&&((error.message||'')+(error.code||'')))||'';
+        this.setState({joinError:/invalid_code/.test(m)?'Código não encontrado. Verifique se o Mestre está conectado e a mesa foi criada.'
+          :/owner_cannot_join/.test(m)?'Você é o Mestre desta mesa. Abra-a pelo Perfil, em Mesas › Como mestre.'
+          :'Não foi possível entrar na mesa agora. Verifique sua conexão e tente novamente.'});
+        if(/owner_cannot_join/.test(m)) this._clearPendingCode();
         return;
       }
-      this.setState({joinTableId:data.table_id,joinTableName:data.table_name,joinTableType:data.table_type||'One-shot',memberId:data.member_id,memberToken:data.member_token,selfApproved:false,selfSheetReady:false,pending:null,pRoll:null,pSend:null});
-      this._rememberMembership({tableId:data.table_id,memberId:data.member_id,token:data.member_token,tableName:data.table_name,tableType:data.table_type||'One-shot'});
+      this._clearPendingCode();
+      if((this._ctxGen||0)!==gen) return;
+      if(data.conflict_member_id){
+        // A conta ja tem uma ficha nesta mesa e este navegador tem outra (de visitante).
+        // Nada e fundido: a pessoa escolhe qual usar; a outra continua como esta.
+        const loc=Object.values(this._readMemberships()).find(m=>m&&m.memberId===data.conflict_member_id)||{};
+        this.setState({joinConflict:{code,tableId:data.table_id,tableName:data.table_name,tableType:data.table_type||'One-shot',
+          account:{memberId:data.member_id,char:data.char_name||'',token:null},
+          browser:{memberId:data.conflict_member_id,char:data.conflict_char_name||'',token:loc.token||null}}});
+        return;
+      }
+      if(data.reused&&saved){
+        // Mesmo participante de antes: segue para onde ele parou (lobby, ficha ou sessao).
+        const r=await this._enterMembership(saved,gen);
+        if(r==='ok'||r==='stale') return;
+        if(r==='error'){ this.setState({joinError:'Não foi possível abrir a mesa agora. Verifique sua conexão e tente novamente.'}); return; }
+      }
     }
     this.go('j_name');
+  }
+  _applyJoin(data,code){
+    const prev=Object.values(this._readMemberships()).find(m=>m&&m.memberId===data.member_id)||null;
+    const token=data.member_token||(prev&&prev.token)||null;
+    const saved={tableId:data.table_id,memberId:data.member_id,token,tableName:data.table_name,tableType:data.table_type||'One-shot',code,
+      // logado, o membro devolvido e sempre da conta (novo, reaproveitado ou recem-vinculado)
+      acct:!!this.state.auth.loggedIn};
+    this._rememberMembership(saved);
+    this.setState({joinTableId:data.table_id,joinTableName:data.table_name,joinTableType:data.table_type||'One-shot',memberId:data.member_id,memberToken:token,
+      selfApproved:false,selfSheetReady:false,pending:null,pRoll:null,pSend:null});
+    return saved;
+  }
+  async chooseJoinConflict(which){
+    const c=this.state.joinConflict; if(!c||this._joinBusy) return;
+    const opt=which==='browser'?c.browser:c.account;
+    this._bumpCtx(); const gen=this._ctxGen;
+    const saved={tableId:c.tableId,memberId:opt.memberId,token:opt.token||null,tableName:c.tableName,tableType:c.tableType,code:c.code,acct:which!=='browser'};
+    this._rememberMembership(saved);
+    this.setState({joinConflict:null,joinTableId:c.tableId,joinTableName:c.tableName,joinTableType:c.tableType,memberId:opt.memberId,memberToken:opt.token||null});
+    this._joinBusy=true; this.setState({joinBusy:true});
+    const r=await this._enterMembership(saved,gen);
+    this._joinBusy=false; this.setState({joinBusy:false});
+    if(r==='gone'||r==='error') this.setState({joinError:r==='gone'?'Esta participação não está mais disponível.':'Não foi possível abrir a mesa agora. Tente novamente.'});
   }
   lobbyCopy(which){
     const code=this._currentTableCode();
@@ -3939,7 +4136,7 @@ class Component extends DCLogic {
         // Etapa 7: mesa em andamento/pausada vem primeiro, com "Continuar" como acao principal
         ...(()=>{ const st=t.status||''; const emJogo=!isArchived&&(st==='Em andamento'||/^Pausada/.test(st));
           return {emJogo, rank:isArchived?3:(emJogo?(st==='Em andamento'?0:1):2),
-            cta:emJogo?'Continuar':(st==='Aguardando jogadores'?'Abrir lobby':'Abrir'),
+            cta:emJogo?'Continuar como mestre':'Abrir como mestre',
             ctaBg:emJogo?'#c6a35e':'transparent', ctaCol:emJogo?'#0b0b10':'#e0c179',
             ctaBorder:emJogo?'1px solid #c6a35e':'1px solid rgba(198,166,100,.35)'}; })(),
         onOpen:()=>this.openTable(t), isTable:true,
@@ -3951,17 +4148,41 @@ class Component extends DCLogic {
         onAskHardDelete:()=>this.askHardDeleteTable(t), onCancelHardDelete:()=>this.cancelHardDeleteTable(), onConfirmHardDelete:()=>this.confirmHardDeleteTable(t)
       };
     });
+    // Etapa 0 pos-sessao: mesas em que a pessoa joga (pela conta ou por credencial deste navegador)
+    const stLabel=r=>r.archived?'Arquivada pelo Mestre':(r.table_status||'—');
+    const playerTablesView=(s.playerTables||[]).map(r=>{
+      const busy=s.enteringMemberId===r.member_id;
+      const onlyHere=r.source==='navegador'&&!r.linked;
+      return {isPlayerRow:true,isTable:false,isHeader:false,key:r.member_id,
+        name:r.table_name||'Mesa', icon:tIcon[r.table_theme]||'◈', acc:tAcc[r.table_theme]||'#b9a06a', surf:tSurf[r.table_theme]||'#1a2733',
+        valid:!!r.valid, invalid:!r.valid,
+        charLine:r.valid?(r.char_name?`Personagem: ${r.char_name}`:'Ficha ainda não criada'):'Indisponível: o Mestre removeu esta participação ou a mesa foi excluída.',
+        statusLine:r.valid?`${r.table_type||'Mesa'} · ${stLabel(r)}${r.approved?' · ficha aprovada':''}`:'',
+        sourceLine:onlyHere?'Neste navegador · sem conta':'',
+        hasSource:onlyHere,
+        canLink:onlyHere&&r.valid&&!!s.auth.loggedIn&&!!r.token,
+        cta:busy?'Abrindo…':'Entrar como jogador',
+        onEnter:()=>this.enterAsPlayer(r), onLink:()=>this.linkPlayerTable(r), onForget:()=>this.forgetPlayerTable(r)};
+    });
     // Lista unica com cabecalhos de secao: Em jogo / Outras mesas / Arquivadas (recolhida).
     const tabsList=(()=>{ const out=[], H=(label,extra)=>out.push({isHeader:true,isTable:false,label,...(extra||{})});
       const em=tablesView.filter(x=>x.emJogo).sort((a,b)=>a.rank-b.rank);
       const outras=tablesView.filter(x=>!x.isArchived&&!x.emJogo);
       const arq=tablesView.filter(x=>x.isArchived);
+      // Etapa 0 pos-sessao: duas secoes por papel; o papel vem em texto, nao so na cor.
+      out.push({isHeader:true,isMajor:true,isTable:false,label:'Como mestre'});
+      if(!tablesView.length) out.push({isHeader:false,isTable:false,isNote:true,label:'Nenhuma mesa criada por você ainda.'});
       if(em.length){ H('Em jogo · continue de onde parou'); em.forEach(x=>out.push(x)); }
       if(outras.length){ H(em.length?'Outras mesas':'Suas mesas'); outras.forEach(x=>out.push(x)); }
       if(arq.length){ H(`Arquivadas (${arq.length})`,{isToggle:true,caret:s.profileArchOpen?'▴':'▾',
         onToggle:()=>this.setState(st=>({profileArchOpen:!st.profileArchOpen}))});
         if(s.profileArchOpen) arq.forEach(x=>out.push(x)); }
-      out.forEach(x=>{ x.headerPlain=x.isHeader&&!x.isToggle; x.headerToggle=x.isHeader&&!!x.isToggle; });
+      out.push({isHeader:true,isMajor:true,isTable:false,label:'Como jogador'});
+      if(s.playerTablesState==='loading') out.push({isHeader:false,isTable:false,isNote:true,label:'Carregando suas participações…'});
+      else if(s.playerTablesState==='error') out.push({isHeader:false,isTable:false,isRetry:true,label:'Não foi possível carregar as mesas em que você joga.',onRetry:()=>this._loadPlayerTables()});
+      else if(!playerTablesView.length) out.push({isHeader:false,isTable:false,isNote:true,label:'Você ainda não entrou em nenhuma mesa como jogador. Use o código de um convite.'});
+      playerTablesView.forEach(x=>out.push(x));
+      out.forEach(x=>{ x.headerPlain=x.isHeader&&!x.isToggle&&!x.isMajor; x.headerToggle=x.isHeader&&!!x.isToggle; x.headerMajor=!!x.isMajor; });
       return out; })();
     const pPers=s.profileTab==='personagens', pMesas=s.profileTab==='mesas';
     const regValid=this.regValid();
@@ -4197,7 +4418,7 @@ class Component extends DCLogic {
       resetBtnLabel:s.resetBusy?'Salvando…':'Salvar nova senha', onResetPass:(e)=>this.setResetPass('pass',e.target.value), onResetPass2:(e)=>this.setResetPass('pass2',e.target.value),
       submitResetPassword:()=>this.submitResetPassword(), goAfterReset:()=>this.goAfterReset(),
       // profile
-      profilePers:pPers, profileMesas:pMesas, charactersView, tablesView, charCount:s.characters.length, tableCount:s.tables.length,
+      profilePers:pPers, profileMesas:pMesas, charactersView, tablesView, charCount:s.characters.length, tableCount:s.tables.length+(s.playerTables||[]).filter(r=>r.valid).length,
       onProfilePers:()=>this.setProfileTab('personagens'), onProfileMesas:()=>this.setProfileTab('mesas'),
       tabPersUnder:pPers?'#c6a35e':'transparent', tabPersCol:pPers?'#efe8d8':'#8d887c', tabMesasUnder:pMesas?'#c6a35e':'transparent', tabMesasCol:pMesas?'#efe8d8':'#8d887c',
       createCharProfile:()=>this.createCharProfile(),
@@ -4412,7 +4633,13 @@ class Component extends DCLogic {
       noClocksAll:!(s.clocks||[]).length, noStressBars:!(s.stressBars||[]).length,
       libSearch:s.libSearch||'', onLibSearch:(e)=>this.setState({libSearch:e.target.value}),
       libNoResults:!!(s.libSearch||'').trim()&&libraryList.length===0,
-      tabsList, noTables:!s.tables.length,
+      tabsList, noTables:false,
+      joinTables:playerTablesView, hasJoinTables:playerTablesView.length>0,
+      joinConflictShow:!!s.joinConflict, joinConflictTable:(s.joinConflict&&s.joinConflict.tableName)||'',
+      joinConflictAcc:(s.joinConflict&&(s.joinConflict.account.char||'ficha sem nome'))||'',
+      joinConflictLoc:(s.joinConflict&&(s.joinConflict.browser.char||'ficha sem nome'))||'',
+      joinConflictHasLoc:!!(s.joinConflict&&s.joinConflict.browser.token),
+      chooseConflictAcc:()=>this.chooseJoinConflict('account'), chooseConflictLoc:()=>this.chooseJoinConflict('browser'),
       // Etapa 7: o que falta para iniciar, em numeros. So leitura: a guarda real continua no
       // banco (master_start_session) e em _startGate.
       lobbyTotal:s.players.length,

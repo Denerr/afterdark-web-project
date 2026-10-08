@@ -19,7 +19,8 @@ As migrações são **incrementais e dependentes de ordem**. Algumas corrigem po
 10. migration_rls_p2.sql                    <- Ponto 2
 11. migration_player_projection.sql         <- relógios/estresse/grupo
 12. migration_session_persistence.sql       <- Ponto 3
-13. migration_skill_pairs.sql               <- UI Etapa 5: par atributo/perícia (último)
+13. migration_skill_pairs.sql               <- UI Etapa 5: par atributo/perícia
+14. migration_identity.sql                  <- Pós-sessão Etapa 0: identidade e aba Mesas (último)
 ```
 
 Todas são idempotentes: rodar de novo não duplica objeto.
@@ -40,7 +41,7 @@ cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql \
     migration_archive_table.sql migration_profiles.sql \
     migration_requests_consequences.sql migration_rls_p2.sql \
     migration_player_projection.sql migration_session_persistence.sql \
-    migration_skill_pairs.sql > /tmp/all.sql
+    migration_skill_pairs.sql migration_identity.sql > /tmp/all.sql
 
 docker cp /tmp/all.sql adpg:/tmp/all.sql
 docker exec adpg psql -U postgres -q -f /tmp/all.sql
@@ -70,6 +71,18 @@ tabela de pares `_ad_skill_attr`, fechada para a API. A tabela **espelha**
 primeiro, aplicar a migração depois.** O cliente novo funciona com o banco antigo (que
 só não valida o par); já o cliente antigo usa como padrão a perícia inexistente
 `analise`, que o banco novo recusa.
+
+Para um banco que já tem a `migration_skill_pairs.sql`, basta `migration_identity.sql`
+(Pós-sessão, Etapa 0). Ela troca `join_table_by_code` (parâmetro novo `p_creds`, com valor
+padrão) e cria `player_link_account`, `my_memberships`, `player_check_memberships`, a
+função de manutenção `_ad_merge_member` (fechada para a API) e o arquivo
+`_ad_members_archive`. **Ordem: aplicar a migração ANTES de publicar o `index.html` da
+Etapa 0.** O cliente antigo funciona com o banco novo; o cliente novo envia `p_creds`, que
+o banco antigo não conhece.
+
+O índice `table_members_one_per_account` (uma participação por conta e mesa) só é criado
+quando não há duplicata. Havendo, a migração termina com um WARNING e não cria o índice:
+resolver com `_ad_merge_member` (ver `docs/gate-pos-0.md`) e rodar a migração de novo.
 
 `migration_player_projection.sql` só substitui duas funções (`player_get_session` e
 `player_get_lobby`): não altera tabela, policy nem grant. O cliente publicado funciona
@@ -125,8 +138,12 @@ docker rm -f adpg
 ```
 
 Esperado: **52** no Ponto 1, **73** no Ponto 2, **24** no 2B (relógios/estresse),
-**32** no Ponto 3 e **16** na UI Etapa 5. O `run_all.sh` também roda a paridade
+**32** no Ponto 3, **16** na UI Etapa 5 e **51** na Etapa 0 pós-sessão (`pos0_tests`). O `run_all.sh` também roda a paridade
 catálogo × banco (`node tests/parity_skills.js`, 24 perícias).
+
+`pos0_tests` também precisa de `migration_identity.sql` copiada para `/tmp/mig.sql` no
+contêiner (ela roda a migração de novo para testar a correção de duplicatas): use o
+`run_all.sh`, que já faz isso.
 
 Cada arquivo cria o schema `t`, então **cada suíte precisa de uma base recém-criada** — rodar duas na mesma base falha na segunda. Recriar o container entre elas.
 
