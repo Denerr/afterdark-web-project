@@ -22,7 +22,8 @@ As migrações são **incrementais e dependentes de ordem**. Algumas corrigem po
 13. migration_skill_pairs.sql               <- UI Etapa 5: par atributo/perícia
 14. migration_identity.sql                  <- Pós-sessão Etapa 0: identidade e aba Mesas
 15. migration_equipment_photo.sql           <- Pós-sessão Etapa 1: equipamento e foto
-16. migration_scenes.sql                    <- Pós-sessão Etapa 2: NPCs, pistas e cenas (último)
+16. migration_scenes.sql                    <- Pós-sessão Etapa 2: NPCs, pistas e cenas
+17. migration_clocks_stress.sql             <- Pós-sessão Etapas 3 e 4: estresse, penalidades, relógios (último)
 ```
 
 Todas são idempotentes: rodar de novo não duplica objeto.
@@ -43,7 +44,7 @@ cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql \
     migration_archive_table.sql migration_profiles.sql \
     migration_requests_consequences.sql migration_rls_p2.sql \
     migration_player_projection.sql migration_session_persistence.sql \
-    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql migration_scenes.sql > /tmp/all.sql
+    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql migration_scenes.sql migration_clocks_stress.sql > /tmp/all.sql
 
 docker cp /tmp/all.sql adpg:/tmp/all.sql
 docker exec adpg psql -U postgres -q -f /tmp/all.sql
@@ -92,6 +93,14 @@ Para um banco que já tem a `migration_equipment_photo.sql`, basta `migration_sc
 (Pós-sessão, Etapa 2). Ela só substitui `player_get_session`: NPCs e pistas chegam ao
 jogador sem as notas privadas, a lista de cenas não chega e a cena ativa compartilhada vem
 em `activeScene`. **Ordem: aplicar ANTES do deploy** (o site novo cria notas privadas).
+
+Para um banco que já tem a `migration_scenes.sql`, basta `migration_clocks_stress.sql`
+(Pós-sessão, Etapas 3 e 4). Ela adiciona `table_members.penalties` e `acked_events`, a
+tabela fechada `_ad_session_ops` (idempotência), a regra `_ad_clock_step` e as funções
+`master_clock_op`, `master_set_penalty` e `player_ack_events`, e substitui
+`player_get_state`/`player_get_session` (só ganham campos: penalidades próprias e avisos
+de conclusão pendentes). **Ordem: aplicar ANTES do deploy** (o site novo avança relógio e
+estresse por `master_clock_op`).
 
 O índice `table_members_one_per_account` (uma participação por conta e mesa) só é criado
 quando não há duplicata. Havendo, a migração termina com um WARNING e não cria o índice:
@@ -151,7 +160,7 @@ docker rm -f adpg
 ```
 
 Esperado: **52** no Ponto 1, **73** no Ponto 2, **24** no 2B (relógios/estresse),
-**32** no Ponto 3, **16** na UI Etapa 5 e **51** na Etapa 0 pós-sessão (`pos0_tests`) **35** na Etapa 1 (`pos1_tests`) e **10** na Etapa 2 (`pos2_tests`). O `run_all.sh` também roda a paridade
+**32** no Ponto 3, **16** na UI Etapa 5 e **51** na Etapa 0 pós-sessão (`pos0_tests`) **35** na Etapa 1 (`pos1_tests`) **10** na Etapa 2 (`pos2_tests`) e **50** nas Etapas 3 e 4 (`pos3_tests`). O `run_all.sh` também roda a paridade
 catálogo × banco (`node tests/parity_skills.js`, 24 perícias).
 
 `pos0_tests` também precisa de `migration_identity.sql` copiada para `/tmp/mig.sql` no

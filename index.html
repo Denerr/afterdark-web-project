@@ -427,7 +427,7 @@
                   <sc-for list="{{ skillsGeral }}" as="a" hint-placeholder-count="5"><option value="{{ a.key }}">{{ a.label }}</option></sc-for>
                 </select></div>
             </div>
-            <div style="font-family:'Space Mono';font-size:11px;color:#7e7a70;margin-bottom:14px;padding:9px 11px;background:#0e0d12;border-radius:4px;border:1px solid rgba(255,255,255,.06)">maior de N d20 + perícia · alvo fixo</div>
+            <div style="font-family:'Space Mono';font-size:11px;color:#7e7a70;margin-bottom:14px;padding:9px 11px;background:#0e0d12;border-radius:4px;border:1px solid rgba(255,255,255,.06)">{{ geralLine }}</div>
           </sc-if>
 
           <!-- COMBATE fields -->
@@ -569,6 +569,8 @@
             <div style="background:#0e0d12;border:1px solid rgba(198,166,100,.25);border-radius:6px;padding:15px;margin-bottom:16px;animation:slideDown .3s ease">
               <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:5px">Nome do relógio</label>
               <input value="{{ clockDraft.name }}" onInput="{{ onClockName }}" placeholder="Ex.: O ritual se completa" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px"/>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:5px">Descrição (aparece no aviso de conclusão)</label>
+              <textarea value="{{ clockDraft.desc }}" onInput="{{ onClockDesc }}" rows="2" placeholder="O que acontece quando ele se completa" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
               <div style="font-size:10px;color:#7e7a70;margin-bottom:6px;letter-spacing:.04em">Sugestões</div>
               <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
                 <sc-for list="{{ clockSuggestions }}" as="g" hint-placeholder-count="4"><button onClick="{{ g.onClick }}" style="font-size:11px;color:#cdc6b6;background:#16141c;border:1px solid {{ g.col }}44;border-radius:14px;padding:5px 10px;cursor:pointer" style-hover="border-color:{{ g.col }}">{{ g.name }}</button></sc-for>
@@ -594,7 +596,8 @@
                   <sc-for list="{{ players }}" as="p" hint-placeholder-count="3"><sc-if value="{{ p.active }}"><option value="{{ p.id }}">{{ p.char }}</option></sc-if></sc-for>
                 </select>
               </sc-if>
-              <button onClick="{{ createClock }}" disabled="{{ clockCreateDisabled }}" style="width:100%;padding:11px;background: {{ clockCreateBg }};color: {{ clockCreateCol }};border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor: {{ clockCreateCursor }}">Criar relógio</button>
+              <button onClick="{{ createClock }}" disabled="{{ clockCreateDisabled }}" style="width:100%;padding:11px;background: {{ clockCreateBg }};color: {{ clockCreateCol }};border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.12em;text-transform:uppercase;cursor: {{ clockCreateCursor }}">{{ clockSaveLabel }}</button>
+              <sc-if value="{{ clockEditing }}"><button onClick="{{ cancelClockEdit }}" style="width:100%;margin-top:8px;padding:10px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Cancelar edição</button></sc-if>
             </div>
           </sc-if>
 
@@ -602,11 +605,13 @@
             <sc-for list="{{ clocksAll }}" as="c" hint-placeholder-count="4">
               <div style="background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-left:3px solid {{ c.col }};border-radius:4px;padding:12px 13px">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:13px;color:#e9e3d4">{{ c.name }}</span><span style="font-family:'Space Mono';font-size:13px;color: {{ c.col }}">{{ c.label }}</span></div>
-                <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">{{ c.type }} · {{ c.scopeLabel }}</div>
+                <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">{{ c.type }} · {{ c.scopeLabel }}<sc-if value="{{ c.modeLabel }}"> · {{ c.modeLabel }}</sc-if></div>
+                <sc-if value="{{ c.hasDesc }}"><div style="font-family:'Cormorant Garamond';font-size:14px;color:#b9b2a2;margin:-4px 0 8px">{{ c.desc }}</div></sc-if>
                 <div style="display:flex;gap:6px">
                   <button onClick="{{ c.onDec }}" aria-label="Reduzir relógio {{ c.name }}" style="flex:1;padding:6px;background:#1a1820;border:1px solid rgba(255,255,255,.1);color:#cfc7b4;border-radius:3px;font-size:12px;cursor:pointer">−</button>
                   <button onClick="{{ c.onAdv }}" style="flex:1;padding:6px;background:#1a1820;border:1px solid {{ c.col }}55;color: {{ c.col }};border-radius:3px;font-size:12px;cursor:pointer">+ Avançar</button>
                   <button onClick="{{ c.onReveal }}" style="padding:6px 9px;background:transparent;border:1px solid rgba(198,166,100,.25);color:#cfc7b4;border-radius:3px;font-size:11px;cursor:pointer">{{ c.revealLabel }}</button>
+                  <button onClick="{{ c.onEdit }}" aria-label="Editar relógio {{ c.name }}" style="padding:6px 9px;background:transparent;border:1px solid rgba(255,255,255,.14);color:#cfc7b4;border-radius:3px;font-size:12px;cursor:pointer">✎</button>
                   <button onClick="{{ c.onDelete }}" aria-label="Excluir relógio {{ c.name }}" style="padding:6px 9px;background:transparent;border:1px solid rgba(196,30,58,.25);color:#c44a5e;border-radius:3px;font-size:12px;cursor:pointer">✕</button>
                 </div>
               </div>
@@ -1178,7 +1183,7 @@
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(6,minmax(46px,1fr));gap:6px;flex:0 1 380px;min-width:0">
-        <sc-for list="{{ selfAttr }}" as="a" hint-placeholder-count="6"><div style="text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:7px 2px"><div style="font-family:'Space Mono';font-weight:700;font-size:16px;color:#e0c179">{{ a.val }}</div><div style="font-size:9px;color:#8d887c;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.label }}</div></div></sc-for>
+        <sc-for list="{{ selfAttr }}" as="a" hint-placeholder-count="6"><div style="text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:7px 2px"><div style="font-family:'Space Mono';font-weight:700;font-size:16px;color:#e0c179">{{ a.val }}</div><div style="font-size:9px;color:#8d887c;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.label }}</div><sc-if value="{{ a.hasPen }}"><div style="font-size:9px;color:#d2a23a;margin-top:2px">{{ a.penLabel }}</div></sc-if></div></sc-for>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:7px;align-items:center">
         <sc-if value="{{ pendingDot }}"><button onClick="{{ openTestFromNotif }}" style="cursor:pointer;min-height:40px;background:transparent;font:500 10px 'Archivo';letter-spacing:.1em;text-transform:uppercase;color:#e0c179;padding:0 12px;border:1px solid rgba(224,193,121,.4);border-radius:20px;animation:glowPulse 2s ease-in-out infinite">⚄ teste pendente</button></sc-if>
@@ -1440,7 +1445,7 @@
           <sc-if value="{{ hasPhotoMsg }}"><div role="status" style="font-size:12px;color:#cdc6b6;margin:-8px 0 14px">{{ photoMsg }}</div></sc-if>
           <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Atributos</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
-            <sc-for list="{{ selfAttr }}" as="a" hint-placeholder-count="6"><div style="text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:9px 2px"><div style="font-family:'Space Mono';font-weight:700;font-size:18px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div></div></sc-for>
+            <sc-for list="{{ selfAttr }}" as="a" hint-placeholder-count="6"><div style="text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:9px 2px"><div style="font-family:'Space Mono';font-weight:700;font-size:18px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div><sc-if value="{{ a.hasPen }}"><div style="font-size:9px;color:#d2a23a;margin-top:2px">{{ a.penLabel }}</div></sc-if></div></sc-for>
           </div>
           <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Perícias treinadas</div>
           <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px">
@@ -1452,6 +1457,13 @@
             <sc-for list="{{ selfWeak }}" as="w" hint-placeholder-count="3"><div style="font-family:'Cormorant Garamond';font-size:16px;color:#cdc6b6">— {{ w.txt }}</div></sc-for>
             <sc-if value="{{ noSelfWeak }}"><span style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#7e7a70">Nenhuma fraqueza registrada.</span></sc-if>
           </div>
+          <sc-if value="{{ hasSelfPens }}">
+            <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#d2a23a;margin-bottom:8px">Penalidades temporárias</div>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-bottom:20px">
+              <sc-for list="{{ selfPens }}" as="x" hint-placeholder-count="2"><div style="font-size:13px;color:#cdc6b6">⚖ {{ x.txt }}</div></sc-for>
+              <div style="font-size:11px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic">O valor efetivo já é usado nos seus testes. Só o Mestre aplica ou remove.</div>
+            </div>
+          </sc-if>
           <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">Estado</div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
             <sc-for list="{{ selfConditions }}" as="c" hint-placeholder-count="2"><span style="font-size:12px;color: {{ c.col }};padding:5px 11px;border:1px solid {{ c.col }}55;border-radius:20px">{{ c.icon }} {{ c.label }}</span></sc-for>
@@ -1595,6 +1607,7 @@
     </div>
     <div style="background:#0c0b11;padding:30px 34px 34px">
       <p style="font-family:'Cormorant Garamond';font-size:21px;line-height:1.6;color:#cdc6b6;margin:0 0 26px;text-wrap:pretty">{{ sceneMode.text }}</p>
+      <sc-if value="{{ hasEvQueueMore }}"><div role="status" style="font-size:12px;color:#8d887c;margin:-12px 0 14px">{{ evQueueMore }}</div></sc-if>
       <button onClick="{{ closeScene }}" style="width:100%;padding:15px;background: {{ sceneAcc }};color:#0b0b10;border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:pointer" style-hover="filter:brightness(1.15)">Continuar →</button>
     </div>
   </div>
@@ -1754,7 +1767,7 @@
 
       <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Atributos</div>
       <div style="display:flex;gap:8px;justify-content:space-between;margin-bottom:20px">
-        <sc-for list="{{ charDetail.attrs }}" as="a" hint-placeholder-count="5"><div style="flex:1;text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:11px 4px"><div style="font-family:'Space Mono';font-weight:700;font-size:20px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div></div></sc-for>
+        <sc-for list="{{ charDetail.attrs }}" as="a" hint-placeholder-count="5"><div style="flex:1;text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:11px 4px"><div style="font-family:'Space Mono';font-weight:700;font-size:20px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div><sc-if value="{{ a.hasPen }}"><div style="font-size:9px;color:#d2a23a;margin-top:2px">{{ a.penLabel }}</div></sc-if></div></sc-for>
       </div>
 
       <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Perícias treinadas</div>
@@ -1824,7 +1837,7 @@
 
       <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Atributos</div>
       <div style="display:flex;gap:7px;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap">
-        <sc-for list="{{ playerCard.attrs }}" as="a" hint-placeholder-count="5"><div style="flex:1;min-width:54px;text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:11px 4px"><div style="font-family:'Space Mono';font-weight:700;font-size:20px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div></div></sc-for>
+        <sc-for list="{{ playerCard.attrs }}" as="a" hint-placeholder-count="5"><div style="flex:1;min-width:54px;text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:11px 4px"><div style="font-family:'Space Mono';font-weight:700;font-size:20px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div><sc-if value="{{ a.hasPen }}"><div style="font-size:9px;color:#d2a23a;margin-top:2px">{{ a.penLabel }}</div></sc-if></div></sc-for>
       </div>
 
       <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Perícias treinadas</div>
@@ -1846,6 +1859,28 @@
       <sc-if value="{{ playerCard.noWeak }}">
         <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#6f6b61">Sem fraquezas registradas.</div>
       </sc-if>
+
+      <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin:20px 0 8px">Penalidades temporárias</div>
+      <sc-if value="{{ playerCard.hasPens }}">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+          <sc-for list="{{ playerCard.pens }}" as="x" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:10px;background:#0f0e13;border:1px solid rgba(210,162,58,.3);border-radius:7px;padding:8px 12px">
+              <span style="flex:1;font-size:13px;color:#cdc6b6">⚖ {{ x.txt }}</span>
+              <button onClick="{{ x.onRemove }}" disabled="{{ playerCard.penBusy }}" aria-label="Remover penalidade" style="min-width:36px;min-height:36px;background:transparent;border:none;color:#c44a5e;cursor:pointer">✕</button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+        <select value="{{ playerCard.penForm.attr }}" onChange="{{ playerCard.onPenAttr }}" aria-label="Atributo" style="flex:1;min-width:110px;background:#13121a;color:#e9e3d4;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px">
+          <sc-for list="{{ playerCard.penAttrOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.key }}">{{ o.label }}</option></sc-for>
+        </select>
+        <select value="{{ playerCard.penForm.value }}" onChange="{{ playerCard.onPenValue }}" aria-label="Valor" style="width:70px;background:#13121a;color:#e9e3d4;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px">
+          <option value="1">−1</option><option value="2">−2</option><option value="3">−3</option>
+        </select>
+        <input value="{{ playerCard.penForm.reason }}" onInput="{{ playerCard.onPenReason }}" placeholder="Motivo (ex.: envenenado)" style="flex:2;min-width:140px;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none"/>
+        <button onClick="{{ playerCard.onPenAdd }}" disabled="{{ playerCard.penBusy }}" style="padding:9px 12px;min-height:38px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:5px;color:#e0c179;font-size:11px;cursor:pointer">{{ playerCard.penAddLabel }}</button>
+      </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 0 8px">
         <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70">Equipamento</div>
@@ -1909,7 +1944,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -1923,7 +1958,7 @@ class Component extends DCLogic {
     clocks:[],
     sessionStale:false, clockBump:{}, groupOpenId:null, actionErrors:{},
     activeTableId:null, saveStatus:'idle', saveError:'', reconnected:false, statusBusy:false, tableStatus:null, tableGone:false, accountLib:null,
-    clockDraft:{name:'',seg:8,type:'Investigação',scope:'mesa',playerId:'',visMode:'todos'}, showClockForm:false,
+    clockDraft:{name:'',desc:'',seg:8,type:'Investigação',scope:'mesa',playerId:'',visMode:'todos'}, showClockForm:false,
     stressBars:[],
     stressDraft:{playerId:'',name:'',max:4,clockId:'',vis:'titular'}, showStressForm:false,
     library:{weapons:[],items:[]},
@@ -2139,7 +2174,7 @@ class Component extends DCLogic {
   // cache/BroadcastChannel NÃO aplica nem grava nada (antes eram globais e uma mesa ou
   // aba sobrescrevia a outra). Fica apenas para a mesa local de quem joga sem conta,
   // com chave e canal separados por mesa.
-  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library','scenes','activeSceneId']; }
+  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library','scenes','activeSceneId','clockEvents']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
   // Etapa 6: alem do aviso flutuante (some em 4,5 s), o erro com contexto fica junto da
   // acao que falhou ate ela dar certo ou ate o usuario dispensar. ctx: teste, consequencia,
@@ -2182,7 +2217,7 @@ class Component extends DCLogic {
   // ---- estado da sessão de jogo por mesa (Supabase) ----
   _blankTableSession(){
     const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)?JSON.parse(JSON.stringify(window.AfterdarkData.catalog)):{weapons:[],items:[]};
-    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null};
+    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null,clockEvents:[]};
   }
   async _loadTableSession(tableId,isOwner){
     const base=this._blankTableSession();
@@ -2222,6 +2257,7 @@ class Component extends DCLogic {
     const next=(remote&&Object.keys(remote).length)?{...base,...remote}:base;
     if(!isOwner){
       // o jogador so pega o que o Mestre cadastrou: nunca o catalogo padrao embutido no site
+      this._enqueuePlayerEvents(remote&&remote.clockEvents);
       const rl=(remote&&remote.library)||{};
       next.library={weapons:Array.isArray(rl.weapons)?rl.weapons:[],items:Array.isArray(rl.items)?rl.items:[]};
       next.clockBump=this._clockBumps(this.state.clocks,next.clocks);
@@ -2461,7 +2497,8 @@ class Component extends DCLogic {
     if(!mbr||!mbr.char_name) return prev;
     return {...(prev||{}),char:mbr.char_name,nick:(prev&&prev.nick)||'',sens:cd.sens||null,attrs:cd.attrs||{},skills:cd.skills||{},weaknesses:cd.weaknesses||[],
       age:cd.age||'',origin:cd.origin||'',appearance:cd.appearance||'',clothes:cd.clothes||'',personality:cd.personality||'',manifest:cd.manifest||'',marks:cd.marks||'',
-      history:cd.history||'',wounds:Array.isArray(mbr.wounds)?mbr.wounds:[],conditions:Array.isArray(mbr.conditions)?mbr.conditions:[]};
+      history:cd.history||'',wounds:Array.isArray(mbr.wounds)?mbr.wounds:[],conditions:Array.isArray(mbr.conditions)?mbr.conditions:[],
+      penalties:Array.isArray(mbr.penalties)?mbr.penalties:((prev&&prev.penalties)||[])};
   }
   // Etapa 6: cada escolha explicita de contexto (entrar com codigo, escolher papel, sair,
   // abrir outra mesa, sair da conta) incrementa _ctxGen. Uma retomada automatica que
@@ -2627,7 +2664,7 @@ class Component extends DCLogic {
       wounds:Array.isArray(m.wounds)?m.wounds:[],conditions:Array.isArray(m.conditions)?m.conditions:[],
       // Etapa 1 pos-sessao: fraquezas e equipamento da ficha gravada na mesa (nunca pelo nome)
       weaknesses:Array.isArray(cd.weaknesses)?cd.weaknesses:[], equipment:Array.isArray(m.equipment)?m.equipment:[],
-      equipRev:m.equip_rev||0, photoRev:m.photo_rev||0,
+      equipRev:m.equip_rev||0, photoRev:m.photo_rev||0, penalties:Array.isArray(m.penalties)?m.penalties:[],
       sheetReady:!!m.sheet_ready,approved:!!m.approved_at,cond:'normal',active:!!(m.char_name)};
   }
   // Mesa ativa do Mestre: identificada pelo ID. O nome só é usado na criação, antes de
@@ -3275,35 +3312,91 @@ class Component extends DCLogic {
   setDraftAttr(attrF,skillF,v){
     this.setState(s=>{ const td={...s.testDraft,[attrF]:v}; if(!this._pairOk(v,td[skillF])) td[skillF]=''; return {testDraft:td}; });
   }
-  advanceClock(id,d,silent){
-    this.setState(s=>{
-      let done=false,name='';
-      const clocks=s.clocks.map(c0=>{
-        if(c0.id!==id) return c0;
-        const c=this._normClock(c0);
-        const fill=Math.max(0,Math.min(c.seg,c.fill+d));
-        if(fill>=c.seg&&c.fill<c.seg){done=true;name=c.name;}
-        // Revelação por gatilho: dispara UMA vez e fica. Reduzir o relógio depois
-        // não volta a esconder — só o Mestre oculta, explicitamente.
-        let vis=c.vis, revealDone=c.revealDone;
-        if(!revealDone && vis==='mestre'){
-          const fire=(c.visMode==='avancar') ? (d>0&&fill>0) : (c.visMode==='completar') ? (fill>=c.seg) : false;
-          if(fire){ vis=this._clockAudience(c); revealDone=true; }
-        }
-        return {...c,fill,vis,revealDone};
-      });
-      const log = d>0 && !silent ? [{icon:'◷',t:'Relógio',txt:`Um relógio avançou.`,vis:'todos'},...s.log] : s.log;
-      return {clocks,log};
-    });
-    setTimeout(()=>{ const c=this.state.clocks.find(x=>x.id===id); if(c&&c.fill>=c.seg&&d>0){ this.openScene({title:'Relógio Concluído',sub:c.name,acc:this.CLOCK_THEME[c.type]||'#c6a35e',text:this.clockEvent(c)}); if(c.type==='Investigação'){ this.revealNextClue(c.name); } this.raiseLinkedStress(id); } },10);
+  // Etapas 3/4 pos-sessao: avanco de relogio e de estresse e uma operacao NO BANCO
+  // (master_clock_op), com a mesa travada e chave de idempotencia. Avanco manual e por
+  // estresse usam a mesma regra (_ad_clock_step no banco; _clockStep aqui, espelho fiel,
+  // so para mesa local sem conta). A tela adota o estado confirmado que o banco devolve.
+  advanceClock(id,d){ return this._clockOp('clock',{clockId:id,delta:d>0?1:-1}); }
+  bumpStress(id,delta){ return this._clockOp('stress',{barId:id,delta:delta>0?1:-1}); }
+  _clockStep(c0,delta){
+    const c=this._normClock(c0), seg=c.seg, old=c.fill, nw=Math.max(0,Math.min(seg,old+delta));
+    let vis=c.vis, done=c.revealDone, revealed=false;
+    if(!done&&vis==='mestre'){
+      const fire=c.visMode==='avancar'?(delta>0&&nw>old):c.visMode==='completar'?(nw>=seg):c.visMode==='parcial'?(nw>=Math.ceil(seg/2)):false;
+      if(fire){ vis=this._clockAudience(c); done=true; revealed=true; }
+    }
+    return {clk:{...c,fill:nw,vis,revealDone:done},completed:old<seg&&nw>=seg,revealed};
   }
-  raiseLinkedStress(clockId){
-    const linked=this.state.stressBars.filter(b=>b.clockId===clockId);
-    if(!linked.length) return;
-    this.setState(s=>({
-      stressBars:s.stressBars.map(b=> b.clockId===clockId? {...b,level:Math.min(b.max,b.level+1)} : b),
-      log:linked.map(b=>{ const p=s.players.find(x=>x.id===b.playerId); return {icon:'⚠',t:'Estresse',txt:`${p?p.char:'Personagem'} — "${b.name}" subiu para ${Math.min(b.max,b.level+1)}/${b.max}.`}; }).concat(s.log)
-    }));
+  async _clockOp(op,args){
+    const s=this.state, tid=s.activeTableId;
+    const bk=op+':'+(args.clockId||args.barId)+':'+args.delta;
+    this._opBusy=this._opBusy||{}; if(this._opBusy[bk]) return false;
+    if(!this._canSaveRemote(tid)){ this._clockOpLocal(op,args); return true; }
+    this._opBusy[bk]=true; this.setState({clockOpBusy:true});
+    // a mesma tentativa reaproveita a chave: se a resposta se perdeu, repetir nao aplica de novo
+    this._opKeys=this._opKeys||{}; const key=this._opKeys[bk]||(this._opKeys[bk]=this._uuid());
+    try{
+      const sv=await this._flushSave(tid);
+      if(!sv.ok){ this._flashActionError('Não foi possível salvar a mesa antes de avançar. Nada foi alterado — tente de novo.'); return false; }
+      let data=null,error=null;
+      const run=(async()=>{ try{ ({data,error}=await this.sb.rpc('master_clock_op',{p_table_id:tid,p_op:op,p_args:args,p_op_key:key})); }catch(e){ error=e; } })();
+      this._savingP=run; await run; this._savingP=null;
+      if(this.state.activeTableId!==tid) return false;
+      if(error||!data||!data.ok){
+        this._flashActionError(/not_found/.test((error&&error.message)||'')?'Este relógio ou barra não existe mais.':'Não foi possível salvar o avanço. Nada foi alterado — tente de novo.');
+        return false;
+      }
+      delete this._opKeys[bk];
+      this._adoptOpState(tid,data);
+      return true;
+    } finally { delete this._opBusy[bk]; this.setState({clockOpBusy:Object.keys(this._opBusy).length>0}); }
+  }
+  _adoptOpState(tid,data){
+    const st=data.state||{};
+    if(data.version!=null) this._versions[tid]=Number(data.version)||0;
+    this.setState({clocks:Array.isArray(st.clocks)?st.clocks:[],stressBars:Array.isArray(st.stressBars)?st.stressBars:[],
+      log:Array.isArray(st.log)?st.log:[],clockEvents:Array.isArray(st.clockEvents)?st.clockEvents:[]});
+    (data.events||[]).forEach(ev=>this._onClockCompleted(ev));
+    this._scheduleSave();
+  }
+  // mesa local (sem conta): a mesma regra, aplicada aqui
+  _clockOpLocal(op,args){
+    const s=this.state; let clockId=args.clockId, delta=args.delta, logs=[], ev=null;
+    let bars=s.stressBars;
+    if(op==='stress'){
+      const b=s.stressBars.find(x=>x.id===args.barId); if(!b) return;
+      const max=Math.max(1,Number(b.max)||4); let lvl=Math.max(0,Math.min(max,(Number(b.level)||0)+delta));
+      clockId=null;
+      if(delta>0&&lvl>=max&&b.clockId&&s.clocks.some(c=>c.id===b.clockId)){ clockId=b.clockId; delta=1; lvl=0; logs.push({icon:'⚠',t:'Estresse',txt:`"${b.name}" chegou ao limite e voltou a zero.`,vis:'mestre'}); }
+      bars=s.stressBars.map(x=>x.id===b.id?{...x,level:lvl}:x);
+    }
+    let clocks=s.clocks;
+    if(clockId){
+      const c=s.clocks.find(x=>x.id===clockId); if(c){ const r=this._clockStep(c,delta); clocks=s.clocks.map(x=>x.id===clockId?r.clk:x);
+        if(r.completed){ ev={id:'ev'+this._uuid().replace(/-/g,''),clockId,name:r.clk.name,desc:r.clk.desc||'',type:r.clk.type,at:new Date().toISOString(),aud:r.clk.vis==='mestre'?'mestre':r.clk.vis}; } }
+    }
+    this.setState({stressBars:bars,clocks,log:[...logs,...s.log],clockEvents:ev?[...(s.clockEvents||[]),ev].slice(-40):(s.clockEvents||[])});
+    if(ev) this._onClockCompleted(ev);
+  }
+  _evPopup(ev,who){ return {key:ev.id,who,title:'Relógio Concluído',sub:ev.name||'Relógio',acc:this.CLOCK_THEME[ev.type]||'#c6a35e',text:(ev.desc&&String(ev.desc).trim())||this.clockEvent({type:ev.type})}; }
+  // Mestre: pop-up da conclusao + pista de investigacao (como antes). A regra antiga
+  // "relogio completo aumenta o estresse" saiu (decisao de 08/10/2026).
+  _onClockCompleted(ev){
+    this.setState(s=>({evQueue:s.evQueue.some(x=>x.key===ev.id)?s.evQueue:[...s.evQueue,this._evPopup(ev,'mestre')]}));
+    if(ev.type==='Investigação') this.revealNextClue(ev.name);
+  }
+  // Jogador: avisos pendentes vem do banco; ciencia gravada por participante.
+  _enqueuePlayerEvents(list){
+    if(!Array.isArray(list)) return;
+    if(this._evFor!==this.state.memberId){ this._evFor=this.state.memberId; this._evSeen=new Set(); }
+    const add=list.filter(e=>e&&e.id&&!this._evSeen.has(e.id));
+    if(add.length){ add.forEach(e=>this._evSeen.add(e.id)); this.setState(s=>({evQueue:[...s.evQueue,...add.map(e=>this._evPopup(e,'jogador'))]})); }
+    if(this._ackPend&&this._ackPend.size) this._sendAcks([...this._ackPend]);
+  }
+  async _sendAcks(ids){
+    const s=this.state; if(!this.sb||!s.memberId||!ids.length) return;
+    this._ackPend=this._ackPend||new Set(); ids.forEach(i=>this._ackPend.add(i));
+    try{ const {error}=await this.sb.rpc('player_ack_events',{p_member_id:s.memberId,p_token:s.memberToken||null,p_ids:ids}); if(!error) ids.forEach(i=>this._ackPend.delete(i)); }catch(e){}
   }
   // ---- barras de estresse ----
   toggleStressForm(){ this.setState(s=>({showStressForm:!s.showStressForm})); }
@@ -3312,7 +3405,6 @@ class Component extends DCLogic {
   cycleStressVis(id){ const order=['todos','titular','mestre']; this.setState(s=>({stressBars:s.stressBars.map(b=>{
     if(b.id!==id) return b; const n=this._normStress(b); return {...n,vis:order[(order.indexOf(n.vis)+1)%order.length]}; })})); }
   createStress(){ const d=this.state.stressDraft; const name=(d.name||'').trim(); if(!name) return; const bar=this._normStress({id:'st'+Date.now(),playerId:d.playerId,name,level:0,max:Number(d.max)||4,clockId:d.clockId||'',vis:d.vis||'titular'}); this.setState(s=>({stressBars:[...s.stressBars,bar],showStressForm:false,stressDraft:{...s.stressDraft,name:''},log:[{icon:'⚠',t:'Estresse',txt:`Nova barra de estresse criada: "${name}".`,vis:'mestre'},...s.log]})); }
-  bumpStress(id,delta){ this.setState(s=>({stressBars:s.stressBars.map(b=>b.id===id?{...b,level:Math.max(0,Math.min(b.max,b.level+delta))}:b)})); }
   deleteStress(id){ this.setState(s=>({stressBars:s.stressBars.filter(b=>b.id!==id)})); }
   revealNextClue(clockName){
     this.setState(s=>{
@@ -3458,7 +3550,13 @@ class Component extends DCLogic {
     return {hasMap:true,noMap:false,missing:false,name:m.name,src,bg:st.status==='ok'?`url("${src}")`:'none',loading:st.status==='loading',error:st.status==='error',
       onRetry:()=>this.retryMap(m.src)};
   }
-  closeScene(){ this.setState({sceneMode:null}); }
+  closeScene(){
+    const s=this.state;
+    if(s.sceneMode){ this.setState({sceneMode:null}); return; }
+    const ev=s.evQueue[0]; if(!ev) return;
+    this.setState(st=>({evQueue:st.evQueue.slice(1)}));
+    if(ev.who==='jogador') this._sendAcks([ev.key]);
+  }
 
   // ---- center stage: cena/mapa + NPC em diálogo ----
   setSceneView(v){ this.setState({sceneView:v}); }
@@ -3466,19 +3564,51 @@ class Component extends DCLogic {
   hideNpcDialogue(){ this.setState({activeNpc:null}); }
 
   // ---- criar relógio ----
-  toggleClockForm(){ this.setState(s=>({showClockForm:!s.showClockForm})); }
+  toggleClockForm(){ this.setState(s=>({showClockForm:!s.showClockForm,clockEditId:s.showClockForm?null:s.clockEditId})); }
   setClockDraft(k,v){ this.setState(s=>({clockDraft:{...s.clockDraft,[k]:v}})); }
   useClockSuggestion(name,type){ this.setState(s=>({clockDraft:{...s.clockDraft,name,type}})); }
-  createClock(){
-    const d=this.state.clockDraft; const name=(d.name||'').trim(); if(!name) return;
+  // Etapa 4: criar e EDITAR (mesmo formulario). Na edicao, a visibilidade existente e
+  // preservada; mudar para Parcial/Completo com o progresso ja no limiar revela apos
+  // salvar, sem contar como nova conclusao.
+  createClock(){ return this.saveClock(); }
+  editClock(id){
+    const c0=this.state.clocks.find(x=>x.id===id); if(!c0) return; const c=this._normClock(c0);
+    this.setState({clockEditId:id,showClockForm:true,clockDraft:{name:c.name||'',desc:c.desc||'',seg:c.seg,type:c.type||'Investigação',scope:c.scope,playerId:c.playerId||'',visMode:c.visMode}});
+  }
+  cancelClockEdit(){ this.setState(s=>({clockEditId:null,showClockForm:false,clockDraft:{...s.clockDraft,name:'',desc:''}})); }
+  async saveClock(){
+    const s=this.state, d=s.clockDraft; const name=(d.name||'').trim(); if(!name) return;
     const vm=d.visMode||'todos';
     const scope=(vm==='jogador')?'player':'mesa';
-    const vis=(vm==='mestre'||vm==='completar'||vm==='avancar')?'mestre':(vm==='jogador'?'jogador':'todos');
-    // revealDone=false só nos modos de gatilho: eles ainda vão revelar sozinhos.
-    const porGatilho=(vm==='avancar'||vm==='completar');
-    const clk={id:'c'+Date.now(),name,type:d.type,seg:Math.max(1,Number(d.seg)||8),fill:0,vis,scope,visMode:vm,
-      playerId:scope==='player'?(d.playerId||''):null,revealDone:!porGatilho};
-    this.setState(s=>({clocks:[...s.clocks,clk],showClockForm:false,clockDraft:{...s.clockDraft,name:''},log:[{icon:'◷',t:'Relógio',txt:`Novo relógio criado: "${name}".`,vis:'mestre'},...s.log]}));
+    const seg=Math.max(1,Math.min(24,Number(d.seg)||8));
+    const desc=String(d.desc||'').trim().slice(0,1000);
+    const editId=s.clockEditId;
+    if(!editId){
+      const vis=(vm==='mestre'||vm==='completar'||vm==='avancar'||vm==='parcial')?'mestre':(vm==='jogador'?'jogador':'todos');
+      // revealDone=false so nos modos de gatilho: eles ainda vao revelar sozinhos.
+      const porGatilho=(vm==='avancar'||vm==='completar'||vm==='parcial');
+      const clk={id:'c'+Date.now(),name,desc,type:d.type,seg,fill:0,vis,scope,visMode:vm,
+        playerId:scope==='player'?(d.playerId||''):null,revealDone:!porGatilho};
+      this.setState(st=>({clocks:[...st.clocks,clk],showClockForm:false,clockDraft:{...st.clockDraft,name:'',desc:''},log:[{icon:'◷',t:'Relógio',txt:`Novo relógio criado: "${name}".`,vis:'mestre'},...st.log]}));
+    } else {
+      this.setState(st=>({clocks:st.clocks.map(c0=>{
+        if(c0.id!==editId) return c0;
+        const c=this._normClock(c0);
+        let vis=c.vis, revealDone=c.revealDone;
+        if(vm!==c.visMode){
+          if(vm==='todos'){ vis='todos'; revealDone=true; }
+          else if(vm==='jogador'){ vis='jogador'; revealDone=true; }
+          else if(vm==='mestre'){ vis='mestre'; revealDone=true; }
+          else if(c.vis==='mestre'){ revealDone=false; }   // gatilho novo num relogio oculto
+          // ja revelado: continua revelado (nao some por trocar o modo)
+        }
+        const fill=Math.min(seg,c.fill);
+        if(!revealDone&&vis==='mestre'&&((vm==='parcial'&&fill>=Math.ceil(seg/2))||(vm==='completar'&&fill>=seg))){ vis=scope==='player'?'jogador':'todos'; revealDone=true; }
+        return {...c,name,desc,type:d.type,seg,fill,visMode:vm,scope,playerId:scope==='player'?(d.playerId||c.playerId||''):null,vis,revealDone};
+      }),clockEditId:null,showClockForm:false,clockDraft:{...st.clockDraft,name:'',desc:''}}));
+    }
+    const tid=this.state.activeTableId;
+    if(this._canSaveRemote(tid)){ const sv=await this._flushSave(tid); if(!sv.ok) this._flashActionError('Não foi possível salvar o relógio agora. Ele continua aqui e será salvo quando a conexão voltar.'); }
   }
   deleteClock(id){ this.setState(s=>({clocks:s.clocks.filter(c=>c.id!==id)})); }
 
@@ -3613,7 +3743,6 @@ class Component extends DCLogic {
       pendingWound:(isCombat&&res.hit&&res.woundLvl!=='—'&&res.targetId)?{targetId:res.targetId,lvl:res.woundLvl,attackerName:res.attackerName||nm,targetName:res.targetName}:s.pendingWound,
       log:[{icon:isCombat?'⚔':'⚄',t:isCombat?'Combate':'Teste',txt:`${nm} · ${res.label.replace(/ — [^—]*$/,'')} — ${res.grade} (${res.total} vs ${res.diff}).`,vis:this._logVis((r.params||{}).vis,r.target_member_id)},...s.log]
     }));
-    if(this._isFailGrade(res.grade)){ setTimeout(()=>this.advanceClock('c1',1),400); }
   }
   dismissNotif(){ clearTimeout(this._notifT); this.setState({testNotif:false,notifCancelled:false}); }
   // Notificação "Teste cancelado": aparece mesmo se a anterior já foi fechada e some sozinha.
@@ -3692,7 +3821,7 @@ class Component extends DCLogic {
   doRoll(ctx,setKey){
     const tempKey=setKey+'Temp', rollKey=setKey, flagKey=setKey+'ing';
     const sides=ctx.mode==='combate'?10:20;
-    const n=ctx.mode==='combate'?1:Math.max(1,ctx.attrVal||1);
+    const n=ctx.mode==='combate'?1:Math.max(1,ctx.attrVal||0);
     let c=0; clearInterval(this._ri); clearInterval(this._pi);
     this.setState({[flagKey]:true,[rollKey]:null});
     const tick=()=>{ this.setState({[tempKey]:Array.from({length:n},()=>this.rN(sides))}); if(++c>9){ clearInterval(timer); this.settle(ctx,setKey); } };
@@ -3716,7 +3845,7 @@ class Component extends DCLogic {
         wound:this.woundFromMargin(margin),label:ctx.label,narr:this.narr(g),targetId:ctx.targetId,
         attackerName:ctx.attackerName||'',targetName:ctx.targetName||''};
     } else {
-      const n=Math.max(1,ctx.attrVal||1);
+      const n=Math.max(1,ctx.attrVal||0);
       const dice=Array.from({length:n},()=>this.rN(20));
       const max=Math.max(...dice), total=max+bonus;
       const nat20=dice.includes(20), allOnes=dice.every(d=>d===1);
@@ -3728,7 +3857,6 @@ class Component extends DCLogic {
       log:[{icon:ctx.mode==='combate'?'⚔':'⚄',t:ctx.mode==='combate'?'Combate':'Teste',txt:`${ctx.label} — ${res.grade} (${res.total} vs ${res.diff}).`,vis:setKey==='roll'?this._logVis(this.state.testDraft.vis,ctx.targetId):'todos'},...s.log]}));
     // Relógio avança só no Mestre: na rolagem local dele aqui, e na do jogador quando
     // o resultado chega (_onPlayerResult). A visibilidade continua definida pelo Mestre.
-    if(setKey==='roll' && this._isFailGrade(res.grade)){ setTimeout(()=>this.advanceClock('c1',1),400); }
     if(setKey==='pRoll' && ctx.requestId){ this._storeResult(ctx.requestId,res); this._submitPlayerResult(ctx.requestId,res); }
   }
   _isFailGrade(g){ return g==='Falha'||g==='Desastre'||g==='Errou o golpe'; }
@@ -3739,7 +3867,7 @@ class Component extends DCLogic {
     this.setState({rollFrom:''});
     const p=this._draftTarget()||{id:null,attrs:{},skills:{},char:'?'};
     if(s.testMode==='combate'){
-      const av=(p.attrs[td.combatAttr]||1), b=(p.skills[td.combatSkill]||0);
+      const av=this._effAttr(p,td.combatAttr).eff, b=(p.skills[td.combatSkill]||0);
       const wpn=s.library.weapons.find(w=>w.id===td.weaponId)||{bonus:0,dano:0,name:'Desarmado'};
       const alvo=this._atkTarget(); const alvoNome=this._atkTargetLabel();
       const lbl=`${p.char} · Ataque com ${wpn.name}`+(alvoNome?` em ${alvoNome}`:'');
@@ -3748,8 +3876,8 @@ class Component extends DCLogic {
         // targetId = destinatario da consequencia (o ALVO). attackerId fica separado.
         targetId:alvo?alvo.id:null, attackerId:p.id, attackerName:p.char, targetName:alvoNome},'roll');
     } else {
-      const av=(p.attrs[td.attrKey]||1), b=(p.skills[td.skillKey]||0);
-      const lbl=`${p.char} · ${this.attrLabel(td.attrKey)} + ${this.skillLabel(td.skillKey)}`;
+      const av=this._effAttr(p,td.attrKey).eff, b=(p.skills[td.skillKey]||0);
+      const lbl=`${p.char} · ${this._attrLine(p,td.attrKey)} + ${this.skillLabel(td.skillKey)}`;
       this.doRoll({mode:'geral',attrVal:av,bonus:b,difficulty:td.difficulty,label:lbl},'roll');
     }
   }
@@ -3764,8 +3892,8 @@ class Component extends DCLogic {
     this._pRollLock=pt.id;
     if(s.testNotif){ clearTimeout(this._notifT); this.setState({testNotif:false,notifCancelled:false}); }
     const attrs=s.self.attrs||{}, skills=s.self.skills||{};
-    if(pt.mode==='combate'){ const av=(attrs[pt.attrKey]||1), b=(skills[pt.skillKey]||0), wp=pt.weaponBonus||0; this.doRoll({mode:'combate',bonus:av+b+wp,difficulty:pt.difficulty,label:pt.label,atkAttr:av,atkSkill:b,weaponBonus:wp,atkAttrLabel:this.attrLabel(pt.attrKey),atkSkillLabel:this.skillLabel(pt.skillKey),weaponName:pt.weaponName,danoBase:pt.danoBase||0,targetId:pt.to,requestId:pt.id},'pRoll'); }
-    else { const av=(attrs[pt.attrKey]||1); const b=(skills[pt.skillKey]||0); this.doRoll({mode:'geral',attrVal:av,bonus:b,difficulty:pt.difficulty,label:pt.label,requestId:pt.id},'pRoll'); }
+    if(pt.mode==='combate'){ const av=this._effAttr(s.self,pt.attrKey).eff, b=(skills[pt.skillKey]||0), wp=pt.weaponBonus||0; this.doRoll({mode:'combate',bonus:av+b+wp,difficulty:pt.difficulty,label:pt.label,atkAttr:av,atkSkill:b,weaponBonus:wp,atkAttrLabel:this.attrLabel(pt.attrKey),atkSkillLabel:this.skillLabel(pt.skillKey),weaponName:pt.weaponName,danoBase:pt.danoBase||0,targetId:pt.to,requestId:pt.id},'pRoll'); }
+    else { const av=this._effAttr(s.self,pt.attrKey).eff; const b=(skills[pt.skillKey]||0); this.doRoll({mode:'geral',attrVal:av,bonus:b,difficulty:pt.difficulty,label:pt.label,requestId:pt.id},'pRoll'); }
   }
   // ---- solicitações de teste: lado do jogador ----
   // Resultado rolado e ainda não confirmado pelo banco fica guardado por membro; após
@@ -3847,7 +3975,7 @@ class Component extends DCLogic {
     finally{ this._selfPollBusy=false; }
   }
   // ---- Etapa 1 pos-sessao: equipamento por personagem e foto na mesa ----
-  _memberCols(){ return 'id,table_id,user_id,player_name,char_name,char_data,status,wounds,conditions,sheet_ready,approved_at,approved_by,joined_at,updated_at,equipment,equip_rev,photo_rev'; }
+  _memberCols(){ return 'id,table_id,user_id,player_name,char_name,char_data,status,wounds,conditions,sheet_ready,approved_at,approved_by,joined_at,updated_at,equipment,equip_rev,photo_rev,penalties'; }
   // So aceita a lista se a revisao for >= a ultima confirmada: uma leitura que saiu antes
   // de uma gravacao nao desfaz o que o banco ja confirmou.
   _applyMyEquip(eq,rev){
@@ -3957,6 +4085,35 @@ class Component extends DCLogic {
     await this._setMemberPhoto(s.memberId,s.memberToken,url);
   }
   removePlayerPhoto(){ const s=this.state; if(!s.memberId||s.photoBusy) return; this._setMemberPhoto(s.memberId,s.memberToken,null); }
+  // ---- Etapa 3 pos-sessao: penalidades temporarias (so o Mestre aplica/remove) ----
+  // Base intacta; efetivo = base - soma das penalidades do atributo, minimo 0 (decisao de
+  // 08/10/2026). Atributo efetivo 0: 1d20 (regra 5.2 do documento do sistema).
+  _effAttr(p,k){
+    const base=(p&&p.attrs&&p.attrs[k])||1;
+    const list=((p&&p.penalties)||[]).filter(x=>x&&x.attr===k);
+    const pen=list.reduce((a,x)=>a+(Number(x.value)||0),0);
+    return {base,pen,eff:Math.max(0,base-pen),reasons:list.map(x=>x.reason).filter(Boolean)};
+  }
+  _attrLine(p,k){ const e=this._effAttr(p,k); const lbl=this.attrLabel(k);
+    return e.pen?`${lbl} ${e.eff} (base ${e.base} − ${e.pen} de penalidade)`:`${lbl} ${e.base}`; }
+  _diceLine(eff){ return eff<=0?'1d20 (atributo 0)':`${eff}d20, fica o maior`; }
+  setPenForm(k,v){ this.setState(s=>({penForm:{...s.penForm,[k]:v}})); }
+  async penaltyOp(memberId,op,pen){
+    if(!this.sb||!memberId||this.state.penBusy) return;
+    const f=this.state.penForm;
+    const body=op==='add'?{p_member_id:memberId,p_op:'add',p_attr:f.attr,p_value:Math.max(1,Math.min(6,Number(f.value)||1)),p_reason:String(f.reason||'').trim().slice(0,200),p_id:this._penPend||(this._penPend='pen'+this._uuid().replace(/-/g,'').slice(0,12))}
+      :{p_member_id:memberId,p_op:'remove',p_attr:null,p_value:null,p_reason:null,p_id:pen.id};
+    this.setState({penBusy:true}); this._membersVer=(this._membersVer||0)+1;
+    let data=null,error=null;
+    try{ ({data,error}=await this.sb.rpc('master_set_penalty',body)); }catch(e){ error=e; }
+    this._membersVer++;
+    this.setState({penBusy:false});
+    if(error||!data||!data.ok){ this._flashActionError('Não foi possível salvar a penalidade. Nada foi alterado — tente de novo.'); return; }
+    if(op==='add'){ this._penPend=null; this.setState(s=>({penForm:{...s.penForm,reason:''}})); }
+    const pc=this.state.players.find(x=>x.id===memberId);
+    this.setState(s=>({players:s.players.map(x=>x.id===memberId?{...x,penalties:Array.isArray(data.penalties)?data.penalties:[]}:x),
+      log:[{icon:'⚖',t:'Penalidade',txt:op==='add'?`${pc?pc.char:'Personagem'}: ${this.attrLabel(body.p_attr)} −${body.p_value}${body.p_reason?' ('+body.p_reason+')':''}.`:`${pc?pc.char:'Personagem'}: penalidade removida.`,vis:'mestre'},...s.log]}));
+  }
   attrLabel(k){ const a=this.ATTRS.find(x=>x.key===k); return a?a.label:k; }
   skillLabel(k){ const a=this.SKILLS.find(x=>x.key===k); return a?a.label:k; }
 
@@ -4295,13 +4452,16 @@ class Component extends DCLogic {
       sensLabel:pcNat.label||'Sensível', sensBonus:pcNat.bonus||'',
       avatarBg:pcPhoto?`center/cover url(${pcPhoto})`:'#1a1820',
       avatarInitial:pcPhoto?'':((pcP.char&&pcP.char!=='—')?pcP.char[0]:'?'),
-      attrs:this.ATTRS.map(a=>({label:a.label,val:(pcP.attrs&&pcP.attrs[a.key])||0})),
+      attrs:this.ATTRS.map(a=>{ const e=this._effAttr(pcP,a.key); return {label:a.label,val:e.pen?e.eff:((pcP.attrs&&pcP.attrs[a.key])||0),hasPen:e.pen>0,penLabel:e.pen?`base ${e.base} · −${e.pen}`:''}; }),
+      pens:(pcP.penalties||[]).map(x=>({txt:`${this.attrLabel(x.attr)} −${x.value}${x.reason?' · '+x.reason:''}`,onRemove:()=>this.penaltyOp(pcP.id,'remove',x)})), hasPens:(pcP.penalties||[]).length>0,
+      penAttrOpts:this.ATTRS.map(a=>({key:a.key,label:a.label})), penForm:s.penForm, penBusy:!!s.penBusy, penAddLabel:s.penBusy?'Salvando…':'Aplicar penalidade',
+      onPenAttr:e=>this.setPenForm('attr',e.target.value), onPenValue:e=>this.setPenForm('value',Number(e.target.value)||1), onPenReason:e=>this.setPenForm('reason',e.target.value), onPenAdd:()=>this.penaltyOp(pcP.id,'add'),
       skills:pcSkills, hasSkills:pcSkills.length>0, noSkills:pcSkills.length===0,
       weaknesses:pcWeak, hasWeak:pcWeak.length>0, noWeak:pcWeak.length===0,
       equip:pcEquip, hasEquip:pcEquip.length>0, noEquip:pcEquip.length===0, assign:pcAssign, hasAssign:pcAssign.length>0,
       assignOpen:!!s.pcAssignOpen, assignLabel:s.pcAssignOpen?'Fechar':'＋ Atribuir do catálogo', toggleAssign:()=>this.setState(st=>({pcAssignOpen:!st.pcAssignOpen})),
       conditions:(pcP.conditions||[]).join(' · '), hasCond:(pcP.conditions||[]).length>0
-    }:{attrs:[],skills:[],weaknesses:[],equip:[],assign:[],acc:'#b9a06a',surf:'#1a1820',glow:'rgba(185,160,106,.35)'};
+    }:{attrs:[],skills:[],weaknesses:[],equip:[],assign:[],pens:[],penAttrOpts:[],penForm:{},acc:'#b9a06a',surf:'#1a1820',glow:'rgba(185,160,106,.35)'};
 
     // Id real do próprio membro: as barras de estresse do jogador são filtradas por ele
     // (no banco, em player_get_session, e aqui na tela).
@@ -4311,7 +4471,8 @@ class Component extends DCLogic {
       const isPlayer=c.scope==='player'; const hidden=c.vis==='mestre';
       const semTitular=isPlayer&&!c.playerId;
       return {...v,
-      onAdv:()=>this.advanceClock(c.id,1), onDec:()=>this.advanceClock(c.id,-1), onReveal:()=>this.revealClock(c.id), onDelete:()=>this.deleteClock(c.id),
+      onAdv:()=>this.advanceClock(c.id,1), onDec:()=>this.advanceClock(c.id,-1), onReveal:()=>this.revealClock(c.id), onDelete:()=>this.deleteClock(c.id), onEdit:()=>this.editClock(c.id),
+      hasDesc:!!(c.desc&&String(c.desc).trim()), desc:c.desc||'', modeLabel:({parcial:'Revela na metade',completar:'Revela ao completar',avancar:'Revela ao avançar'})[c.visMode]||'',
       // Rótulos distinguem os três estados reais: público, individual e oculto.
       // Etapa 6: o mesmo vocabulario em toda a interface: Todos / Só titular / Só mestre.
       visText:hidden?'Só mestre':(isPlayer?'Só titular':'Todos'),
@@ -4394,7 +4555,8 @@ class Component extends DCLogic {
     const clues=s.clues.map(k=>({...k, sColor:clueColor[k.status]||'#7e7a70'}));
 
     const selfV=s.self; const selfSens=this.SENS[selfV.sens];
-    const selfAttr=this.ATTRS.map(a=>({...a, val:(selfV.attrs&&selfV.attrs[a.key])||0}));
+    const selfAttr=this.ATTRS.map(a=>{ const e=this._effAttr(selfV,a.key); return {...a, val:e.pen?e.eff:((selfV.attrs&&selfV.attrs[a.key])||0), hasPen:e.pen>0, penLabel:e.pen?`base ${e.base} · −${e.pen}`:''}; });
+    const selfPens=(selfV.penalties||[]).map(x=>({txt:`${this.attrLabel(x.attr)} −${x.value}${x.reason?' · '+x.reason:''}`}));
     const selfSkill=this.SKILLS.filter(a=>selfV.skills[a.key]).map(a=>({...a, val:selfV.skills[a.key]}));
     const selfWeak=selfV.weaknesses.map(x=>({txt:x}));
     const selfStress=s.stressBars.filter(b=>b.playerId===selfId).map(b=>this.stressView(b));
@@ -4427,9 +4589,10 @@ class Component extends DCLogic {
     const atkMissing=isCombat&&atkKind==='membro'&&!atkT;
     const atkSelfHit=isCombat&&!!atkT&&atkT.id===draftPlayer.id;
     const atkFlowTarget=atkKind==='npc'?'NPC / adversário':(atkT?atkT.char:'não escolhido');
-    const dPattr=draftPlayer.attrs[isCombat?s.testDraft.combatAttr:s.testDraft.attrKey]||1;
+    const dPe=this._effAttr(draftPlayer,isCombat?s.testDraft.combatAttr:s.testDraft.attrKey); const dPattr=dPe.eff;
     const dPskill=draftPlayer.skills[isCombat?s.testDraft.combatSkill:s.testDraft.skillKey]||0;
-    const combatTotalLine=`1d10 + ${dPattr} (atr) + ${dPskill} (perícia) + ${selWeapon.bonus} (arma)`;
+    const combatTotalLine=`1d10 + ${dPattr} (atr${dPe.pen?`, base ${dPe.base} − ${dPe.pen} de penalidade`:''}) + ${dPskill} (perícia) + ${selWeapon.bonus} (arma)`;
+    const geralLine=`${draftPlayer.char||'?'}: ${this._attrLine(draftPlayer,s.testDraft.attrKey)} → ${this._diceLine(dPattr)} + ${this.skillLabel(s.testDraft.skillKey)} ${dPskill}`;
 
     // ---- ferimentos (editar/aplicar/remover/cadastrar) ----
     const woundDefBase=[{lvl:'leve',label:'Leve',effect:'+1 dif. nas ações afetadas',desc:'Hematoma feio',col:'#d2a23a',border:'rgba(210,162,58,.3)'},{lvl:'moderado',label:'Moderado',effect:'+2 dif. / perde posição',desc:'Costela trincada',col:'#d6452f',border:'rgba(214,69,47,.3)'},{lvl:'grave',label:'Grave',effect:'+4 dif. / risco de sair',desc:'Sangramento intenso',col:'#c41e3a',border:'rgba(196,30,58,.35)'},{lvl:'critico',label:'Crítico',effect:'morte, captura, transformação',desc:'À beira da morte',col:'#8a1f1f',border:'rgba(138,31,31,.4)'}];
@@ -4487,7 +4650,7 @@ class Component extends DCLogic {
       ? `${narrName} caminha por Saint Vesper sem dons sobrenaturais — apenas razão, leitura social e teimosia. Onde outros sentem o oculto, ${narrName.split(' ')[0]} precisa de provas, e é justamente por isso que costuma encontrá-las primeiro.`
       : `${narrName} é alguém marcado por uma ${sensInfo.label.toLowerCase()} que se manifesta como ${narrManif}. Percebe o que as pessoas não dizem — e paga por isso com as fraquezas que escolheu carregar.`) : '';
 
-    const sm=s.sceneMode; const sceneAcc=sm?sm.acc:'#c6a35e'; const sceneSurf=sm&&sm.surf?sm.surf:'#241420'; const sceneGlow=sm&&sm.glow?sm.glow:(sceneAcc+'55');
+    const evTop=s.evQueue[0]||null; const sm=s.sceneMode||evTop; const sceneAcc=sm?sm.acc:'#c6a35e'; const sceneSurf=sm&&sm.surf?sm.surf:'#241420'; const sceneGlow=sm&&sm.glow?sm.glow:(sceneAcc+'55');
     const fld=(k)=>(e)=>this.setWiz(k,e.target.value);
 
     // ---- auth / profile ----
@@ -4732,7 +4895,8 @@ class Component extends DCLogic {
     const selfPrefix=selfV.char?selfV.char+' · ':'';
     const testHistory=s.log.filter(e=>e.t==='Teste'||e.t==='Combate').slice(0,4).map(e=>{ const m=e.txt.match(/^(.*?) — (.*?) \(/); const full=m?m[1]:e.txt; return {label:(selfPrefix&&full.startsWith(selfPrefix))?full.slice(selfPrefix.length):full, full:e.txt, grade:m?m[2]:'—', col:histCol(m?m[2]:'')}; });
     const pt=s.pending;
-    const pendingFormula=pt ? (pt.mode==='combate' ? `Ataque · 1d10 + atributo + perícia · DEF ${pt.difficulty}` : `${this.attrLabel(pt.attrKey)} (${selfV.attrs?selfV.attrs[pt.attrKey]||1:1}d20) + ${this.skillLabel(pt.skillKey)} · DIF ${pt.difficulty}`) : '';
+    const ptE=pt?this._effAttr(selfV,pt.attrKey):null;
+    const pendingFormula=pt ? (pt.mode==='combate' ? `Ataque · 1d10 + ${this._attrLine(selfV,pt.attrKey)} + perícia · DEF ${pt.difficulty}` : `${this._attrLine(selfV,pt.attrKey)} → ${this._diceLine(ptE.eff)} + ${this.skillLabel(pt.skillKey)} · DIF ${pt.difficulty}`) : '';
     const ptPending=!!(pt&&pt.status==='pendente');
     const pendingDot=ptPending&&!s.pRoll&&!s.pRolling;
     const ps=s.pSend&&pt&&s.pSend.reqId===pt.id?s.pSend:null;
@@ -4849,7 +5013,7 @@ class Component extends DCLogic {
       topMesasBg:(screen==='profile'&&s.profileTab==='mesas')?'rgba(198,163,94,.16)':'transparent', topMesasCol:(screen==='profile'&&s.profileTab==='mesas')?'#e9e3d4':'#cfc7b4',
       topPersBg:(screen==='profile'&&s.profileTab==='personagens')?'rgba(198,163,94,.16)':'transparent', topPersCol:(screen==='profile'&&s.profileTab==='personagens')?'#e9e3d4':'#cfc7b4',
       topProfileBg:screen==='profile'?'rgba(198,163,94,.16)':'transparent', topProfileCol:screen==='profile'?'#e9e3d4':'#cfc7b4',
-      sceneMode:sm, hasScene:!!sm, sceneAcc, sceneSurf, sceneGlow, sceneAccBorder:sceneAcc+'55',
+      sceneMode:sm, hasScene:!!sm, evQueueMore:(!s.sceneMode&&s.evQueue.length>1)?`+${s.evQueue.length-1} aviso${s.evQueue.length>2?'s':''} na fila`:'', hasEvQueueMore:!s.sceneMode&&s.evQueue.length>1, sceneAcc, sceneSurf, sceneGlow, sceneAccBorder:sceneAcc+'55',
       setHomeA:()=>this.setHomeVar('A'), setHomeB:()=>this.setHomeVar('B'),
       goMestre:()=>this.pickRole('mestre'), goJogador:()=>this.pickRole('jogador'), goMyTables:()=>this.goMyTables(),
       back:()=>this.back(), reset:()=>this.reset(),
@@ -4874,7 +5038,8 @@ class Component extends DCLogic {
       // clock form
       showClockForm:s.showClockForm, toggleClockForm:()=>this.toggleClockForm(),
       clockFormBtnLabel:s.showClockForm?'✕ Fechar':'＋ Criar relógio', clockFormBtnCol:s.showClockForm?'#c44a5e':'#e0c179',
-      clockDraft:cd, onClockName:(e)=>this.setClockDraft('name',e.target.value), onClockType:(e)=>this.setClockDraft('type',e.target.value),
+      clockDraft:cd, onClockDesc:(e)=>this.setClockDraft('desc',e.target.value), clockEditing:!!s.clockEditId, clockSaveLabel:s.clockEditId?'Salvar alterações':'Criar relógio', cancelClockEdit:()=>this.cancelClockEdit(),
+      onClockName:(e)=>this.setClockDraft('name',e.target.value), onClockType:(e)=>this.setClockDraft('type',e.target.value),
       clockSuggestions, segOptions, clockTypes, visModeOptions,
       onClockScopeMesa:()=>this.setClockDraft('scope','mesa'), onClockScopePlayer:()=>this.setClockDraft('scope','player'), onClockPlayer:(e)=>this.setClockDraft('playerId',e.target.value),
       clockScopeIsPlayer,
@@ -4931,7 +5096,7 @@ class Component extends DCLogic {
       dashCols, showCenterCol, showRightCol, showTestesBox, showDiarioBox, showSideTabs, sideTabs,
       showFab:!pNarrow, showBottomNav:pNarrow&&!s.kbOpen, bottomNav, menuBottom:pNarrow?'calc(70px + env(safe-area-inset-bottom, 0px))':'88px',
       panelPadBottom:pNarrow?'calc(84px + env(safe-area-inset-bottom, 0px))':'96px', hdrActions:!pNarrow, hdrAvatar:pNarrow?'44px':'56px', hdrNameSize:pNarrow?'18px':'22px',
-      fichaOpen, selfIdentity, hasSelfIdentity:selfIdentity.length>0, noSelfSkill:selfSkill.length===0, noSelfWeak:selfWeak.length===0,
+      fichaOpen, selfPens, hasSelfPens:selfPens.length>0, selfIdentity, hasSelfIdentity:selfIdentity.length>0, noSelfSkill:selfSkill.length===0, noSelfWeak:selfWeak.length===0,
       openFicha:()=>this.openPlayerArea('ficha'), openNpcs:()=>this.openPlayerArea('npcs'), openPistas:()=>this.openPlayerArea('pistas'), openInv:()=>this.openPlayerArea('inventario'),
       centerIsMapa, centerIsCena:!centerIsMapa,
       mapaTabBg:centerIsMapa?'#c6a35e':'transparent', mapaTabCol:centerIsMapa?'#0b0b10':'#cfc7b4',
@@ -5061,7 +5226,7 @@ class Component extends DCLogic {
       lobbyHasAwaiting:s.players.some(p=>!p.approved&&p.sheetReady),
       lobbyHasNoSheet:s.players.some(p=>!p.approved&&!p.sheetReady),
       lobbyAllApproved:s.players.length>0&&s.players.every(p=>p.approved),
-      toolGroups, showToolTabs, toolPistas:s.masterTool==='pistas',
+      toolGroups, showToolTabs, toolPistas:s.masterTool==='pistas', geralLine,
       cluesMaster:clues.map(k=>({...k, shareLabel:k.status==='oculta'?'Compartilhar':'Ocultar', onShare:()=>this.toggleClueShare(k.id),
         hasNotes:!!k.notes, onEdit:()=>this.openContentForm('clue',k),
         delAsk:s.contentDel==='clue:'+k.id, noDelAsk:s.contentDel!=='clue:'+k.id, onAskDel:()=>this.askDeleteContent('clue',k.id), onDel:()=>this.deleteContent('clue',k.id), onCancelDel:()=>this.cancelDeleteContent(),
