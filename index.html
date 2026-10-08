@@ -1333,6 +1333,15 @@
           <button onClick="{{ backToMap }}" aria-label="Fechar ficha" style="flex-shrink:0;min-height:44px;padding:0 14px;border-radius:7px;background:transparent;border:1px solid rgba(255,255,255,.12);color:#cfc7b4;font:500 12px 'Archivo';cursor:pointer" style-hover="border-color:rgba(198,166,100,.5)">✕ Fechar</button>
         </div>
         <div style="padding:18px 20px 28px">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+            <div role="img" aria-label="Foto do personagem" style="width:64px;height:64px;flex-shrink:0;border-radius:50%;background: {{ selfPhotoBg }};border:1px solid rgba(198,166,100,.35);display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-weight:700;font-size:24px;color:#e0c179">{{ selfPhotoInitial }}</div>
+            <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+              <label style="position:relative;display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;min-height:40px;border:1px solid rgba(198,166,100,.35);border-radius:5px;color:#e0c179;font-size:11px;letter-spacing:.06em;cursor:pointer">{{ playerPhotoLabel }}
+                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange="{{ onPlayerPhoto }}" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"/></label>
+              <sc-if value="{{ hasSelfPhoto }}"><button onClick="{{ removePlayerPhoto }}" style="align-self:flex-start;padding:4px 0;background:transparent;border:none;color:#a39e90;font-size:11px;cursor:pointer;text-decoration:underline">Remover foto</button></sc-if>
+            </div>
+          </div>
+          <sc-if value="{{ hasPhotoMsg }}"><div role="status" style="font-size:12px;color:#cdc6b6;margin:-8px 0 14px">{{ photoMsg }}</div></sc-if>
           <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:10px">Atributos</div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
             <sc-for list="{{ selfAttr }}" as="a" hint-placeholder-count="6"><div style="text-align:center;background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:7px;padding:9px 2px"><div style="font-family:'Space Mono';font-weight:700;font-size:18px;color:#e0c179">{{ a.val }}</div><div style="font-size:10px;color:#8d887c;margin-top:2px">{{ a.label }}</div></div></sc-for>
@@ -1416,21 +1425,21 @@
                       <div style="display:flex;align-items:center;gap:11px;background:#fbf6ea;border:1px solid rgba(122,90,46,.25);border-radius:3px;padding:12px 14px;box-shadow:0 2px 6px rgba(60,40,10,.1)">
                         <span style="font-size:16px;color:#7a5a2e">{{ o.icon }}</span>
                         <div style="flex:1"><div style="font-size:14px;color:#2a2014;font-weight:600">{{ o.name }} <sc-if value="{{ o.hasBonus }}"><span style="font-family:'Space Mono';color:#9a6a1a">+{{ o.bonus }}</span></sc-if></div><sc-if value="{{ o.hasDesc }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#6a543a">{{ o.desc }}</div></sc-if></div>
-                        <button onClick="{{ o.onRemove }}" aria-label="Remover {{ o.name }} do inventário" style="font-size:13px;color:#a04a3a;background:transparent;border:none;cursor:pointer">✕</button>
+                        <button onClick="{{ o.onRemove }}" disabled="{{ o.busy }}" aria-label="Largar {{ o.name }}" style="min-width:36px;min-height:36px;font-size:13px;color:#a04a3a;background:transparent;border:none;cursor:pointer">{{ o.removeLabel }}</button>
                       </div>
                     </sc-for>
                     <sc-if value="{{ noOwned }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:14px 0">{{ emptyStuffMsg }}</div></sc-if>
                   </div>
-                  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a07f4a;margin-bottom:9px">＋ Adicionar da biblioteca do Mestre</div>
+                  <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#a07f4a;margin-bottom:9px">＋ Pegar do catálogo do Mestre</div>
                   <div style="display:flex;flex-direction:column;gap:7px">
                     <sc-for list="{{ invAvailable }}" as="a" hint-placeholder-count="3">
                       <button onClick="{{ a.onAdd }}" style="display:flex;align-items:center;gap:10px;text-align:left;background:rgba(122,90,46,.08);border:1px dashed rgba(122,90,46,.4);border-radius:3px;padding:10px 13px;cursor:pointer" style-hover="background:rgba(122,90,46,.16)">
                         <span style="font-size:14px;color:#7a5a2e">{{ a.icon }}</span>
-                        <div style="flex:1"><span style="font-size:13px;color:#3a2e1c;font-weight:500">{{ a.name }}</span><sc-if value="{{ a.hasBonus }}"><span style="font-family:'Space Mono';color:#9a6a1a;font-size:12px;margin-left:6px">+{{ a.bonus }}</span></sc-if></div>
-                        <span style="font-size:16px;color:#7a5a2e">＋</span>
+                        <div style="flex:1"><span style="font-size:13px;color:#3a2e1c;font-weight:500">{{ a.name }}</span><sc-if value="{{ a.hasBonus }}"><span style="font-family:'Space Mono';color:#9a6a1a;font-size:12px;margin-left:6px">+{{ a.bonus }}</span></sc-if><sc-if value="{{ a.owned }}"><span style="font-family:'Cormorant Garamond';font-style:italic;font-size:13px;color:#6a543a;margin-left:8px">{{ a.ownedLabel }}</span></sc-if></div>
+                        <span style="font-size:16px;color:#7a5a2e">{{ a.addLabel }}</span>
                       </button>
                     </sc-for>
-                    <sc-if value="{{ noAvailable }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8a7350;text-align:center;padding:8px 0">Tudo da biblioteca já está no seu inventário.</div></sc-if>
+                    <sc-if value="{{ noAvailable }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8a7350;text-align:center;padding:8px 0">O Mestre ainda não cadastrou itens no catálogo da mesa.</div></sc-if>
                   </div>
                 </sc-if>
               </div>
@@ -1741,6 +1750,30 @@
       <sc-if value="{{ playerCard.noWeak }}">
         <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#6f6b61">Sem fraquezas registradas.</div>
       </sc-if>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 0 8px">
+        <div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70">Equipamento</div>
+        <sc-if value="{{ playerCard.hasAssign }}"><button onClick="{{ playerCard.toggleAssign }}" style="padding:6px 12px;min-height:36px;background:transparent;border:1px solid rgba(198,166,100,.35);border-radius:5px;color:#e0c179;font-size:11px;letter-spacing:.06em;cursor:pointer">{{ playerCard.assignLabel }}</button></sc-if>
+      </div>
+      <sc-if value="{{ playerCard.hasEquip }}">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <sc-for list="{{ playerCard.equip }}" as="e" hint-placeholder-count="2">
+            <div style="display:flex;align-items:center;gap:10px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:8px 12px">
+              <span style="color:#c6a35e">{{ e.icon }}</span>
+              <span style="flex:1;font-size:13px;color:#cdc6b6">{{ e.name }} <sc-if value="{{ e.hasBonus }}"><span style="font-family:'Space Mono';color:#e0c179;font-size:12px">+{{ e.bonus }}</span></sc-if></span>
+              <button onClick="{{ e.onRemove }}" disabled="{{ e.busy }}" aria-label="Retirar {{ e.name }}" style="min-width:36px;min-height:36px;background:transparent;border:none;color:#c44a5e;cursor:pointer">✕</button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ playerCard.noEquip }}">
+        <div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#6f6b61">Sem armas ou itens.</div>
+      </sc-if>
+      <sc-if value="{{ playerCard.assignOpen }}">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">
+          <sc-for list="{{ playerCard.assign }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.onAdd }}" style="padding:7px 12px;min-height:36px;background:transparent;border:1px dashed rgba(198,166,100,.35);border-radius:20px;color:#cdc6b6;font-size:12px;cursor:pointer">{{ a.label }}</button></sc-for>
+        </div>
+      </sc-if>
     </div>
   </div>
 </div>
@@ -1780,7 +1813,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -2092,6 +2125,9 @@ class Component extends DCLogic {
     if(failed){ if(!this.state.sessionStale) this.setState({sessionStale:true}); return; }
     const next=(remote&&Object.keys(remote).length)?{...base,...remote}:base;
     if(!isOwner){
+      // o jogador so pega o que o Mestre cadastrou: nunca o catalogo padrao embutido no site
+      const rl=(remote&&remote.library)||{};
+      next.library={weapons:Array.isArray(rl.weapons)?rl.weapons:[],items:Array.isArray(rl.items)?rl.items:[]};
       next.clockBump=this._clockBumps(this.state.clocks,next.clocks);
       if(this.state.sessionStale) this._flashReconnected();
       this.setState({...next,sessionStale:false});
@@ -2364,6 +2400,8 @@ class Component extends DCLogic {
       }
       const status=data.table_status;
       this._rememberMembership(saved);
+      this._equipRev=-1; this._photoRevs={};
+      this._applyMyEquip(mbr.equipment,mbr.equip_rev);
       this.setState(s=>({
         joinTableId:saved.tableId, joinTableName:saved.tableName, joinTableType:saved.tableType||'One-shot', memberId:saved.memberId, memberToken:saved.token||null,
         joinName:mbr.player_name||s.joinName, tableStatus:status||null, tableGone:false,
@@ -2491,6 +2529,9 @@ class Component extends DCLogic {
     const cd=m.char_data||{};
     return {id:m.id,player:m.player_name||'Jogador',char:m.char_name||'—',status:m.status||'conectando',sens:cd.sens||null,attrs:cd.attrs||{},skills:cd.skills||{},
       wounds:Array.isArray(m.wounds)?m.wounds:[],conditions:Array.isArray(m.conditions)?m.conditions:[],
+      // Etapa 1 pos-sessao: fraquezas e equipamento da ficha gravada na mesa (nunca pelo nome)
+      weaknesses:Array.isArray(cd.weaknesses)?cd.weaknesses:[], equipment:Array.isArray(m.equipment)?m.equipment:[],
+      equipRev:m.equip_rev||0, photoRev:m.photo_rev||0,
       sheetReady:!!m.sheet_ready,approved:!!m.approved_at,cond:'normal',active:!!(m.char_name)};
   }
   // Mesa ativa do Mestre: identificada pelo ID. O nome só é usado na criação, antes de
@@ -2509,12 +2550,12 @@ class Component extends DCLogic {
       const ver=this._membersVer||0;
       try{
         const [mres,rres]=await Promise.all([
-          this.sb.from('table_members').select('*').eq('table_id',t.id).order('joined_at',{ascending:true}),
+          this.sb.from('table_members').select(this._memberCols()).eq('table_id',t.id).order('joined_at',{ascending:true}),
           this.state.auth.loggedIn?this.sb.from('table_requests').select('id,target_member_id,kind,params,status,result,created_at,answered_at,master_ack_at').eq('table_id',t.id).order('created_at',{ascending:false}).limit(30):Promise.resolve({data:null})
         ]);
         const cur=this._activeTableRow();
         if(!cur||cur.id!==t.id) return;
-        if(!mres.error&&mres.data&&ver===(this._membersVer||0)) this.setState({players:mres.data.map(m=>this._mapMember(m))});
+        if(!mres.error&&mres.data&&ver===(this._membersVer||0)){ const ps=mres.data.map(m=>this._mapMember(m)); this.setState({players:ps}); this._syncPhotos(ps,null,null); }
         if(rres&&!rres.error&&rres.data){ this.setState({sentReqs:rres.data}); if(this.state.screen==='m_session') this._processAnsweredRequests(rres.data); }
       }catch(e){}
       finally{ this._mpollBusy=false; }
@@ -2538,7 +2579,7 @@ class Component extends DCLogic {
     if(!this.sb||!memberId) return null;
     const {data,error}=await this.sb.rpc('player_get_lobby',{p_member_id:memberId,p_token:memberToken||null});
     if(error||!data||this.state.memberId!==memberId) return null;
-    if(Array.isArray(data.members)) this.setState({players:data.members.map(m=>this._mapMember(m))});
+    if(Array.isArray(data.members)){ const ps=data.members.map(m=>this._mapMember(m)); this.setState({players:ps}); this._syncPhotos(ps,memberId,memberToken); }
     return data.table_status;
   }
   _startPlayerPolling(tableId){
@@ -2971,6 +3012,7 @@ class Component extends DCLogic {
       // logado, o membro devolvido e sempre da conta (novo, reaproveitado ou recem-vinculado)
       acct:!!this.state.auth.loggedIn};
     this._rememberMembership(saved);
+    if(this.state.memberId!==data.member_id){ this._equipRev=-1; this._photoRevs={}; this.setState({myEquip:[]}); }
     this.setState({joinTableId:data.table_id,joinTableName:data.table_name,joinTableType:data.table_type||'One-shot',memberId:data.member_id,memberToken:token,
       selfApproved:false,selfSheetReady:false,pending:null,pRoll:null,pSend:null});
     return saved;
@@ -3265,8 +3307,6 @@ class Component extends DCLogic {
 
   // ---- inventário do jogador ----
   setInvDivider(d){ this.setState({invDivider:d}); }
-  addToInventory(kind,id){ this.setState(s=>{ const cur=s.inventory[kind]||[]; if(cur.includes(id)) return s; return {inventory:{...s.inventory,[kind]:[...cur,id]}}; }); }
-  removeFromInventory(kind,id){ this.setState(s=>({inventory:{...s.inventory,[kind]:(s.inventory[kind]||[]).filter(x=>x!==id)}})); }
 
   // ---- enviar teste ao jogador ----
   // Alvo do teste: o jogador escolhido no seletor, desde que tenha ficha; senão o primeiro
@@ -3611,11 +3651,123 @@ class Component extends DCLogic {
       if(error&&/not_authorized|42501/.test((error.message||'')+(error.code||''))){ this.setState({tableGone:true}); return; }
       if(error||!data) return;
       const m=data.member||{};
+      this._applyMyEquip(m.equipment,m.equip_rev);
       this.setState(st=>({self:this._selfFromMember(m,st.self),selfApproved:!!m.approved,selfSheetReady:!!m.sheet_ready,tableStatus:data.table_status||st.tableStatus,tableGone:false}));
       this._syncPlayerRequests(Array.isArray(data.requests)?data.requests:[]);
     }catch(e){}
     finally{ this._selfPollBusy=false; }
   }
+  // ---- Etapa 1 pos-sessao: equipamento por personagem e foto na mesa ----
+  _memberCols(){ return 'id,table_id,user_id,player_name,char_name,char_data,status,wounds,conditions,sheet_ready,approved_at,approved_by,joined_at,updated_at,equipment,equip_rev,photo_rev'; }
+  // So aceita a lista se a revisao for >= a ultima confirmada: uma leitura que saiu antes
+  // de uma gravacao nao desfaz o que o banco ja confirmou.
+  _applyMyEquip(eq,rev){
+    if(!Array.isArray(eq)) return;
+    const r=typeof rev==='number'?rev:0;
+    if(r<(this._equipRev==null?-1:this._equipRev)) return;
+    this._equipRev=r; this.setState({myEquip:eq});
+  }
+  async equipOp(memberId,op,kind,ref,iid){
+    const s=this.state; if(!this.sb||!memberId) return;
+    const isSelf=memberId===s.memberId;
+    // a mesma tentativa reaproveita o mesmo iid: se a resposta se perdeu, repetir nao duplica
+    this._pendIid=this._pendIid||{};
+    const pk=memberId+':'+kind+':'+ref;
+    if(op==='add') iid=iid||this._pendIid[pk]||(this._pendIid[pk]=this._uuid());
+    const key=op+':'+iid;
+    if(this._equipBusyK&&this._equipBusyK[key]) return;
+    this._equipBusyK={...(this._equipBusyK||{}),[key]:true};
+    this.setState(st=>({equipBusy:{...st.equipBusy,[key]:true}}));
+    const call=()=>this.sb.rpc('member_equip',{p_member_id:memberId,p_token:isSelf?(s.memberToken||null):null,p_op:op,p_kind:kind,p_ref:String(ref||''),p_iid:iid});
+    let data=null,error=null;
+    try{ ({data,error}=await call()); }catch(e){ error=e; }
+    // Mestre que acabou de cadastrar o item: o catalogo ainda pode nao ter sido salvo
+    if(error&&!isSelf&&/not_in_catalog/.test(error.message||'')&&this.state.activeTableId){
+      const sv=await this._flushSave(this.state.activeTableId);
+      if(sv.ok){ try{ ({data,error}=await call()); }catch(e){ error=e; } }
+    }
+    const done=()=>{ const b={...(this._equipBusyK||{})}; delete b[key]; this._equipBusyK=b; this.setState(st=>{ const e={...st.equipBusy}; delete e[key]; return {equipBusy:e}; }); };
+    if(error||!data||!data.ok){
+      done();
+      const m=(error&&error.message)||'';
+      this._flashActionError(/not_in_catalog/.test(m)?'Este item não está mais no catálogo da mesa.':/equipment_full/.test(m)?'Limite de equipamentos deste personagem atingido.':'Não foi possível salvar o equipamento. Nada foi alterado — tente de novo.',isSelf?'jogador':undefined);
+      return;
+    }
+    if(op==='add') delete this._pendIid[pk];
+    if(isSelf){ this._applyMyEquip(data.equipment,data.rev); }
+    else {
+      // Mestre: descarta a leitura que ja estava em voo e aplica o confirmado
+      this._membersVer=(this._membersVer||0)+1;
+      this.setState(st=>({players:st.players.map(p=>p.id===memberId&&(data.rev>=(p.equipRev||0))?{...p,equipment:data.equipment,equipRev:data.rev}:p)}));
+    }
+    done();
+  }
+  // Fotos: as leituras trazem so a revisao; a imagem vem quando a revisao muda.
+  async _syncPhotos(ps,memberId,token){
+    if(!this.sb||!Array.isArray(ps)||!ps.length||this._photoSyncBusy) return;
+    this._photoRevs=this._photoRevs||{};
+    const need=ps.filter(p=>p&&p.id&&(this._photoRevs[p.id]||0)!==(p.photoRev||0)).map(p=>p.id);
+    if(!need.length) return;
+    const via=memberId||ps[0].id;
+    this._photoSyncBusy=true;
+    try{
+      const {data,error}=await this.sb.rpc('member_photos',{p_member_id:via,p_token:memberId?(token||null):null,p_ids:need});
+      if(error||!data) return;
+      const upd={};
+      Object.keys(data).forEach(id=>{ const r=data[id]||{}; if((r.rev||0)>=(this._photoRevs[id]||0)){ this._photoRevs[id]=r.rev||0; upd[id]=r.photo||null; } });
+      this.setState(st=>({photos:{...st.photos,...upd}}));
+    }catch(e){}
+    finally{ this._photoSyncBusy=false; }
+  }
+  // Reduz a imagem no navegador (lado maior 256 px, JPEG) e valida o formato.
+  _resizeImage(file){
+    return new Promise((resolve,reject)=>{
+      if(!file) return reject(new Error('sem_arquivo'));
+      if(!/^image\/(jpeg|png|webp|gif)$/.test(file.type||'')) return reject(new Error('formato'));
+      if(file.size>15*1024*1024) return reject(new Error('grande'));
+      const rd=new FileReader();
+      rd.onerror=()=>reject(new Error('leitura'));
+      rd.onload=()=>this._shrinkImage(rd.result).then(resolve,reject);
+      rd.readAsDataURL(file);
+    });
+  }
+  _shrinkImage(src){
+    return new Promise((resolve,reject)=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error('formato'));
+      img.onload=()=>{
+        try{
+          const max=256, k=Math.min(1,max/Math.max(img.width||1,img.height||1));
+          const w=Math.max(1,Math.round((img.width||1)*k)), h=Math.max(1,Math.round((img.height||1)*k));
+          const cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+          const cx=cv.getContext('2d'); cx.fillStyle='#13121a'; cx.fillRect(0,0,w,h); cx.drawImage(img,0,0,w,h);
+          resolve(cv.toDataURL('image/jpeg',0.85));
+        }catch(e){ reject(new Error('formato')); }
+      };
+      img.src=src;
+    });
+  }
+  _photoErrMsg(e){ const m=(e&&e.message)||''; return m==='formato'?'Formato não suportado. Use uma imagem JPG, PNG ou WebP.':m==='grande'?'Imagem grande demais (máximo 15 MB).':'Não foi possível salvar a foto. A anterior foi mantida — tente de novo.'; }
+  // Grava a foto da ficha da mesa. Troca na tela SO depois da confirmacao do banco.
+  async _setMemberPhoto(memberId,token,dataUrl,quiet){
+    if(!this.sb||!memberId) return false;
+    const seq=(this._photoSeq=(this._photoSeq||0)+1);
+    if(!quiet) this.setState({photoBusy:true,photoMsg:''});
+    let data=null,error=null;
+    try{ ({data,error}=await this.sb.rpc('member_set_photo',{p_member_id:memberId,p_token:token||null,p_photo:dataUrl})); }catch(e){ error=e; }
+    if(seq!==this._photoSeq) return false;   // outro envio mais novo assumiu
+    if(error||!data||!data.ok){ if(!quiet) this.setState({photoBusy:false,photoMsg:/photo_invalid/.test((error&&error.message)||'')?'Formato não suportado. Use uma imagem JPG, PNG ou WebP.':'Não foi possível salvar a foto. A anterior foi mantida — tente de novo.'}); return false; }
+    this._photoRevs=this._photoRevs||{}; this._photoRevs[memberId]=data.rev;
+    this.setState(st=>({photos:{...st.photos,[memberId]:dataUrl},photoBusy:false,photoMsg:quiet?st.photoMsg:(dataUrl?'✓ Foto salva':'✓ Foto removida')}));
+    return true;
+  }
+  async onPlayerPhoto(e){
+    const f=e&&e.target&&e.target.files&&e.target.files[0]; if(e&&e.target) e.target.value='';
+    const s=this.state; if(!f||!s.memberId||s.photoBusy) return;
+    let url; try{ url=await this._resizeImage(f); }catch(err){ this.setState({photoMsg:this._photoErrMsg(err)}); return; }
+    await this._setMemberPhoto(s.memberId,s.memberToken,url);
+  }
+  removePlayerPhoto(){ const s=this.state; if(!s.memberId||s.photoBusy) return; this._setMemberPhoto(s.memberId,s.memberToken,null); }
   attrLabel(k){ const a=this.ATTRS.find(x=>x.key===k); return a?a.label:k; }
   skillLabel(k){ const a=this.SKILLS.find(x=>x.key===k); return a?a.label:k; }
 
@@ -3781,6 +3933,8 @@ class Component extends DCLogic {
     if(this.sb && s.memberId){
       if(!(await this._submitSheet(s.joinName||s.auth.name||'Jogador',c.name,charData))) return;
     }
+    // a ficha da mesa herda a foto do personagem do Perfil (reduzida); falha nao bloqueia a entrada
+    if(this.sb&&s.memberId&&c.photo){ this._shrinkImage(c.photo).then(u=>this._setMemberPhoto(s.memberId,s.memberToken,u,true)).catch(()=>{}); }
     this.setState(st=>({self:this._selfFromMember({char_name:c.name,char_data:charData,wounds:[],conditions:[]},st.self)}));
     this.go('j_lobby');
     this._startPlayerPolling(s.joinTableId);
@@ -3802,15 +3956,33 @@ class Component extends DCLogic {
   }
   openPlayerCard(id){ this.setState({playerCardId:id}); }
   closePlayerCard(){ this.setState({playerCardId:null}); }
-  onCharPhoto(e){ const f=e.target&&e.target.files&&e.target.files[0]; if(!f) return; const id=this.state.selectedChar; const rd=new FileReader(); rd.onload=()=>this.setCharPhoto(id,rd.result); rd.readAsDataURL(f); }
-  setCharPhoto(id,dataUrl){ this.setState(s=>({characters:s.characters.map(c=>c.id===id?{...c,photo:dataUrl}:c)}),()=>this._syncCharToSupabase(id)); }
-  removeCharPhoto(){ const id=this.state.selectedChar; this.setState(s=>({characters:s.characters.map(c=>c.id===id?{...c,photo:null}:c)}),()=>this._syncCharToSupabase(id)); }
+  // Etapa 1 pos-sessao: antes o arquivo original (varios MB) ia inteiro para o personagem e a
+  // tela trocava a foto antes do banco confirmar. Agora a imagem e reduzida, validada e so
+  // aparece depois de salva; em erro, a foto anterior fica.
+  async onCharPhoto(e){
+    const f=e&&e.target&&e.target.files&&e.target.files[0]; if(e&&e.target) e.target.value='';
+    const id=this.state.selectedChar; if(!f||!id||this.state.charPhotoBusy) return;
+    let url; try{ url=await this._resizeImage(f); }catch(err){ this._flashActionError(this._photoErrMsg(err)); return; }
+    this.setCharPhoto(id,url);
+  }
+  async setCharPhoto(id,dataUrl){
+    const ch=this.state.characters.find(c=>c.id===id); if(!ch) return;
+    if(!this.sb||!this.state.auth.loggedIn){ this.setState(s=>({characters:s.characters.map(c=>c.id===id?{...c,photo:dataUrl}:c)})); return; }
+    const {id:_id,...data}=ch; data.photo=dataUrl;
+    this.setState({charPhotoBusy:true});
+    let error=null;
+    try{ ({error}=await this.sb.from('characters').update({data}).eq('id',id)); }catch(e){ error=e; }
+    this.setState({charPhotoBusy:false});
+    if(error){ this._flashActionError('Não foi possível salvar a foto do personagem. A anterior foi mantida — tente de novo.'); return; }
+    this.setState(s=>({characters:s.characters.map(c=>c.id===id?{...c,photo:dataUrl}:c)}));
+  }
+  removeCharPhoto(){ const id=this.state.selectedChar; if(id) this.setCharPhoto(id,null); }
   _syncCharToSupabase(id){
     if(!this.sb || !this.state.auth.loggedIn) return;
     const ch=this.state.characters.find(c=>c.id===id); if(!ch) return;
     const {id:_id,...data}=ch;
     this.sb.from('characters').update({data}).eq('id',id).then(({error})=>{
-      if(error) this._flashActionError('Não foi possível salvar a foto do personagem.');
+      if(error) this._flashActionError('Não foi possível salvar o personagem.');
     });
   }
 
@@ -3887,11 +4059,13 @@ class Component extends DCLogic {
     const condColor={normal:'#7fae8f',abalado:'#d2a23a',pressao:'#d6452f',risco:'#c41e3a',ferido:'#c41e3a',fora:'#7e7a70'};
     const wcol={leve:'#d2a23a',moderado:'#d6452f',grave:'#c41e3a',critico:'#8a1f1f'};
 
-    const photoMap={}; s.characters.forEach(c=>{ if(c.photo) photoMap[c.name]=c.photo; });
+    // Etapa 1 pos-sessao: foto da ficha da mesa, pelo id do membro (antes: pelo nome do
+    // personagem nos personagens da conta de quem olhava).
+    const photoOf=id=>(s.photos||{})[id]||null;
     const players=s.players.map(p=>{
       const acc=this.SENS_ACCENT[p.sens]||'#b9a06a';
       const active=p.char&&p.char!=='—';
-      const photo=photoMap[p.char];
+      const photo=photoOf(p.id);
       return {...p, initial:active?p.char[0]:'?', acc,
         avatarBg:photo?`center/cover url(${photo})`:'#1a1820', avatarInitial:photo?'':(active?p.char[0]:'?'),
         sLabel:statusLabel[p.status]||p.status, cLabel:condLabel[p.cond]||p.cond, cColor:condColor[p.cond]||'#7fae8f',
@@ -3915,10 +4089,15 @@ class Component extends DCLogic {
     const pcP=s.playerCardId?s.players.find(x=>x.id===s.playerCardId):null;
     const pcNat=pcP?(this.SENS[pcP.sens]||{}):{};
     const pcTheme=pcP?(this.THEME[pcNat.theme]||{}):{};
-    const pcCharRec=pcP?(s.characters.find(c=>c.name===pcP.char)||{}):{};
-    const pcPhoto=pcP?photoMap[pcP.char]:null;
+    const pcPhoto=pcP?photoOf(pcP.id):null;
     const pcSkills=pcP?this.SKILLS.filter(k=>(pcP.skills[k.key]||0)>0).map(k=>({label:k.label,val:pcP.skills[k.key]})):[];
-    const pcWeak=pcP?((pcCharRec.weaknesses||[]).map(w=>({txt:w}))):[];
+    const pcWeak=pcP?((pcP.weaknesses||[]).map(w=>({txt:w}))):[];
+    // equipamento do personagem (Mestre pode atribuir e retirar)
+    const eqView=(eq,mid)=>(eq||[]).map(e=>({...e,icon:e.kind==='weapons'?'⚔':'◈',hasBonus:e.kind==='weapons'&&(e.bonus||0)>0,hasDesc:!!e.desc,
+      busy:!!s.equipBusy['remove:'+e.iid],onRemove:()=>this.equipOp(mid,'remove',e.kind,e.ref,e.iid)}));
+    const pcEquip=pcP?eqView(pcP.equipment,pcP.id):[];
+    const pcAssign=pcP?[...(s.library.weapons||[]).map(e=>({...e,kind:'weapons'})),...(s.library.items||[]).map(e=>({...e,kind:'items'}))].map(e=>({
+      label:(e.kind==='weapons'?'⚔ ':'◈ ')+e.name, onAdd:()=>this.equipOp(pcP.id,'add',e.kind,e.id)})):[];
     const playerCardOpen=!!pcP;
     const playerCard=pcP?{
       acc:this.SENS_ACCENT[pcP.sens]||'#b9a06a',
@@ -3930,8 +4109,10 @@ class Component extends DCLogic {
       attrs:this.ATTRS.map(a=>({label:a.label,val:(pcP.attrs&&pcP.attrs[a.key])||0})),
       skills:pcSkills, hasSkills:pcSkills.length>0, noSkills:pcSkills.length===0,
       weaknesses:pcWeak, hasWeak:pcWeak.length>0, noWeak:pcWeak.length===0,
+      equip:pcEquip, hasEquip:pcEquip.length>0, noEquip:pcEquip.length===0, assign:pcAssign, hasAssign:pcAssign.length>0,
+      assignOpen:!!s.pcAssignOpen, assignLabel:s.pcAssignOpen?'Fechar':'＋ Atribuir do catálogo', toggleAssign:()=>this.setState(st=>({pcAssignOpen:!st.pcAssignOpen})),
       conditions:(pcP.conditions||[]).join(' · '), hasCond:(pcP.conditions||[]).length>0
-    }:{attrs:[],skills:[],weaknesses:[],acc:'#b9a06a',surf:'#1a1820',glow:'rgba(185,160,106,.35)'};
+    }:{attrs:[],skills:[],weaknesses:[],equip:[],assign:[],acc:'#b9a06a',surf:'#1a1820',glow:'rgba(185,160,106,.35)'};
 
     // Id real do próprio membro: as barras de estresse do jogador são filtradas por ele
     // (no banco, em player_get_session, e aqui na tela).
@@ -4324,7 +4505,7 @@ class Component extends DCLogic {
       {top:'68%',left:'33%',label:'Beco',color:'#9b9588',glow:'rgba(155,149,136,.4)',size:'9px',labelCol:'#b3ada0'}
     ];
     // self avatar + health
-    const selfPhoto=photoByName[selfV.char];
+    const selfPhoto=photoOf(s.memberId);
     const selfAvatarBg=selfPhoto?`center/cover url(${selfPhoto})`:'#1c1a24';
     const selfAvatarInitial=selfPhoto?'':(selfV.char[0]||'?');
     const wlbl={leve:'Ferimento Leve',moderado:'Ferimento Moderado',grave:'Ferimento Grave',critico:'Crítico'};
@@ -4375,11 +4556,14 @@ class Component extends DCLogic {
     const cluesFoundV=clues.filter(k=>k.status!=='oculta').map((k,i)=>({...k,tilt:tilts[i%tilts.length]}));
     const invIsStuff=s.invDivider==='itens'||s.invDivider==='armas';
     const invKind=s.invDivider==='armas'?'weapons':'items';
-    const ownedIds=s.inventory[invKind]||[];
-    const libOf=invKind==='weapons'?s.library.weapons:s.library.items;
-    const invOwned=ownedIds.map(id=>libOf.find(e=>e.id===id)).filter(Boolean).map(e=>({...e,icon:invKind==='weapons'?'⚔':'◈',hasBonus:invKind==='weapons'&&e.bonus>0,hasDesc:!!e.desc,onRemove:()=>this.removeFromInventory(invKind,e.id)}));
-    const invAvailable=libOf.filter(e=>!ownedIds.includes(e.id)).map(e=>({...e,icon:invKind==='weapons'?'⚔':'◈',hasBonus:invKind==='weapons'&&e.bonus>0,onAdd:()=>this.addToInventory(invKind,e.id)}));
-    const invDividers=[['pistas','Pistas',cluesFoundV.length],['itens','Itens',(s.inventory.items||[]).length],['armas','Armas',(s.inventory.weapons||[]).length]].map(([k,label,count])=>({k,label,count,onClick:()=>this.setInvDivider(k),bg:s.invDivider===k?'#ece3cf':'#221c12',col:s.invDivider===k?'#3a2e1c':'#a08a64',shadow:s.invDivider===k?'0 -2px 8px rgba(0,0,0,.2)':'none'}));
+    // Etapa 1 pos-sessao: o equipamento e do personagem e vem confirmado do banco
+    // (antes: lista unica da mesa, alterada so na tela e desfeita pela leitura seguinte).
+    const myEq=s.myEquip||[];
+    const libOf=(invKind==='weapons'?s.library.weapons:s.library.items)||[];
+    const invOwned=eqView(myEq.filter(e=>e.kind===invKind),s.memberId).map(e=>({...e,removeLabel:e.busy?'…':'✕'}));
+    const invAvailable=libOf.map(e=>{ const n=myEq.filter(x=>x.kind===invKind&&x.ref===e.id).length; const busy=Object.keys(s.equipBusy||{}).some(k=>k.startsWith('add:'))&&!!(this._pendIid&&this._pendIid[s.memberId+':'+invKind+':'+e.id]);
+      return {...e,icon:invKind==='weapons'?'⚔':'◈',hasBonus:invKind==='weapons'&&e.bonus>0,owned:n>0,ownedLabel:n>0?`você tem ${n}`:'',addLabel:busy?'…':'＋',onAdd:()=>this.equipOp(s.memberId,'add',invKind,e.id)}; });
+    const invDividers=[['pistas','Pistas',cluesFoundV.length],['itens','Itens',myEq.filter(e=>e.kind==='items').length],['armas','Armas',myEq.filter(e=>e.kind==='weapons').length]].map(([k,label,count])=>({k,label,count,onClick:()=>this.setInvDivider(k),bg:s.invDivider===k?'#ece3cf':'#221c12',col:s.invDivider===k?'#3a2e1c':'#a08a64',shadow:s.invDivider===k?'0 -2px 8px rgba(0,0,0,.2)':'none'}));
 
     return {
       grain:(this.props.showGrain!==false), actionError:s.actionError, hasActionError:!!s.actionError,
@@ -4556,6 +4740,10 @@ class Component extends DCLogic {
       invStuffTitle:s.invDivider==='armas'?'⚔ Equipamento · Armas':'◈ Equipamento · Itens',
       invOwned, noOwned:invOwned.length===0, emptyStuffMsg:s.invDivider==='armas'?'Você não carrega armas ainda.':'Você não carrega itens ainda.',
       invAvailable, noAvailable:invAvailable.length===0, noClues:cluesFoundV.length===0,
+      onPlayerPhoto:(e)=>this.onPlayerPhoto(e), removePlayerPhoto:()=>this.removePlayerPhoto(), hasSelfPhoto:!!photoOf(s.memberId),
+      selfPhotoBg:photoOf(s.memberId)?`center/cover url(${photoOf(s.memberId)})`:'#1c1a24', selfPhotoInitial:photoOf(s.memberId)?'':((s.self&&s.self.char&&s.self.char[0])||'?'),
+      playerPhotoLabel:s.photoBusy?'Salvando…':(photoOf(s.memberId)?'✎ Trocar foto':'＋ Adicionar foto'), photoMsg:s.photoMsg, hasPhotoMsg:!!s.photoMsg,
+      charPhotoBusy:!!s.charPhotoBusy,
       players, readyCount, total:s.players.length, clocksAll, log:s.log, npcs, clues,
       startSessionDisabled:!startGate.ok||s.startBusy, startBlockReason:startGate.reason, startSessionLabel:/^Pausada/.test(((this._activeTableRow()||{}).status)||'')?'▸ Retomar RPG':'▸ Iniciar RPG', startSessionBg:!startGate.ok?'#26242c':sessTheme.acc, startSessionCol:!startGate.ok?'#6f6b61':'#0b0b10', startSessionCursor:!startGate.ok?'not-allowed':'pointer',
       tableCode, lobbyInviteLink:`https://afterdark-rpg.netlify.app/?code=${tableCode}`, lobbyNoAuth:!s.auth.loggedIn,
