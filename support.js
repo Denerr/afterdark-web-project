@@ -340,9 +340,24 @@
   function kebabToCamel(s) {
     return s.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
   }
+  // Separa as declaracoes por ";" fora de parenteses e aspas: url(data:image/jpeg;base64,...)
+  // tem ";" dentro e era cortado ao meio (a foto do personagem sumia da moldura).
+  function splitDecls(css) {
+    const out = []; let depth = 0, q = "", cur = "";
+    for (const ch of css) {
+      if (q) { if (ch === q) q = ""; }
+      else if (ch === '"' || ch === "'") q = ch;
+      else if (ch === "(") depth++;
+      else if (ch === ")") depth = Math.max(0, depth - 1);
+      else if (ch === ";" && depth === 0) { out.push(cur); cur = ""; continue; }
+      cur += ch;
+    }
+    out.push(cur);
+    return out;
+  }
   function cssToObj(css) {
     const o = {};
-    for (const decl of css.split(";")) {
+    for (const decl of splitDecls(css)) {
       const i = decl.indexOf(":");
       if (i < 0) continue;
       const prop = decl.slice(0, i).trim();
