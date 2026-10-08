@@ -1218,7 +1218,7 @@
           <!-- MAP -->
           <sc-if value="{{ centerIsMapa }}">
             <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:14px">
-              <div style="position:relative;height:440px;border-radius:9px;overflow:hidden;background:radial-gradient(80% 80% at 50% 40%, #1a1622, #0c0a10);border:1px solid rgba(198,166,100,.15)">
+              <div style="position:relative;width:100%;aspect-ratio:3 / 2;max-height:440px;min-height:200px;border-radius:9px;overflow:hidden;background:radial-gradient(80% 80% at 50% 40%, #1a1622, #0c0a10);border:1px solid rgba(198,166,100,.15)">
                 <sc-if value="{{ pMap.hasMap }}">
                   <div role="img" aria-label="Mapa: {{ pMapName }}" style="position:absolute;inset:0;width:100%;height:100%;background:#0c0a10;background-image: {{ pMap.bg }};background-size:contain;background-repeat:no-repeat;background-position:center"></div>
                   <sc-if value="{{ pMap.loading }}"><div role="status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8d887c;background:rgba(8,8,12,.4)">Carregando mapa…</div></sc-if>
@@ -5155,7 +5155,7 @@ class Component extends DCLogic {
       onClueName:e=>this.setContentField('clue','name',e.target.value), onClueTxt:e=>this.setContentField('clue','txt',e.target.value), onClueNotes:e=>this.setContentField('clue','notes',e.target.value),
       onSceneTitle:e=>this.setContentField('scene','title',e.target.value), onSceneDesc:e=>this.setContentField('scene','desc',e.target.value), onSceneNotes:e=>this.setContentField('scene','notes',e.target.value),
       onSceneMap:e=>this.setContentField('scene','mapId',e.target.value), onSceneShared:e=>this.setContentField('scene','shared',!!e.target.checked),
-      sceneMapOptions:[{id:'',name:'Sem mapa'},...this.MAPS.map(m=>({id:m.id,name:m.name}))].map(m=>({...m,sel:((s.sceneForm||{}).mapId||'')===m.id})),
+      sceneMapOptions:[{id:'',name:'Sem mapa'},...this.MAPS.filter(m=>!s.oneshot||!m.oneshot||m.oneshot===s.oneshot||m.id===((s.sceneForm||{}).mapId)).map(m=>({id:m.id,name:m.name}))].map(m=>({...m,sel:((s.sceneForm||{}).mapId||'')===m.id})),
       noMapsYet:this.MAPS.length===0,
       scenePresentOpts:s.sceneForm?[...s.players.filter(p=>p.char&&p.char!=='—').map(p=>({kind:'pc',id:p.id,label:p.char+' (jogador)'})),...s.npcs.map(n=>({kind:'npc',id:n.id,label:n.name+' (NPC)'}))]
         .map(o=>({...o,on:(s.sceneForm.present||[]).some(p=>p.kind===o.kind&&p.id===o.id),onToggle:()=>this.toggleScenePresent(o.kind,o.id)})):[],
