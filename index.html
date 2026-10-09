@@ -39,6 +39,7 @@
 <script src="src/data/themes.js"></script>
 <script src="src/data/equipment.js"></script>
 <script src="src/data/maps.js"></script>
+<script src="src/data/clock_images.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 </helmet>
@@ -577,6 +578,17 @@
               <input value="{{ clockDraft.name }}" onInput="{{ onClockName }}" placeholder="Ex.: O ritual se completa" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px"/>
               <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:5px">Descrição (aparece no aviso de conclusão)</label>
               <textarea value="{{ clockDraft.desc }}" onInput="{{ onClockDesc }}" rows="2" placeholder="O que acontece quando ele se completa" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Imagem da conclusão (fundo do aviso)</label>
+              <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px">
+                <div role="img" aria-label="Prévia da imagem da conclusão" style="width:96px;height:64px;flex-shrink:0;border-radius:6px;background:#0c0b11;border:1px solid rgba(255,255,255,.12);overflow:hidden"><div style="width:100%;height:100%;background: {{ clockImgBg }}"></div></div>
+                <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+                  <label style="position:relative;padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Enviar imagem<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange="{{ onClockImg }}" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"/></label>
+                  <button onClick="{{ clockAcervo }}" style="padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Escolher do acervo</button>
+                  <sc-if value="{{ clockHasImg }}"><button onClick="{{ clockRemoveImg }}" style="align-self:flex-start;padding:4px 0;background:transparent;border:none;color:#a39e90;font-size:11px;cursor:pointer;text-decoration:underline">Usar o padrão do tipo</button></sc-if>
+                  <span style="font-size:11px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic">Sem imagem própria, o aviso usa a do tipo (quando houver) ou o fundo atual.</span>
+                </div>
+              </div>
+              <sc-if value="{{ clockHasImgErr }}"><div role="alert" style="font-size:12px;color:#e08a8a;margin:-4px 0 10px">{{ clockImgErr }}</div></sc-if>
               <div style="font-size:10px;color:#7e7a70;margin-bottom:6px;letter-spacing:.04em">Sugestões</div>
               <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
                 <sc-for list="{{ clockSuggestions }}" as="g" hint-placeholder-count="4"><button onClick="{{ g.onClick }}" style="font-size:11px;color:#cdc6b6;background:#16141c;border:1px solid {{ g.col }}44;border-radius:14px;padding:5px 10px;cursor:pointer" style-hover="border-color:{{ g.col }}">{{ g.name }}</button></sc-for>
@@ -1700,6 +1712,7 @@
 <div style="position:fixed;inset:0;z-index:80;display:flex;align-items:center;justify-content:center;padding:30px;background:rgba(6,6,10,.92);backdrop-filter:blur(6px);animation:fadeIn .4s ease">
   <div style="width:100%;max-width:680px;border-radius:12px;overflow:hidden;border:1px solid {{ sceneAccBorder }};box-shadow:0 40px 120px rgba(0,0,0,.7)">
     <div style="height:280px;position:relative;background:radial-gradient(90% 120% at 50% 0%, {{ sceneSurf }}, #08080c)">
+      <sc-if value="{{ hasPopupBg }}"><div role="img" aria-label="Imagem do aviso" style="position:absolute;inset:0;background: {{ popupBg }}"></div><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,12,.4),rgba(8,8,12,.85))"></div></sc-if>
       <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 30%, {{ sceneGlow }}, transparent 70%);animation:glowPulse 4s ease-in-out infinite"></div>
       <div style="position:absolute;left:0;right:0;bottom:0;padding:30px 34px;background:linear-gradient(180deg,transparent,rgba(8,8,12,.92))">
         <div style="font-size:11px;letter-spacing:.24em;text-transform:uppercase;color: {{ sceneAcc }};margin-bottom:10px">{{ sceneMode.title }}</div>
@@ -2059,7 +2072,7 @@ class Component extends DCLogic {
     clocks:[],
     sessionStale:false, clockBump:{}, groupOpenId:null, actionErrors:{},
     activeTableId:null, saveStatus:'idle', saveError:'', reconnected:false, statusBusy:false, tableStatus:null, tableGone:false, accountLib:null,
-    clockDraft:{name:'',desc:'',seg:8,type:'Investigação',scope:'mesa',playerId:'',visMode:'todos'}, showClockForm:false,
+    clockDraft:{name:'',desc:'',imageId:null,seg:8,type:'Investigação',scope:'mesa',playerId:'',visMode:'todos'}, showClockForm:false,
     stressBars:[],
     stressDraft:{playerId:'',name:'',max:4,clockId:'',vis:'titular'}, showStressForm:false,
     library:{weapons:[],items:[]},
@@ -3498,17 +3511,32 @@ class Component extends DCLogic {
     let clocks=s.clocks;
     if(clockId){
       const c=s.clocks.find(x=>x.id===clockId); if(c){ const r=this._clockStep(c,delta); clocks=s.clocks.map(x=>x.id===clockId?r.clk:x);
-        if(r.completed){ ev={id:'ev'+this._uuid().replace(/-/g,''),clockId,name:r.clk.name,desc:r.clk.desc||'',type:r.clk.type,at:new Date().toISOString(),aud:r.clk.vis==='mestre'?'mestre':r.clk.vis}; } }
+        if(r.completed){ ev={id:'ev'+this._uuid().replace(/-/g,''),kind:'complete',clockId,name:r.clk.name,desc:r.clk.desc||'',imageId:r.clk.imageId||null,type:r.clk.type,fill:r.clk.fill,seg:r.clk.seg,at:new Date().toISOString(),aud:r.clk.vis==='mestre'?'mestre':r.clk.vis}; }
+        else if(r.revealed){ ev={id:'ev'+this._uuid().replace(/-/g,''),kind:'reveal',clockId,name:r.clk.name,type:r.clk.type,fill:r.clk.fill,seg:r.clk.seg,at:new Date().toISOString(),aud:r.clk.vis==='jogador'?'jogador':'todos'}; } }
     }
-    this.setState({stressBars:bars,clocks,log:[...logs,...s.log],clockEvents:ev?[...(s.clockEvents||[]),ev].slice(-40):(s.clockEvents||[])});
+    this.setState({stressBars:bars,clocks,log:[...logs,...s.log],clockEvents:ev?[...(s.clockEvents||[]),ev].slice(-300):(s.clockEvents||[])});
     if(ev) this._onClockCompleted(ev);
   }
-  _evPopup(ev,who){ return {key:ev.id,who,title:'Relógio Concluído',sub:ev.name||'Relógio',acc:this.CLOCK_THEME[ev.type]||'#c6a35e',text:(ev.desc&&String(ev.desc).trim())||this.clockEvent({type:ev.type})}; }
+  // Plano final, Etapa 3: aviso de revelacao (sem conclusao) separado do de conclusao; a
+  // conclusao pode ter imagem de fundo (do relogio, senao a padrao do tipo, senao a atual).
+  _evPopup(ev,who){
+    const acc=this.CLOCK_THEME[ev.type]||'#c6a35e';
+    if(ev.kind==='reveal') return {key:ev.id,who,kind:'reveal',title:'Relógio revelado',sub:ev.name||'Relógio',acc,
+      text:`Este relógio agora é visível ao grupo.${ev.seg?` Progresso: ${ev.fill||0} de ${ev.seg}.`:''}`};
+    return {key:ev.id,who,kind:'complete',title:'Relógio Concluído',sub:ev.name||'Relógio',acc,imageId:ev.imageId||null,type:ev.type,
+      text:(ev.desc&&String(ev.desc).trim())||this.clockEvent({type:ev.type})};
+  }
+  _popupBg(sm){
+    if(!sm||sm.kind!=='complete') return null;
+    const own=sm.imageId?this._mediaBg(sm.imageId,'cover'):null; if(own) return own;
+    const d=((window.AfterdarkData||{}).clockImages||{})[sm.type];
+    return d?`center/cover no-repeat url("${d}")`:null;
+  }
   // Mestre: pop-up da conclusao + pista de investigacao (como antes). A regra antiga
   // "relogio completo aumenta o estresse" saiu (decisao de 08/10/2026).
   _onClockCompleted(ev){
     this.setState(s=>({evQueue:s.evQueue.some(x=>x.key===ev.id)?s.evQueue:[...s.evQueue,this._evPopup(ev,'mestre')]}));
-    if(ev.type==='Investigação') this.revealNextClue(ev.name);
+    if(ev.kind!=='reveal'&&ev.type==='Investigação') this.revealNextClue(ev.name);
   }
   // Jogador: avisos pendentes vem do banco; ciencia gravada por participante.
   _enqueuePlayerEvents(list){
@@ -3705,7 +3733,7 @@ class Component extends DCLogic {
   createClock(){ return this.saveClock(); }
   editClock(id){
     const c0=this.state.clocks.find(x=>x.id===id); if(!c0) return; const c=this._normClock(c0);
-    this.setState({clockEditId:id,showClockForm:true,clockDraft:{name:c.name||'',desc:c.desc||'',seg:c.seg,type:c.type||'Investigação',scope:c.scope,playerId:c.playerId||'',visMode:c.visMode}});
+    this.setState({clockEditId:id,showClockForm:true,clockDraft:{name:c.name||'',desc:c.desc||'',imageId:c.imageId||null,seg:c.seg,type:c.type||'Investigação',scope:c.scope,playerId:c.playerId||'',visMode:c.visMode}});
   }
   cancelClockEdit(){ this.setState(s=>({clockEditId:null,showClockForm:false,clockDraft:{...s.clockDraft,name:'',desc:''}})); }
   async saveClock(){
@@ -3719,10 +3747,11 @@ class Component extends DCLogic {
       const vis=(vm==='mestre'||vm==='completar'||vm==='avancar'||vm==='parcial')?'mestre':(vm==='jogador'?'jogador':'todos');
       // revealDone=false so nos modos de gatilho: eles ainda vao revelar sozinhos.
       const porGatilho=(vm==='avancar'||vm==='completar'||vm==='parcial');
-      const clk={id:'c'+Date.now(),name,desc,type:d.type,seg,fill:0,vis,scope,visMode:vm,
+      const clk={id:'c'+Date.now(),name,desc,imageId:d.imageId||null,type:d.type,seg,fill:0,vis,scope,visMode:vm,
         playerId:scope==='player'?(d.playerId||''):null,revealDone:!porGatilho};
-      this.setState(st=>({clocks:[...st.clocks,clk],showClockForm:false,clockDraft:{...st.clockDraft,name:'',desc:''},log:[{icon:'◷',t:'Relógio',txt:`Novo relógio criado: "${name}".`,vis:'mestre'},...st.log]}));
+      this.setState(st=>({clocks:[...st.clocks,clk],showClockForm:false,clockDraft:{...st.clockDraft,name:'',desc:'',imageId:null},log:[{icon:'◷',t:'Relógio',txt:`Novo relógio criado: "${name}".`,vis:'mestre'},...st.log]}));
     } else {
+      let editReveal=null;
       this.setState(st=>({clocks:st.clocks.map(c0=>{
         if(c0.id!==editId) return c0;
         const c=this._normClock(c0);
@@ -3735,9 +3764,11 @@ class Component extends DCLogic {
           // ja revelado: continua revelado (nao some por trocar o modo)
         }
         const fill=Math.min(seg,c.fill);
-        if(!revealDone&&vis==='mestre'&&((vm==='parcial'&&fill>=Math.ceil(seg/2))||(vm==='completar'&&fill>=seg))){ vis=scope==='player'?'jogador':'todos'; revealDone=true; }
-        return {...c,name,desc,type:d.type,seg,fill,visMode:vm,scope,playerId:scope==='player'?(d.playerId||c.playerId||''):null,vis,revealDone};
-      }),clockEditId:null,showClockForm:false,clockDraft:{...st.clockDraft,name:'',desc:''}}));
+        if(!revealDone&&vis==='mestre'&&((vm==='parcial'&&fill>=Math.ceil(seg/2))||(vm==='completar'&&fill>=seg))){ vis=scope==='player'?'jogador':'todos'; revealDone=true;
+          editReveal={id:'ev'+this._uuid().replace(/-/g,''),kind:'reveal',clockId:c.id,name,type:d.type,fill,seg,at:new Date().toISOString(),aud:vis,playerId:scope==='player'?(d.playerId||c.playerId||null):null}; }
+        return {...c,name,desc,imageId:d.imageId||null,type:d.type,seg,fill,visMode:vm,scope,playerId:scope==='player'?(d.playerId||c.playerId||''):null,vis,revealDone};
+      }),clockEditId:null,showClockForm:false,clockDraft:{...st.clockDraft,name:'',desc:'',imageId:null}}));
+      if(editReveal) this.setState(st=>({clockEvents:[...(st.clockEvents||[]),editReveal].slice(-300)}));
     }
     const tid=this.state.activeTableId;
     if(this._canSaveRemote(tid)){ const sv=await this._flushSave(tid); if(!sv.ok) this._flashActionError('Não foi possível salvar o relógio agora. Ele continua aqui e será salvo quando a conexão voltar.'); }
@@ -4257,13 +4288,25 @@ class Component extends DCLogic {
     catch(err){ this.setContentField('npc','imgErr',this._photoErrMsg(new Error('formato'))); return; }
     await this._setFormImage('npc',url,'contain',(this.state.npcForm.name||'NPC'));
   }
+  _formKey(kind){ return kind==='clock'?'clockDraft':kind+'Form'; }
+  _formPatch(kind,patch){ const k=this._formKey(kind); this.setState(st=>st[k]?{[k]:{...st[k],...patch}}:st); }
   async _setFormImage(kind,url,fit,name){
-    this.setState({imgBusy:true}); this.setContentField(kind,'imgErr','');
-    try{ const id=await this._uploadMedia(kind,name,url); this.setState(st=>({[kind+'Form']:st[kind+'Form']?{...st[kind+'Form'],imageId:id,imageFit:fit}:st[kind+'Form']})); return true; }
-    catch(err){ this.setContentField(kind,'imgErr',/media_too_large/.test(err.message)?'Imagem grande demais mesmo depois de reduzida.':'Não foi possível enviar a imagem. A anterior foi mantida — tente de novo.'); return false; }
+    this.setState({imgBusy:true}); this._formPatch(kind,{imgErr:''});
+    try{ const id=await this._uploadMedia(kind,name,url); this._formPatch(kind,{imageId:id,imageFit:fit}); return true; }
+    catch(err){ this._formPatch(kind,{imgErr:/media_too_large/.test(err.message)?'Imagem grande demais mesmo depois de reduzida.':'Não foi possível enviar a imagem. A anterior foi mantida — tente de novo.'}); return false; }
     finally{ this.setState({imgBusy:false}); }
   }
-  removeFormImage(kind){ this.setState(st=>({[kind+'Form']:st[kind+'Form']?{...st[kind+'Form'],imageId:null,imageFit:null}:null})); }
+  removeFormImage(kind){ this._formPatch(kind,{imageId:null,imageFit:null}); }
+  // imagem de fundo (aviso de conclusao, imagem de cena): cobre o quadro, ate 1280 px
+  async onBgImage(e,kind){
+    const f=e&&e.target&&e.target.files&&e.target.files[0]; if(e&&e.target) e.target.value='';
+    if(!f) return;
+    if(!/^image\/(jpeg|png|webp|gif)$/.test(f.type||'')||f.size>15*1024*1024){ this._formPatch(kind,{imgErr:this._photoErrMsg(new Error(f.size>15*1024*1024?'grande':'formato'))}); return; }
+    let url; try{ const raw=await new Promise((res,rej)=>{ const rd=new FileReader(); rd.onerror=rej; rd.onload=()=>res(rd.result); rd.readAsDataURL(f); }); url=await this._shrinkImage(raw,1280,0.82); }
+    catch(err){ this._formPatch(kind,{imgErr:this._photoErrMsg(new Error('formato'))}); return; }
+    const f0=this.state[this._formKey(kind)]||{};
+    await this._setFormImage(kind,url,'cover',f0.name||f0.title||kind);
+  }
   async openAcervo(kind){
     this.setState({acervo:{kind,items:[],state:'loading'}});
     try{ const {data,error}=await this.sb.rpc('master_media_list',{p_kind:null}); if(error) throw error;
@@ -4271,7 +4314,7 @@ class Component extends DCLogic {
     catch(e){ this.setState(st=>st.acervo?{acervo:{...st.acervo,state:'error'}}:st); }
   }
   pickAcervo(item){ const a=this.state.acervo; if(!a) return; const fit=a.kind==='npc'?(item.width&&item.height&&item.width===item.height?'cover':'contain'):'cover';
-    this.setState(st=>({acervo:null,[a.kind+'Form']:st[a.kind+'Form']?{...st[a.kind+'Form'],imageId:item.id,imageFit:fit}:st[a.kind+'Form']})); }
+    this.setState({acervo:null}); this._formPatch(a.kind,{imageId:item.id,imageFit:fit}); }
   // ---- editor de foto: enquadrar (arrastar), zoom (controle, botoes, roda, pinca), girar ----
   // A moldura e redonda; a imagem sempre cobre o quadro (sem bordas vazias). Resultado:
   // quadrado 320 px em JPEG, salvo so ao confirmar.
@@ -4910,7 +4953,7 @@ class Component extends DCLogic {
       ? `${narrName} caminha por Saint Vesper sem dons sobrenaturais — apenas razão, leitura social e teimosia. Onde outros sentem o oculto, ${narrName.split(' ')[0]} precisa de provas, e é justamente por isso que costuma encontrá-las primeiro.`
       : `${narrName} é alguém marcado por uma ${sensInfo.label.toLowerCase()} que se manifesta como ${narrManif}. Percebe o que as pessoas não dizem — e paga por isso com as fraquezas que escolheu carregar.`) : '';
 
-    const evTop=s.evQueue[0]||null; const sm=s.sceneMode||evTop; const sceneAcc=sm?sm.acc:'#c6a35e'; const sceneSurf=sm&&sm.surf?sm.surf:'#241420'; const sceneGlow=sm&&sm.glow?sm.glow:(sceneAcc+'55');
+    const evTop=s.evQueue[0]||null; const sm=s.sceneMode||evTop; const sceneAcc=sm?sm.acc:'#c6a35e'; const sceneSurf=sm&&sm.surf?sm.surf:'#241420'; const popupBg=this._popupBg(sm); const sceneGlow=sm&&sm.glow?sm.glow:(sceneAcc+'55');
     const fld=(k)=>(e)=>this.setWiz(k,e.target.value);
 
     // ---- auth / profile ----
@@ -5279,7 +5322,7 @@ class Component extends DCLogic {
       topMesasBg:(screen==='profile'&&s.profileTab==='mesas')?'rgba(198,163,94,.16)':'transparent', topMesasCol:(screen==='profile'&&s.profileTab==='mesas')?'#e9e3d4':'#cfc7b4',
       topPersBg:(screen==='profile'&&s.profileTab==='personagens')?'rgba(198,163,94,.16)':'transparent', topPersCol:(screen==='profile'&&s.profileTab==='personagens')?'#e9e3d4':'#cfc7b4',
       topProfileBg:screen==='profile'?'rgba(198,163,94,.16)':'transparent', topProfileCol:screen==='profile'?'#e9e3d4':'#cfc7b4',
-      sceneMode:sm, hasScene:!!sm, evQueueMore:(!s.sceneMode&&s.evQueue.length>1)?`+${s.evQueue.length-1} aviso${s.evQueue.length>2?'s':''} na fila`:'', hasEvQueueMore:!s.sceneMode&&s.evQueue.length>1, sceneAcc, sceneSurf, sceneGlow, sceneAccBorder:sceneAcc+'55',
+      sceneMode:sm, hasScene:!!sm, popupBg:popupBg||'none', hasPopupBg:!!popupBg, evQueueMore:(!s.sceneMode&&s.evQueue.length>1)?`+${s.evQueue.length-1} aviso${s.evQueue.length>2?'s':''} na fila`:'', hasEvQueueMore:!s.sceneMode&&s.evQueue.length>1, sceneAcc, sceneSurf, sceneGlow, sceneAccBorder:sceneAcc+'55',
       setHomeA:()=>this.setHomeVar('A'), setHomeB:()=>this.setHomeVar('B'),
       goMestre:()=>this.pickRole('mestre'), goJogador:()=>this.pickRole('jogador'), goMyTables:()=>this.goMyTables(),
       back:()=>this.back(), reset:()=>this.reset(),
@@ -5304,7 +5347,10 @@ class Component extends DCLogic {
       // clock form
       showClockForm:s.showClockForm, toggleClockForm:()=>this.toggleClockForm(),
       clockFormBtnLabel:s.showClockForm?'✕ Fechar':'＋ Criar relógio', clockFormBtnCol:s.showClockForm?'#c44a5e':'#e0c179',
-      clockDraft:cd, onClockDesc:(e)=>this.setClockDraft('desc',e.target.value), clockEditing:!!s.clockEditId, clockSaveLabel:s.clockEditId?'Salvar alterações':'Criar relógio', cancelClockEdit:()=>this.cancelClockEdit(),
+      clockDraft:cd, onClockDesc:(e)=>this.setClockDraft('desc',e.target.value),
+      clockImgBg:this._mediaBg(cd.imageId,'cover')||'none', clockHasImg:!!cd.imageId, clockImgErr:cd.imgErr||'', clockHasImgErr:!!cd.imgErr,
+      clockTypeDefault:!!(((window.AfterdarkData||{}).clockImages||{})[cd.type]),
+      onClockImg:e=>this.onBgImage(e,'clock'), clockAcervo:()=>this.openAcervo('clock'), clockRemoveImg:()=>this.removeFormImage('clock'), clockEditing:!!s.clockEditId, clockSaveLabel:s.clockEditId?'Salvar alterações':'Criar relógio', cancelClockEdit:()=>this.cancelClockEdit(),
       onClockName:(e)=>this.setClockDraft('name',e.target.value), onClockType:(e)=>this.setClockDraft('type',e.target.value),
       clockSuggestions, segOptions, clockTypes, visModeOptions,
       onClockScopeMesa:()=>this.setClockDraft('scope','mesa'), onClockScopePlayer:()=>this.setClockDraft('scope','player'), onClockPlayer:(e)=>this.setClockDraft('playerId',e.target.value),
