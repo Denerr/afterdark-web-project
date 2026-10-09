@@ -18,7 +18,10 @@
           <p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:0">{{ sc.sensLabel }} — usar esta ficha</p>
         </div>
       </sc-for>
-      <sc-if value="{{ noSavedChars }}">
+      <sc-if value="{{ charsLoading }}"><div role="status" style="background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:18px 22px"><div style="font-size:15px;color:#a39e90">Carregando seus personagens…</div></div></sc-if>
+      <sc-if value="{{ charsError }}"><div role="alert" style="background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:18px 22px"><div style="font-size:15px;color:#e08a8a;margin-bottom:8px">Não foi possível carregar seus personagens.</div><button onClick="{{ retryChars }}" style="padding:9px 14px;min-height:40px;background:transparent;border:1px solid rgba(198,166,100,.45);border-radius:4px;color:#e0c179;font-size:12px;cursor:pointer">Tentar de novo</button></div></sc-if>
+      <sc-if value="{{ charsLoggedOut }}"><div style="background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:18px 22px"><div style="font-size:15px;color:#cdc6b6;margin-bottom:4px">↺ Usar um personagem salvo</div><p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:0 0 10px">Seus personagens ficam na sua conta. Entre para escolher um deles — sua entrada nesta mesa é mantida.</p><button onClick="{{ charsLogin }}" style="padding:9px 14px;min-height:40px;background:transparent;border:1px solid rgba(198,166,100,.45);border-radius:4px;color:#e0c179;font-size:12px;cursor:pointer">Entrar na conta</button></div></sc-if>
+      <sc-if value="{{ charsEmpty }}">
         <div style="background:#0f0e13;border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:18px 22px;opacity:.5">
           <div style="font-size:15px;color:#6f6b61;margin-bottom:3px">↺ Selecionar personagem existente</div>
           <p style="font-family:'Cormorant Garamond';font-size:15px;color:#6f6b61;margin:0">Você ainda não tem fichas salvas.</p>

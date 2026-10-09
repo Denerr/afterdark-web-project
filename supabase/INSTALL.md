@@ -23,7 +23,8 @@ As migrações são **incrementais e dependentes de ordem**. Algumas corrigem po
 14. migration_identity.sql                  <- Pós-sessão Etapa 0: identidade e aba Mesas
 15. migration_equipment_photo.sql           <- Pós-sessão Etapa 1: equipamento e foto
 16. migration_scenes.sql                    <- Pós-sessão Etapa 2: NPCs, pistas e cenas
-17. migration_clocks_stress.sql             <- Pós-sessão Etapas 3 e 4: estresse, penalidades, relógios (último)
+17. migration_clocks_stress.sql             <- Pós-sessão Etapas 3 e 4: estresse, penalidades, relógios
+18. migration_final_pause.sql               <- Plano final Etapa 1: pausa bloqueia ações da mesa (último)
 ```
 
 Todas são idempotentes: rodar de novo não duplica objeto.
@@ -44,7 +45,7 @@ cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql \
     migration_archive_table.sql migration_profiles.sql \
     migration_requests_consequences.sql migration_rls_p2.sql \
     migration_player_projection.sql migration_session_persistence.sql \
-    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql migration_scenes.sql migration_clocks_stress.sql > /tmp/all.sql
+    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql migration_scenes.sql migration_clocks_stress.sql migration_final_pause.sql > /tmp/all.sql
 
 docker cp /tmp/all.sql adpg:/tmp/all.sql
 docker exec adpg psql -U postgres -q -f /tmp/all.sql
@@ -101,6 +102,10 @@ tabela fechada `_ad_session_ops` (idempotência), a regra `_ad_clock_step` e as 
 `player_get_state`/`player_get_session` (só ganham campos: penalidades próprias e avisos
 de conclusão pendentes). **Ordem: aplicar ANTES do deploy** (o site novo avança relógio e
 estresse por `master_clock_op`).
+
+Para um banco que já tem a `migration_clocks_stress.sql`, basta `migration_final_pause.sql`
+(Plano final, Etapa 1): com a mesa pausada ou encerrada, o jogador não responde testes nem
+pega/larga equipamento (erro `table_paused`). Lobby e Mestre não são afetados. Ordem livre.
 
 O índice `table_members_one_per_account` (uma participação por conta e mesa) só é criado
 quando não há duplicata. Havendo, a migração termina com um WARNING e não cria o índice:

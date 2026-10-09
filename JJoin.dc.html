@@ -13,6 +13,12 @@
     <sc-if value="{{ hasJoinError }}"><p style="font-size:12px;color:#e08a8a;margin:0 0 12px;text-align:center">{{ joinError }}</p></sc-if>
     <sc-if value="{{ !hasJoinError }}"><div style="height:20px"></div></sc-if>
     <button onClick="{{ toName }}" disabled="{{ joinBusy }}" style="width:100%;padding:14px;background:{{ joinBtnBg }};color:{{ joinBtnCol }};border:none;border-radius:3px;font:700 12px 'Archivo';letter-spacing:.16em;text-transform:uppercase;cursor:{{ joinBtnCursor }};margin-bottom:18px" style-hover="background:#e0c179">{{ joinBtnLabel }}</button>
+    <sc-if value="{{ joinLoggedOut }}">
+      <div style="border:1px solid rgba(198,166,100,.25);border-radius:8px;padding:12px 14px;margin:0 0 18px;background:rgba(198,166,100,.06)">
+        <p style="font-size:13px;line-height:1.5;color:#cdc6b6;margin:0 0 8px">Já jogou nesta mesa com sua conta? Entre na conta antes para recuperar a mesma ficha.</p>
+        <button onClick="{{ joinLoginFirst }}" style="padding:9px 14px;min-height:40px;background:transparent;border:1px solid rgba(198,166,100,.45);border-radius:4px;color:#e0c179;font-size:12px;cursor:pointer">Entrar na conta</button>
+      </div>
+    </sc-if>
     <sc-if value="{{ joinConflictShow }}">
       <div role="alert" style="border:1px solid rgba(210,162,58,.3);border-radius:8px;padding:14px;margin:0 0 18px;background:rgba(210,162,58,.07)">
         <p style="font-size:13px;line-height:1.5;color:#e9e3d4;margin:0 0 10px">Você já tem uma ficha em <b>{{ joinConflictTable }}</b> pela sua conta, e este navegador guarda outra, de quando entrou sem conta. Nenhuma das duas será apagada. Com qual quer entrar?</p>

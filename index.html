@@ -43,6 +43,12 @@
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 </helmet>
 
+<sc-if value="{{ resumeFailed }}">
+  <div role="alert" style="position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:94;max-width:420px;width:calc(100% - 28px);background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:8px;padding:12px 14px;box-shadow:0 18px 50px rgba(0,0,0,.6);display:flex;align-items:center;gap:12px">
+    <span style="font-size:13px;color:#e9e3d4;flex:1">Não foi possível reabrir sua mesa agora. Sua ficha continua salva.</span>
+    <button onClick="{{ retryResume }}" style="padding:8px 12px;min-height:40px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:5px;color:#e0c179;font-size:12px;cursor:pointer">Tentar de novo</button>
+  </div>
+</sc-if>
 <sc-if value="{{ hasActionError }}">
   <div style="position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:95;max-width:420px;width:calc(100% - 28px);background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:8px;padding:13px 16px;box-shadow:0 18px 50px rgba(0,0,0,.6);animation:slideDown .3s ease;display:flex;align-items:center;gap:10px">
     <span style="font-size:15px;color:#e08a8a;flex-shrink:0">⚠</span>
@@ -1085,7 +1091,7 @@
 
 <!-- ========================= JOGADOR · ENTRAR ========================= -->
 <sc-if value="{{ isJJoin }}" data-screen-label="Jogador Entrar">
-<dc-import name="JJoin" joinTables="{{ joinTables }}" hasJoinTables="{{ hasJoinTables }}" joinConflictShow="{{ joinConflictShow }}" joinConflictTable="{{ joinConflictTable }}" joinConflictAcc="{{ joinConflictAcc }}" joinConflictLoc="{{ joinConflictLoc }}" joinConflictHasLoc="{{ joinConflictHasLoc }}" chooseConflictAcc="{{ chooseConflictAcc }}" chooseConflictLoc="{{ chooseConflictLoc }}" joinCode="{{ joinCode }}" onJoinCode="{{ onJoinCode }}" joinInputBorder="{{ joinInputBorder }}" hasJoinError="{{ hasJoinError }}" joinError="{{ joinError }}" joinBusy="{{ joinBusy }}" joinBtnBg="{{ joinBtnBg }}" joinBtnCol="{{ joinBtnCol }}" joinBtnCursor="{{ joinBtnCursor }}" joinBtnLabel="{{ joinBtnLabel }}" toName="{{ toName }}"/>
+<dc-import name="JJoin" joinLoggedOut="{{ joinLoggedOut }}" joinLoginFirst="{{ joinLoginFirst }}" joinTables="{{ joinTables }}" hasJoinTables="{{ hasJoinTables }}" joinConflictShow="{{ joinConflictShow }}" joinConflictTable="{{ joinConflictTable }}" joinConflictAcc="{{ joinConflictAcc }}" joinConflictLoc="{{ joinConflictLoc }}" joinConflictHasLoc="{{ joinConflictHasLoc }}" chooseConflictAcc="{{ chooseConflictAcc }}" chooseConflictLoc="{{ chooseConflictLoc }}" joinCode="{{ joinCode }}" onJoinCode="{{ onJoinCode }}" joinInputBorder="{{ joinInputBorder }}" hasJoinError="{{ hasJoinError }}" joinError="{{ joinError }}" joinBusy="{{ joinBusy }}" joinBtnBg="{{ joinBtnBg }}" joinBtnCol="{{ joinBtnCol }}" joinBtnCursor="{{ joinBtnCursor }}" joinBtnLabel="{{ joinBtnLabel }}" toName="{{ toName }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · NOME ========================= -->
@@ -1095,7 +1101,7 @@
 
 <!-- ========================= JOGADOR · ESCOLHER PERSONAGEM ========================= -->
 <sc-if value="{{ isJChar }}" data-screen-label="Jogador Personagem">
-<dc-import name="JChar" toWizard="{{ toWizard }}" savedCharsForJoin="{{ savedCharsForJoin }}" noSavedChars="{{ noSavedChars }}"/>
+<dc-import name="JChar" toWizard="{{ toWizard }}" savedCharsForJoin="{{ savedCharsForJoin }}" noSavedChars="{{ noSavedChars }}" charsLoggedOut="{{ charsLoggedOut }}" charsLoading="{{ charsLoading }}" charsError="{{ charsError }}" retryChars="{{ retryChars }}" charsEmpty="{{ charsEmpty }}" charsLogin="{{ charsLogin }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · MESA PAUSADA / ENCERRADA / INDISPONÍVEL ========================= -->
@@ -1148,6 +1154,21 @@
           <button onClick="{{ openTestFromNotif }}" style="flex:1;min-height:44px;padding:10px;background:#c6a35e;color:#0b0b10;border:none;border-radius:5px;font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer" style-hover="background:#e0c179">Abrir teste</button>
           <button onClick="{{ dismissNotif }}" style="min-height:44px;padding:10px 14px;background:transparent;color:#8d887c;border:1px solid rgba(255,255,255,.12);border-radius:5px;font:500 11px 'Archivo';letter-spacing:.06em;cursor:pointer" style-hover="color:#cfc7b4">Depois</button>
         </div></sc-if>
+      </div>
+    </sc-if>
+
+    <!-- Plano final, Etapa 1: pausa = aviso fixo com saidas; acoes da mesa bloqueadas -->
+    <sc-if value="{{ pausedShow }}">
+      <div role="status" style="display:flex;align-items:center;gap:12px 16px;flex-wrap:wrap;background:linear-gradient(180deg,#1c1810,#13121a);border:1px solid rgba(198,166,100,.4);border-radius:12px;padding:14px 18px;margin-bottom:16px">
+        <span style="font-size:20px;color:#e0c179">❚❚</span>
+        <div style="flex:1;min-width:200px">
+          <div style="font-family:'Cinzel';font-weight:700;font-size:16px;color:#efe8d8">Mesa pausada pelo Mestre</div>
+          <div style="font-family:'Cormorant Garamond';font-size:15px;color:#cdc6b6">As ações da mesa voltam quando ele retomar. Sua participação e sua ficha continuam salvas — você pode sair e voltar pela aba Mesas.</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onClick="{{ pausedGoTables }}" style="padding:10px 14px;min-height:44px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:5px;color:#e0c179;font-size:12px;cursor:pointer">Mesas</button>
+          <button onClick="{{ pausedGoHome }}" style="padding:10px 14px;min-height:44px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#cfc7b4;font-size:12px;cursor:pointer">Tela inicial</button>
+        </div>
       </div>
     </sc-if>
 
@@ -1974,7 +1995,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -2412,6 +2433,12 @@ class Component extends DCLogic {
     this._tsSaveT=this._retryT=this._loadRetryT=null; this._loadedFor=null; this._dirtySince=0;
   }
   componentDidUpdate(){
+    const scr=this.state.screen;
+    if(this._lastScr!==scr){
+      const wasPlayer=/^j_(panel|lobby)$/.test(this._lastScr||''), isPlayer=/^j_(panel|lobby)$/.test(scr);
+      if(wasPlayer&&!isPlayer&&!/^auth_|^connect_gate/.test(scr)){ clearInterval(this._ppoll); clearInterval(this._jsPoll); this._ppoll=this._jsPoll=null; }
+      this._lastScr=scr;
+    }
     if(this.state.screen==='j_wizard'){ clearTimeout(this._wizDraftT); this._wizDraftT=setTimeout(()=>this._saveWizDraft(),400); }
     this._syncParallax();
     if(!this._ready) return;
@@ -2547,8 +2574,13 @@ class Component extends DCLogic {
       if(!saved){ const raw=localStorage.getItem('afterdark:activeMembership'); if(raw) saved=JSON.parse(raw); }
     }catch(e){}
     if(!saved||!saved.tableId||!saved.memberId||!this.sb) return;
-    await this._enterMembership(saved,gen);
+    const r=await this._enterMembership(saved,gen);
+    // falha de rede: nao abre criacao de ficha nem esquece o vinculo; oferece nova tentativa
+    this.setState({resumeFailed:r==='error'});
   }
+  retryResume(){ this.setState({resumeFailed:false}); this._bumpCtx(); this._tryResumeMembership(); }
+  // Convite aberto sem login: entrar na conta ANTES de entrar na mesa recupera a ficha da conta.
+  joinLoginFirst(){ const c=this._normCode(this.state.joinCode); if(c) this._setPendingCode(c); this.goLogin(); }
   // Entra num vinculo ja existente, validado pelo banco. Devolve 'ok', 'gone' (o banco
   // recusou: removido/mesa excluida), 'error' (rede) ou 'stale' (outro contexto escolhido).
   async _enterMembership(saved,gen){
@@ -2860,13 +2892,22 @@ class Component extends DCLogic {
   }
   async _loadUserData(){
     if(!this.sb) return;
-    const [chars,tbls]=await Promise.all([
+    // Plano final, Etapa 1: carregando / erro / vazio sao estados diferentes (antes, a escolha
+    // de personagem dizia "voce nao tem fichas" enquanto a lista ainda carregava).
+    this.setState({charsState:'loading'});
+    let chars,tbls;
+    const seq=(this._udSeq=(this._udSeq||0)+1);
+    // a biblioteca refaz a consulta sozinha quando a rede cai; depois de 8 s vira erro visivel
+    const tmo=new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),8000));
+    try{ [chars,tbls]=await Promise.race([tmo,Promise.all([
       this.sb.from('characters').select('*').order('created_at',{ascending:true}),
       this.sb.from('tables').select('id,name,type,faction,theme,status,invite_code,archived,created_at').order('created_at',{ascending:true})
-    ]);
+    ])]); }catch(e){ if(seq===this._udSeq) this.setState({charsState:'error'}); return; }
+    if(seq!==this._udSeq) return;
     this._loadAccountLib();
     this._loadPlayerTables();
-    if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id}))});
+    if(!chars.error) this.setState({characters:(chars.data||[]).map(r=>({...r.data,id:r.id})),charsState:'ok'});
+    else this.setState({charsState:'error'});
     if(!tbls.error) this.setState({tables:(tbls.data||[]).map(r=>({id:r.id,name:r.name,type:r.type,faction:r.faction,theme:r.theme,status:r.status,invite_code:r.invite_code||null,archived:!!r.archived,role:'mestre',target:'m_session'}))});
   }
   componentWillUnmount(){ this._unmounted=true; if(this._onPageHide) window.removeEventListener('pagehide',this._onPageHide); clearInterval(this._ri); clearInterval(this._pi); clearInterval(this._authIv); clearInterval(this._mpoll); clearInterval(this._ppoll); clearInterval(this._jsPoll); if(this._onR) window.removeEventListener('resize',this._onR); if(this._onVis) document.removeEventListener('visibilitychange',this._onVis); this._parallaxDisable(); }
@@ -3953,7 +3994,7 @@ class Component extends DCLogic {
     if(ok||cancelled) this._clearStoredResult(reqId);
     if(ok){ this._resultShownAt=Date.now(); this.setState(st=>({testNotif:st.notifCancelled?st.testNotif:false,pSend:{reqId,state:'sent',msg:''},pending:st.pending&&st.pending.id===reqId?{...st.pending,status:'respondido'}:st.pending})); return; }
     if(cancelled){ this.setState(st=>({pSend:{reqId,state:'cancelled',msg:'O Mestre cancelou este teste.'},pending:st.pending&&st.pending.id===reqId?{...st.pending,status:'cancelado'}:st.pending})); return; }
-    this.setState({pSend:{reqId,state:'error',msg:'Não foi possível enviar o resultado ao Mestre. Ele continua salvo aqui.'}});
+    this.setState({pSend:{reqId,state:'error',msg:this._tablePaused()?'Mesa pausada: o resultado continua salvo aqui e pode ser reenviado quando a sessão voltar.':'Não foi possível enviar o resultado ao Mestre. Ele continua salvo aqui.'}});
   }
   resendPlayerResult(){ const s=this.state, pt=s.pending; if(!pt||!pt.id||!s.pRoll) return; this._submitPlayerResult(pt.id,s.pRoll); }
   _reqToPending(r){ const p=r.params||{}; return {...p,id:r.id,mode:r.kind,status:r.status}; }
@@ -4021,6 +4062,7 @@ class Component extends DCLogic {
   async equipOp(memberId,op,kind,ref,iid){
     const s=this.state; if(!this.sb||!memberId) return;
     const isSelf=memberId===s.memberId;
+    if(isSelf&&this._tablePaused()){ this._flashActionError('Mesa pausada pelo Mestre: as ações da mesa voltam quando ele retomar.','jogador'); return; }
     // a mesma tentativa reaproveita o mesmo iid: se a resposta se perdeu, repetir nao duplica
     this._pendIid=this._pendIid||{};
     const pk=memberId+':'+kind+':'+ref;
@@ -4041,7 +4083,7 @@ class Component extends DCLogic {
     if(error||!data||!data.ok){
       done();
       const m=(error&&error.message)||'';
-      this._flashActionError(/not_in_catalog/.test(m)?'Este item não está mais no catálogo da mesa.':/equipment_full/.test(m)?'Limite de equipamentos deste personagem atingido.':'Não foi possível salvar o equipamento. Nada foi alterado — tente de novo.',isSelf?'jogador':undefined);
+      this._flashActionError(/table_paused/.test(m)?'Mesa pausada pelo Mestre: as ações da mesa voltam quando ele retomar.':/not_in_catalog/.test(m)?'Este item não está mais no catálogo da mesa.':/equipment_full/.test(m)?'Limite de equipamentos deste personagem atingido.':'Não foi possível salvar o equipamento. Nada foi alterado — tente de novo.',isSelf?'jogador':undefined);
       return;
     }
     if(op==='add') delete this._pendIid[pk];
@@ -4375,6 +4417,9 @@ class Component extends DCLogic {
   }
   dismissWizRestored(){ this.setState({wizRestored:false}); }
   startCharWizard(){ this.setState({wizReturn:'player',wizStep:1,wiz:{name:this.state.joinName||this.state.auth.name||'',charName:'',age:'',appearance:'',clothes:'',personality:'',origin:'',sens:null,manifest:'',marks:'',weaknesses:[],attrs:{corpo:1,reflexo:1,mente:1,presenca:1,instinto:1,espirito:1},skills:{},history:''}}); this.go('j_wizard'); this._restoreWizDraft(); }
+  // Plano final, Etapa 1: pausa bloqueia acoes da mesa (tambem no banco); navegacao livre.
+  _tablePaused(){ const st=this.state.tableStatus||''; return /^Pausada/.test(st)||st==='Encerrada'; }
+  pausedGoTables(){ if(this.state.auth.loggedIn) this.goMesas(); else this.pickRole('jogador'); }
   async _selectSavedChar(c){
     const s=this.state;
     const charData=this._charDataFromProfile(c);
@@ -5183,7 +5228,15 @@ class Component extends DCLogic {
       pNoMapText:pAct?(pMap.missing?'O mapa desta cena não está disponível.':'Esta cena não tem mapa.'):'O Mestre ainda não mostrou um mapa.',
       playerClocks, hasMyClocks:playerClocks.length>0, sessionStale:s.sessionStale,
       // Ponto 3: status da mesa e conexão (jogador)
-      tblOvShow:(screen==='j_panel'||screen==='j_lobby')&&!!(s.tableGone||s.tableStatus==='Encerrada'||(screen==='j_panel'&&/^Pausada/.test(s.tableStatus||''))),
+      // pausa nao cobre mais a tela: vira um aviso fixo com saidas (menu, mesas, inicio)
+      tblOvShow:(screen==='j_panel'||screen==='j_lobby')&&!!(s.tableGone||s.tableStatus==='Encerrada'),
+      pausedShow:screen==='j_panel'&&/^Pausada/.test(s.tableStatus||'')&&!s.tableGone,
+      pausedGoTables:()=>this.pausedGoTables(), pausedGoHome:()=>this.goHome(),
+      resumeFailed:!!s.resumeFailed&&!/^(j_|m_)/.test(screen), retryResume:()=>this.retryResume(),
+      joinLoggedOut:!s.auth.loggedIn, joinLoginFirst:()=>this.joinLoginFirst(),
+      charsLoggedOut:!s.auth.loggedIn, charsLoading:s.auth.loggedIn&&(s.charsState==='loading'||s.charsState==='idle'),
+      charsError:s.auth.loggedIn&&s.charsState==='error', retryChars:()=>this._loadUserData(),
+      charsEmpty:s.auth.loggedIn&&s.charsState==='ok'&&s.characters.length===0, charsLogin:()=>this.goLogin(),
       tblOvIcon:s.tableGone?'⚠':s.tableStatus==='Encerrada'?'✦':'❚❚',
       tblOvTitle:s.tableGone?'Mesa indisponível':s.tableStatus==='Encerrada'?'Mesa encerrada pelo Mestre':'Mesa pausada pelo Mestre',
       tblOvText:s.tableGone?'Esta mesa não está mais disponível para o seu vínculo.':s.tableStatus==='Encerrada'?'A sessão chegou ao fim. Obrigado por jogar.':'Aguardando o Mestre retomar a sessão. Esta tela volta sozinha quando a mesa continuar.',
@@ -5207,7 +5260,7 @@ class Component extends DCLogic {
       selfAvatarBg, selfAvatarInitial, healthLabel, healthColor, selfConditions,
       testHistory, noHistory:testHistory.length===0,
       pendingHeader, pendingBoxBorder:ptPending?'rgba(224,193,121,.5)':'rgba(255,255,255,.07)',
-      canRollPlayer:ptPending&&!s.pRoll&&!s.pRolling, pSendSending:!!(ps&&ps.state==='sending'), pSendSent:!!(ps&&ps.state==='sent'), pSendError:!!(ps&&ps.state==='error'), pSendCancelled:!!(ps&&ps.state==='cancelled'), pSendMsg:ps?ps.msg:'',
+      canRollPlayer:ptPending&&!s.pRoll&&!s.pRolling&&!this._tablePaused(), pSendSending:!!(ps&&ps.state==='sending'), pSendSent:!!(ps&&ps.state==='sent'), pSendError:!!(ps&&ps.state==='error'), pSendCancelled:!!(ps&&ps.state==='cancelled'), pSendMsg:ps?ps.msg:'',
       resendPlayerResult:()=>this.resendPlayerResult(),
       mobileFocusBar, focusLabel:tabLabels[focus]||'', backToMap:()=>this.clearFocus(),
       overlayOpen, overlayNpcs, overlayInv, overlayTitle:overlayNpcs?'NPCs conhecidos':'Inventário',
@@ -5362,7 +5415,7 @@ class Component extends DCLogic {
       joinBtnCursor:s.joinBusy?'not-allowed':'pointer', joinBtnLabel:s.joinBusy?'Verificando...':'Entrar →',
       toName:()=>this.joinByCode(), toChar:()=>this.go('j_char'), toWizard:()=>this.startCharWizard(), toIntro:()=>this.go('j_intro'), toPanel:()=>this.go('j_panel'),
       savedCharsForJoin:s.characters.map(c=>({name:c.name,sensLabel:this.SENS[c.sens]?this.SENS[c.sens].label:'Sensitivo',onSelect:()=>this._selectSavedChar(c)})),
-      noSavedChars:s.characters.length===0,
+      noSavedChars:false,
       // player lobby
       mySheetLabel:s.selfApproved?'✓ Aprovada pelo Mestre':(s.selfSheetReady?'Ficha concluída · aguardando o Mestre':'Ficha pendente'), mySheetCol:s.selfApproved?'#7fae8f':'#d2a23a',
       myCharName:s.self.char||'Personagem', myCharInitial:(s.self.char||'?')[0].toUpperCase(),
