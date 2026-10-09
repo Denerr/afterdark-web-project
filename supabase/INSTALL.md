@@ -28,7 +28,8 @@ As migrações são **incrementais e dependentes de ordem**. Algumas corrigem po
 19. migration_final_media.sql               <- Plano final Etapa 2: acervo de imagens, retrato de NPC, diálogo
 20. migration_final_clocks.sql              <- Plano final Etapa 3: aviso de revelação, imagem do aviso, retenção
 21. migration_final_scenes_maps.sql         <- Plano final Etapa 4: cenas e mapas distintos
-22. migration_final_map_marks.sql           <- Plano final Etapa 5: marcações no mapa (último)
+22. migration_final_map_marks.sql           <- Plano final Etapa 5: marcações no mapa
+23. migration_final_objectives.sql          <- Plano final Etapa 6: objetivos da mesa (último)
 ```
 
 Todas são idempotentes: rodar de novo não duplica objeto.
@@ -49,7 +50,7 @@ cat tests/00_stub_supabase.sql schema.sql migration_invite_code.sql \
     migration_archive_table.sql migration_profiles.sql \
     migration_requests_consequences.sql migration_rls_p2.sql \
     migration_player_projection.sql migration_session_persistence.sql \
-    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql migration_scenes.sql migration_clocks_stress.sql migration_final_pause.sql migration_final_media.sql migration_final_clocks.sql migration_final_scenes_maps.sql migration_final_map_marks.sql > /tmp/all.sql
+    migration_skill_pairs.sql migration_identity.sql migration_equipment_photo.sql migration_scenes.sql migration_clocks_stress.sql migration_final_pause.sql migration_final_media.sql migration_final_clocks.sql migration_final_scenes_maps.sql migration_final_map_marks.sql migration_final_objectives.sql > /tmp/all.sql
 
 docker cp /tmp/all.sql adpg:/tmp/all.sql
 docker exec adpg psql -U postgres -q -f /tmp/all.sql
@@ -131,6 +132,10 @@ Para um banco que já tem a `migration_final_scenes_maps.sql`, basta
 `migration_final_map_marks.sql` (Plano final, Etapa 5): tabela fechada `map_marks` (uma
 linha por marcação), `player_mark_move`, `master_mark_upsert/delete/clear`, `master_marks`
 e `player_get_session` com as marcações públicas do mapa ativo. **Aplicar ANTES do deploy.**
+
+Para um banco que já tem a `migration_final_map_marks.sql`, basta
+`migration_final_objectives.sql` (Plano final, Etapa 6): `player_get_session` passa a
+entregar os objetivos compartilhados, em ordem e sem notas. **Aplicar ANTES do deploy.**
 
 O índice `table_members_one_per_account` (uma participação por conta e mesa) só é criado
 quando não há duplicata. Havendo, a migração termina com um WARNING e não cria o índice:

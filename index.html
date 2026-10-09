@@ -232,6 +232,32 @@
     <!-- LEFT: player cards -->
     <sc-if value="{{ showPlayersColM }}">
     <div style="display:flex;flex-direction:column;gap:12px">
+      <!-- Plano final, Etapa 6: objetivos (o Mestre cria, ordena, muda o status) -->
+      <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7e7a70;padding-left:2px">Objetivos</div>
+      <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:5px;padding:12px">
+        <div style="display:flex;gap:6px;margin-bottom:10px">
+          <input value="{{ objDraft }}" onInput="{{ onObjDraft }}" placeholder="Novo objetivo do grupo" aria-label="Texto do objetivo" style="flex:1;min-width:0;background:#0f0e13;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:8px;font-size:12px;color:#e9e3d4;outline:none"/>
+          <button onClick="{{ saveObjective }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px;border-color:rgba(198,166,100,.45);color:#e0c179">{{ objSaveLabel }}</button>
+        </div>
+        <sc-if value="{{ objEditing }}"><button onClick="{{ cancelObjEdit }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px;margin:-4px 0 10px">Cancelar edição</button></sc-if>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ mObjectives }}" as="o" hint-placeholder-count="2">
+            <div style="border:1px solid {{ o.border }};border-left:3px solid {{ o.col }};border-radius:4px;padding:8px 9px;animation: {{ o.anim }}">
+              <div style="display:flex;gap:7px;align-items:flex-start"><span aria-hidden="true" style="color: {{ o.col }};font-size:13px">{{ o.icon }}</span><span style="flex:1;font-size:12px;color:#e9e3d4;overflow-wrap:anywhere">{{ o.text }}</span></div>
+              <div style="font-size:10px;color: {{ o.col }};margin:3px 0 6px 20px">{{ o.statusLabel }}{{ o.privLabel }}</div>
+              <div style="display:flex;gap:4px;flex-wrap:wrap">
+                <sc-if value="{{ o.isOpen }}"><button onClick="{{ o.onDone }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px;color:#7fae8f;border-color:rgba(127,174,143,.3)">✓ Concluído</button><button onClick="{{ o.onFail }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px;color:#c0473f;border-color:rgba(196,30,58,.3)">✕ Falhou</button></sc-if>
+                <sc-if value="{{ o.notOpen }}"><button onClick="{{ o.onReopen }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px">◷ Em andamento</button></sc-if>
+                <button onClick="{{ o.onUp }}" aria-label="Subir {{ o.text }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px">↑</button><button onClick="{{ o.onDown }}" aria-label="Descer {{ o.text }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px">↓</button>
+                <button onClick="{{ o.onEdit }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px">✎</button>
+                <button onClick="{{ o.onShare }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px">{{ o.shareLabel }}</button>
+                <button onClick="{{ o.onDel }}" style="font-size:10px;letter-spacing:.04em;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:5px 8px;cursor:pointer;color:#cfc7b4;min-height:30px;color:#c44a5e;border-color:rgba(196,30,58,.3)">{{ o.delLabel }}</button>
+              </div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ !mHasObj }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:14px;color:#8a7350">Nenhum objetivo ainda.</div></sc-if>
+        </div>
+      </div>
       <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7e7a70;padding-left:2px">Jogadores</div>
       <sc-for list="{{ players }}" as="p" hint-placeholder-count="4">
         <sc-if value="{{ p.active }}">
@@ -1332,6 +1358,21 @@
       <!-- CENTER: MAPA / CENA tabs -->
       <sc-if value="{{ showCenterCol }}">
         <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+          <!-- Plano final, Etapa 6: objetivos do grupo (fora do mapa) -->
+          <sc-if value="{{ pHasObj }}">
+            <div role="region" aria-label="Objetivos" style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:12px 14px">
+              <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;margin-bottom:8px">Objetivos</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ pObjectives }}" as="o" hint-placeholder-count="2">
+                  <div style="display:flex;gap:9px;align-items:center;border:1px solid {{ o.border }};border-left:3px solid {{ o.col }};border-radius:6px;padding:7px 10px;animation: {{ o.anim }}">
+                    <span aria-hidden="true" style="color: {{ o.col }};font-size:14px">{{ o.icon }}</span>
+                    <span style="flex:1;font-size:13px;color:#e9e3d4;overflow-wrap:anywhere">{{ o.text }}</span>
+                    <span style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;color: {{ o.col }};white-space:nowrap">{{ o.statusLabel }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
           <div style="display:flex;gap:4px;background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:10px;padding:5px">
             <button onClick="{{ onCenterMapa }}" style="flex:1;min-height:44px;padding:11px;border:none;border-radius:7px;font:600 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;background: {{ mapaTabBg }};color: {{ mapaTabCol }};transition:.2s">◉ Mapa</button>
             <button onClick="{{ onCenterCena }}" style="flex:1;min-height:44px;padding:11px;border:none;border-radius:7px;font:600 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;background: {{ cenaTabBg }};color: {{ cenaTabCol }};transition:.2s">❖ Cena</button>
@@ -2154,7 +2195,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, marks:[], mapCam:{}, mapVp:{}, mapMode:{}, markPending:null, markMsg:'', markBusy:false, markTool:{kind:'point',npcId:'',label:'',descr:'',icon:'local',vis:'public',routePts:[],selectedId:null}, markClearAsk:false, media:{}, acervo:null, imgBusy:false, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, objectives:[], objDraft:'', objEditId:null, objPulse:{}, marks:[], mapCam:{}, mapVp:{}, mapMode:{}, markPending:null, markMsg:'', markBusy:false, markTool:{kind:'point',npcId:'',label:'',descr:'',icon:'local',vis:'public',routePts:[],selectedId:null}, markClearAsk:false, media:{}, acervo:null, imgBusy:false, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -2384,7 +2425,7 @@ class Component extends DCLogic {
   // cache/BroadcastChannel NÃO aplica nem grava nada (antes eram globais e uma mesa ou
   // aba sobrescrevia a outra). Fica apenas para a mesa local de quem joga sem conta,
   // com chave e canal separados por mesa.
-  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library','scenes','activeSceneId','clockEvents','activeNpcId','activeMapId']; }
+  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library','scenes','activeSceneId','clockEvents','activeNpcId','activeMapId','objectives']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
   // Etapa 6: alem do aviso flutuante (some em 4,5 s), o erro com contexto fica junto da
   // acao que falhou ate ela dar certo ou ate o usuario dispensar. ctx: teste, consequencia,
@@ -2427,7 +2468,7 @@ class Component extends DCLogic {
   // ---- estado da sessão de jogo por mesa (Supabase) ----
   _blankTableSession(){
     const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)?JSON.parse(JSON.stringify(window.AfterdarkData.catalog)):{weapons:[],items:[]};
-    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null,clockEvents:[],activeNpcId:null,dialogue:null,activeMapId:null,marks:[]};
+    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null,clockEvents:[],activeNpcId:null,dialogue:null,activeMapId:null,marks:[],objectives:[]};
   }
   async _loadTableSession(tableId,isOwner){
     const base=this._blankTableSession();
@@ -2468,6 +2509,7 @@ class Component extends DCLogic {
     if(!isOwner){
       // o jogador so pega o que o Mestre cadastrou: nunca o catalogo padrao embutido no site
       this._enqueuePlayerEvents(remote&&remote.clockEvents);
+      this._objTransitions(Array.isArray(remote&&remote.objectives)?remote.objectives:[]);
       next.marks=this._mergeMarksList(Array.isArray(remote&&remote.marks)?remote.marks:[]);
       const rl=(remote&&remote.library)||{};
       next.library={weapons:Array.isArray(rl.weapons)?rl.weapons:[],items:Array.isArray(rl.items)?rl.items:[]};
@@ -4358,6 +4400,40 @@ class Component extends DCLogic {
     const s=this.state; if(!f||!s.memberId||s.photoBusy) return;
     this._openPhotoEditor(f,{kind:'member'});
   }
+  // ---- Plano final, Etapa 6: objetivos da mesa (so o Mestre escreve; status manual) ----
+  _objTransitions(list){
+    const seen=this._objSeen||(this._objSeen={}); const first=!this._objInit; const pulse={};
+    (list||[]).forEach(o=>{ if(!first&&seen[o.id]&&seen[o.id]!==o.status&&o.status==='concluido') pulse[o.id]=Date.now(); seen[o.id]=o.status; });
+    this._objInit=true;
+    if(Object.keys(pulse).length&&!this._prefersReducedMotion()){ this.setState(s=>({objPulse:{...s.objPulse,...pulse}})); clearTimeout(this._objPulseT); this._objPulseT=setTimeout(()=>this.setState({objPulse:{}}),1600); }
+  }
+  setObjDraft(v){ this.setState({objDraft:v}); }
+  async saveObjective(){
+    const s=this.state, text=String(s.objDraft||'').trim().slice(0,200); if(!text) return;
+    if(s.objEditId){ this.setState(st=>({objectives:st.objectives.map(o=>o.id===st.objEditId?{...o,text}:o),objDraft:'',objEditId:null})); await this._commitContent('Objetivo atualizado'); return; }
+    const order=(s.objectives||[]).reduce((m,o)=>Math.max(m,Number(o.order)||0),0)+1;
+    this.setState(st=>({objectives:[...(st.objectives||[]),{id:'o'+this._uuid().replace(/-/g,'').slice(0,10),text,order,status:'andamento',shared:true}],objDraft:''}));
+    await this._commitContent('Objetivo criado');
+  }
+  editObjective(o){ this.setState({objEditId:o.id,objDraft:o.text}); }
+  cancelObjEdit(){ this.setState({objEditId:null,objDraft:''}); }
+  async setObjStatus(id,status){
+    const prev=(this.state.objectives.find(o=>o.id===id)||{}).status;
+    this.setState(st=>({objectives:st.objectives.map(o=>o.id===id?{...o,status}:o)}));
+    if(status==='concluido'&&prev!=='concluido'&&!this._prefersReducedMotion()){ this.setState(st=>({objPulse:{...st.objPulse,[id]:Date.now()}})); clearTimeout(this._objPulseT); this._objPulseT=setTimeout(()=>this.setState({objPulse:{}}),1600); }
+    await this._commitContent(status==='concluido'?'Objetivo concluído':status==='falhou'?'Objetivo marcado como falho':'Objetivo em andamento');
+  }
+  async moveObjective(id,dir){
+    const list=[...this.state.objectives].sort((a,b)=>(a.order||0)-(b.order||0)); const i=list.findIndex(o=>o.id===id), j=i+dir;
+    if(i<0||j<0||j>=list.length) return; const a=list[i], b=list[j];
+    this.setState(st=>({objectives:st.objectives.map(o=>o.id===a.id?{...o,order:b.order}:o.id===b.id?{...o,order:a.order}:o)}));
+    await this._commitContent('Ordem salva');
+  }
+  async toggleObjShared(id){ this.setState(st=>({objectives:st.objectives.map(o=>o.id===id?{...o,shared:o.shared===false}:o)})); await this._commitContent('Visibilidade salva'); }
+  async removeObjective(id){
+    if(this.state.contentDel!=='obj:'+id){ this.setState({contentDel:'obj:'+id}); return; }
+    this.setState(st=>({objectives:st.objectives.filter(o=>o.id!==id),contentDel:null})); await this._commitContent('Objetivo removido');
+  }
   // ---- Plano final, Etapa 5: mapa interativo compartilhado ----
   // Camera (zoom/arraste) e de cada pessoa; marcacoes sao registros no banco, em
   // coordenadas 0..1 relativas a imagem (o mesmo ponto em qualquer tela e zoom).
@@ -5600,6 +5676,18 @@ class Component extends DCLogic {
       stageSceneTitle:actScene?actScene.title:'Nenhuma cena ativa', stageSceneDesc:actScene?(actScene.desc||'Sem descrição.'):'Cadastre uma cena em Cenas e ative-a para mostrá-la aqui e aos jogadores.',
       stageSceneBadge:actScene?(actScene.shared?'Compartilhada':'Só o Mestre vê'):'—', stageHasScene:!!actScene,
       stagePresent:actScene?(presentNames(actScene.present).join(', ')||'Ninguém marcado'):'', stageMap:actMap, stageMapName:actMap.hasMap?actMap.name:'',
+      ...(()=>{ const ST={andamento:{l:'Em andamento',i:'◷',c:'#cfc7b4',b:'rgba(255,255,255,.14)'},concluido:{l:'Concluído',i:'✓',c:'#7fae8f',b:'rgba(127,174,143,.3)'},falhou:{l:'Falhou',i:'✕',c:'#c0473f',b:'rgba(196,30,58,.3)'}};
+        const ord=[...(s.objectives||[])].sort((a,b)=>(a.order||0)-(b.order||0));
+        const vw=(o,isM)=>{ const t=ST[o.status]||ST.andamento; const pulse=!!(s.objPulse||{})[o.id];
+          return {id:o.id,text:o.text,statusLabel:t.l,icon:t.i,col:t.c,border:t.b,anim:pulse?'objPulse 1.2s ease 1':'none',shared:o.shared!==false,privLabel:o.shared===false?' · só o Mestre vê':'',
+            ...(isM?{onDone:()=>this.setObjStatus(o.id,'concluido'),onFail:()=>this.setObjStatus(o.id,'falhou'),onReopen:()=>this.setObjStatus(o.id,'andamento'),
+              isOpen:o.status==='andamento'||!o.status, notOpen:!!o.status&&o.status!=='andamento',
+              onUp:()=>this.moveObjective(o.id,-1),onDown:()=>this.moveObjective(o.id,1),onEdit:()=>this.editObjective(o),onShare:()=>this.toggleObjShared(o.id),
+              shareLabel:o.shared===false?'Mostrar ao grupo':'Ocultar do grupo',delLabel:s.contentDel==='obj:'+o.id?'Confirmar remoção':'Remover',onDel:()=>this.removeObjective(o.id)}:{})}; };
+        const mObj=ord.map(o=>vw(o,true)), pObj=ord.filter(o=>o.shared!==false).map(o=>vw(o,false));
+        return {mObjectives:mObj, mHasObj:mObj.length>0, pObjectives:pObj, pHasObj:pObj.length>0,
+          objDraft:s.objDraft, onObjDraft:e=>this.setObjDraft(e.target.value), saveObjective:()=>this.saveObjective(), objSaveLabel:s.objEditId?'Salvar':'＋ Adicionar',
+          objEditing:!!s.objEditId, cancelObjEdit:()=>this.cancelObjEdit()}; })(),
       stageMV:this._mapViewer('m',s.activeMapId), pMV:this._mapViewer('p',s.activeMapId), markMsg:s.markMsg, hasMarkMsg:!!s.markMsg,
       pPlaceHint:this._tablePaused()?'Mesa pausada: o marcador não pode ser movido agora.':'Toque ou clique no mapa para posicionar seu personagem. Arrastar ou pinçar só move a visão.',
       ...(()=>{ const t=s.markTool, mapMarks=(s.marks||[]).filter(m=>m.mapId===s.activeMapId);
