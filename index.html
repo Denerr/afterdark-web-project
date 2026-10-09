@@ -3429,7 +3429,8 @@ class Component extends DCLogic {
       // logado, o membro devolvido e sempre da conta (novo, reaproveitado ou recem-vinculado)
       acct:!!this.state.auth.loggedIn};
     this._rememberMembership(saved);
-    if(this.state.memberId!==data.member_id){ this._equipRev=-1; this._photoRevs={}; this.setState({myEquip:[]}); }
+    // outra participacao: nada da mesa anterior sobra na memoria (sessao, marcacoes, avisos)
+    if(this.state.memberId!==data.member_id){ this._equipRev=-1; this._photoRevs={}; this._objInit=false; this._objSeen={}; this.setState({myEquip:[],...this._blankTableSession(),evQueue:[],markPending:null}); }
     this.setState({joinTableId:data.table_id,joinTableName:data.table_name,joinTableType:data.table_type||'One-shot',memberId:data.member_id,memberToken:token,
       selfApproved:false,selfSheetReady:false,pending:null,pRoll:null,pSend:null});
     return saved;
