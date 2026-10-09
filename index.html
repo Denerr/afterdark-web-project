@@ -310,7 +310,7 @@
         <!-- NPC dialogue layer -->
         <sc-if value="{{ npcDialogueOn }}">
           <div style="position:absolute;left:18px;bottom:108px;z-index:5;display:flex;align-items:flex-end;gap:14px;max-width:80%;animation:slideDown .4s ease">
-            <div style="width:72px;height:88px;border-radius:8px;flex-shrink:0;background:radial-gradient(circle at 50% 28%, {{ npcDlg.surf }}, #08080c);border:1.5px solid {{ npcDlg.acc }};box-shadow:0 10px 30px rgba(0,0,0,.6)"></div>
+            <div style="width:72px;height:88px;border-radius:8px;flex-shrink:0;background:radial-gradient(circle at 50% 28%, {{ npcDlg.surf }}, #08080c);border:1.5px solid {{ npcDlg.acc }};box-shadow:0 10px 30px rgba(0,0,0,.6)"><div style="width:100%;height:100%;border-radius:inherit;background: {{ npcDlg.imgBg }}"></div></div>
             <div style="background:rgba(12,11,17,.92);border:1px solid {{ npcDlg.acc }}66;border-radius:12px;border-bottom-left-radius:2px;padding:14px 18px;box-shadow:0 14px 40px rgba(0,0,0,.55)">
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
                 <span style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">{{ npcDlg.name }}</span>
@@ -863,6 +863,18 @@
               <textarea value="{{ npcForm.desc }}" onInput="{{ onNpcDesc }}" placeholder="Quem é, como se apresenta" rows="3" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
               <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Notas privadas do Mestre</label>
               <textarea value="{{ npcForm.notes }}" onInput="{{ onNpcNotes }}" placeholder="Só você vê" rows="3" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Imagem (o grupo só vê com o retrato revelado)</label>
+              <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px">
+                <div role="img" aria-label="Prévia da imagem do NPC" style="width:72px;height:96px;flex-shrink:0;border-radius:6px;background:#0c0b11;border:1px solid rgba(255,255,255,.12);overflow:hidden"><div style="width:100%;height:100%;background: {{ npcImgBg }}"></div></div>
+                <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+                  <label style="position:relative;padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Card inteiro (sem corte)<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange="{{ onNpcCard }}" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"/></label>
+                  <label style="position:relative;padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Retrato (enquadrar)<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange="{{ onNpcPortrait }}" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"/></label>
+                  <button onClick="{{ npcAcervo }}" style="padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Escolher do acervo</button>
+                  <sc-if value="{{ npcHasImg }}"><button onClick="{{ npcRemoveImg }}" style="align-self:flex-start;padding:4px 0;background:transparent;border:none;color:#a39e90;font-size:11px;cursor:pointer;text-decoration:underline">Remover imagem</button></sc-if>
+                  <span role="status" style="font-size:11px;color:#8d887c">{{ imgBusyLabel }}</span>
+                </div>
+              </div>
+              <sc-if value="{{ npcHasImgErr }}"><div role="alert" style="font-size:12px;color:#e08a8a;margin:-4px 0 10px">{{ npcImgErr }}</div></sc-if>
 
               <sc-if value="{{ npcFormErr }}"><div role="alert" style="font-size:12px;color:#e08a8a;margin:0 0 10px">{{ npcForm.err }}</div></sc-if>
               <div style="display:flex;gap:8px">
@@ -875,7 +887,7 @@
             <sc-for list="{{ npcs }}" as="n" hint-placeholder-count="4">
               <div style="padding:11px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:4px">
                 <div style="display:flex;gap:11px;align-items:center">
-                  <div style="width:38px;height:38px;border-radius:4px;flex-shrink:0;background:radial-gradient(circle at 50% 30%, {{ n.surf }}, #0a0a0e);border:1px solid {{ n.acc }};filter: {{ n.imgFilter }}"></div>
+                  <div style="width:38px;height:38px;border-radius:4px;flex-shrink:0;background:radial-gradient(circle at 50% 30%, {{ n.surf }}, #0a0a0e);border:1px solid {{ n.acc }};filter: {{ n.imgFilter }}"><div style="width:100%;height:100%;border-radius:inherit;background: {{ n.imgBg }}"></div></div>
                   <div style="flex:1;min-width:0"><div style="font-size:13px;color:#e9e3d4;overflow-wrap:anywhere">{{ n.name }}</div><div style="font-size:11px;color:#7e7a70">{{ n.rLabel }} · {{ n.sharedLabel }}</div></div>
                 </div>
                 <sc-if value="{{ n.hasDesc }}"><div style="font-family:'Cormorant Garamond';font-size:14px;color:#b9b2a2;margin-top:6px">{{ n.desc }}</div></sc-if>
@@ -1236,6 +1248,19 @@
             <button onClick="{{ onCenterCena }}" style="flex:1;min-height:44px;padding:11px;border:none;border-radius:7px;font:600 12px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;background: {{ cenaTabBg }};color: {{ cenaTabCol }};transition:.2s">❖ Cena</button>
           </div>
 
+          <!-- Plano final, Etapa 2: NPC em dialogo (do banco), ao lado da area do mapa -->
+          <sc-if value="{{ hasPDialog }}">
+            <div role="status" aria-label="NPC em diálogo" style="display:flex;gap:14px;align-items:center;background:#13121a;border:1px solid {{ pDialog.acc }}66;border-left:3px solid {{ pDialog.acc }};border-radius:12px;padding:12px 14px;animation:slideDown .4s ease">
+              <div style="width:72px;height:88px;border-radius:8px;flex-shrink:0;background:radial-gradient(circle at 50% 28%, {{ pDialog.surf }}, #08080c);border:1.5px solid {{ pDialog.acc }}"><div style="width:100%;height:100%;border-radius:inherit;background: {{ pDialog.imgBg }}"></div></div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color: {{ pDialog.acc }};margin-bottom:3px">☻ Em diálogo</div>
+                <div style="font-family:'Cinzel';font-weight:600;font-size:17px;color:#efe8d8;overflow-wrap:anywhere">{{ pDialog.name }}</div>
+                <sc-if value="{{ pDialog.hasFaction }}"><div style="font-size:11px;color:#8d887c">{{ pDialog.faction }}</div></sc-if>
+                <sc-if value="{{ pDialog.hasDesc }}"><p style="font-family:'Cormorant Garamond';font-size:15px;line-height:1.4;color:#cdc6b6;margin:4px 0 0">{{ pDialog.desc }}</p></sc-if>
+              </div>
+            </div>
+          </sc-if>
+
           <!-- MAP -->
           <sc-if value="{{ centerIsMapa }}">
             <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:14px">
@@ -1386,7 +1411,7 @@
                   <sc-for list="{{ groupCards }}" as="g" hint-placeholder-count="3">
                     <div style="background:#0f0e13;border:1px solid {{ g.cardBorder }};border-radius:8px;overflow:hidden;transition:border-color .3s ease">
                       <button onClick="{{ g.onToggle }}" style="display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:transparent;border:none;padding:12px 13px;cursor:pointer">
-                        <span style="width:34px;height:34px;flex-shrink:0;border-radius:50%;background:#1a1820;border:1px solid {{ g.acc }};display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-size:15px;color: {{ g.acc }}">{{ g.initial }}</span>
+                        <span role="img" aria-label="Retrato de {{ g.char }}" style="width:34px;height:34px;flex-shrink:0;border-radius:50%;background: {{ g.avBg }};border:1px solid {{ g.acc }};display:flex;align-items:center;justify-content:center;font-family:'Cinzel';font-size:15px;color: {{ g.acc }}">{{ g.avInitial }}</span>
                         <span style="flex:1;min-width:0">
                           <span style="display:block;font-size:13px;color:#e9e3d4">{{ g.char }}<sc-if value="{{ g.isSelf }}"><span style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#0b0b10;background:#c6a35e;border-radius:10px;padding:2px 7px;margin-left:8px">{{ g.youLabel }}</span></sc-if></span>
                           <span style="display:block;font-size:11px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic">{{ g.player }}</span>
@@ -1516,7 +1541,7 @@
             <div style="display:flex;flex-direction:column;gap:11px">
               <sc-for list="{{ npcsKnown }}" as="n" hint-placeholder-count="3">
                 <div style="display:flex;gap:13px;align-items:center;background:#0f0e13;border:1px solid {{ n.acc }}33;border-radius:10px;padding:14px">
-                  <div style="width:48px;height:48px;border-radius:8px;flex-shrink:0;background:radial-gradient(circle at 50% 30%, {{ n.surf }}, #0a0a0e);border:1px solid {{ n.acc }};filter: {{ n.imgFilter }}"></div>
+                  <div style="width:48px;height:48px;border-radius:8px;flex-shrink:0;background:radial-gradient(circle at 50% 30%, {{ n.surf }}, #0a0a0e);border:1px solid {{ n.acc }};filter: {{ n.imgFilter }}"><div style="width:100%;height:100%;border-radius:inherit;background: {{ n.imgBg }}"></div></div>
                   <div style="flex:1"><div style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">{{ n.name }}</div><div style="font-size:12px;color: {{ n.acc }}">{{ n.faction }}</div><p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:5px 0 0;line-height:1.4">{{ n.desc }}</p></div>
                 </div>
               </sc-for>
@@ -1615,6 +1640,31 @@
 
 </div>
 
+
+
+<!-- ========================= ACERVO DE IMAGENS (overlay) ========================= -->
+<sc-if value="{{ acervoOpen }}">
+<div role="dialog" aria-label="Acervo de imagens" style="position:fixed;inset:0;z-index:96;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(6,6,10,.92);backdrop-filter:blur(6px);animation:fadeIn .25s ease">
+  <div style="width:100%;max-width:560px;max-height:86vh;overflow:auto;background:#13121a;border:1px solid rgba(198,166,100,.25);border-radius:12px;padding:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
+      <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e">Acervo de imagens</div>
+      <button onClick="{{ closeAcervo }}" style="padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#cfc7b4;font-size:12px;cursor:pointer">Fechar</button>
+    </div>
+    <sc-if value="{{ acervoLoading }}"><div role="status" style="font-size:13px;color:#a39e90;padding:12px 0">Carregando o acervo…</div></sc-if>
+    <sc-if value="{{ acervoError }}"><div role="alert" style="font-size:13px;color:#e08a8a;padding:12px 0">Não foi possível carregar o acervo. <button onClick="{{ retryAcervo }}" style="margin-left:8px;padding:6px 10px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:4px;color:#e0c179;font-size:11px;cursor:pointer">Tentar de novo</button></div></sc-if>
+    <sc-if value="{{ acervoEmpty }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;padding:12px 0">Seu acervo ainda está vazio. As imagens que você enviar ficam guardadas aqui para reutilizar em outras mesas.</div></sc-if>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px">
+      <sc-for list="{{ acervoItems }}" as="it" hint-placeholder-count="4">
+        <button onClick="{{ it.onPick }}" style="display:flex;flex-direction:column;gap:6px;padding:6px;background:#0f0e13;border:1px solid rgba(255,255,255,.08);border-radius:8px;cursor:pointer;text-align:left">
+          <span style="display:block;width:100%;aspect-ratio:1 / 1;border-radius:6px;background: {{ it.bg }}"></span>
+          <span style="font-size:11px;color:#cdc6b6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ it.name }}</span>
+          <span style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#8d887c">{{ it.kindLabel }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
 
 <!-- ========================= EDITOR DE FOTO (overlay) ========================= -->
 <sc-if value="{{ edOpen }}">
@@ -1995,7 +2045,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, media:{}, acervo:null, imgBusy:false, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -2016,7 +2066,7 @@ class Component extends DCLogic {
     libDraft:{kind:'weapons',name:'',bonus:1,dano:2,alcance:'Corpo a corpo',ruido:'Médio',desc:''},
     inventory:{ items:['i2'], weapons:['w1'] },
     invDivider:'pistas',
-    sceneView:'cena', activeNpc:null, playerMenuOpen:false, topMenuOpen:false, testNotif:false, notifCancelled:false,
+    sceneView:'cena', activeNpcId:null, dialogue:null, playerMenuOpen:false, topMenuOpen:false, testNotif:false, notifCancelled:false,
     log:[],
     npcs:[],
     clues:[],
@@ -2225,7 +2275,7 @@ class Component extends DCLogic {
   // cache/BroadcastChannel NÃO aplica nem grava nada (antes eram globais e uma mesa ou
   // aba sobrescrevia a outra). Fica apenas para a mesa local de quem joga sem conta,
   // com chave e canal separados por mesa.
-  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library','scenes','activeSceneId','clockEvents']; }
+  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library','scenes','activeSceneId','clockEvents','activeNpcId']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
   // Etapa 6: alem do aviso flutuante (some em 4,5 s), o erro com contexto fica junto da
   // acao que falhou ate ela dar certo ou ate o usuario dispensar. ctx: teste, consequencia,
@@ -2268,7 +2318,7 @@ class Component extends DCLogic {
   // ---- estado da sessão de jogo por mesa (Supabase) ----
   _blankTableSession(){
     const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)?JSON.parse(JSON.stringify(window.AfterdarkData.catalog)):{weapons:[],items:[]};
-    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null,clockEvents:[]};
+    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null,clockEvents:[],activeNpcId:null,dialogue:null};
   }
   async _loadTableSession(tableId,isOwner){
     const base=this._blankTableSession();
@@ -3539,7 +3589,7 @@ class Component extends DCLogic {
   hideNpc(id){ this.setState(s=>({npcs:s.npcs.map(n=>n.id===id?{...n,reveal:1}:n)})); }
   toggleClueShare(id){ this.setState(s=>({clues:s.clues.map(k=>k.id===id?{...k,status:k.status==='oculta'?'compartilhada':'oculta'}:k)})); }
   openContentForm(kind,item){
-    const blank={npc:{id:null,name:'',desc:'',notes:'',faction:''},clue:{id:null,name:'',txt:'',notes:''},
+    const blank={npc:{id:null,name:'',desc:'',notes:'',faction:'',imageId:null,imageFit:null},clue:{id:null,name:'',txt:'',notes:''},
       scene:{id:null,title:'',desc:'',notes:'',present:[],mapId:'',shared:true}}[kind];
     const f=item?{...blank,...item,present:Array.isArray(item.present)?item.present.map(x=>({...x})):[]}:blank;
     if(kind==='clue'&&f.txt==='—') f.txt='';
@@ -3575,7 +3625,7 @@ class Component extends DCLogic {
     const T=v=>String(v||'').trim();
     if(kind==='npc'){
       this.setState(st=>{ const ex=st.npcs.find(n=>n.id===id);
-        const e={...(ex||{theme:'human',reveal:1}),id,name:T(f.name).slice(0,80),desc:T(f.desc).slice(0,2000),notes:T(f.notes).slice(0,4000),faction:T(f.faction).slice(0,60)};
+        const e={...(ex||{theme:'human',reveal:1}),id,name:T(f.name).slice(0,80),desc:T(f.desc).slice(0,2000),notes:T(f.notes).slice(0,4000),faction:T(f.faction).slice(0,60),imageId:f.imageId||null,imageFit:f.imageId?(f.imageFit||'contain'):null};
         return {npcs:ex?st.npcs.map(n=>n.id===id?e:n):[...st.npcs,e],npcForm:{...f,id}}; });
     } else if(kind==='clue'){
       this.setState(st=>{ const ex=st.clues.find(k=>k.id===id);
@@ -3593,7 +3643,7 @@ class Component extends DCLogic {
   cancelDeleteContent(){ this.setState({contentDel:null}); }
   async deleteContent(kind,id){
     if(this.state.contentDel!==kind+':'+id) return;
-    if(kind==='npc') this.setState(s=>({npcs:s.npcs.filter(n=>n.id!==id)}));
+    if(kind==='npc') this.setState(s=>({npcs:s.npcs.filter(n=>n.id!==id),activeNpcId:s.activeNpcId===id?null:s.activeNpcId}));
     else if(kind==='clue') this.setState(s=>({clues:s.clues.filter(k=>k.id!==id)}));
     else this.setState(s=>({scenes:s.scenes.filter(x=>x.id!==id),activeSceneId:s.activeSceneId===id?null:s.activeSceneId}));
     this.setState({contentDel:null});
@@ -3635,8 +3685,15 @@ class Component extends DCLogic {
 
   // ---- center stage: cena/mapa + NPC em diálogo ----
   setSceneView(v){ this.setState({sceneView:v}); }
-  showNpcDialogue(id){ this.setState(s=>{ const n=s.npcs.find(x=>x.id===id); const reveal=n&&n.reveal<3?3:(n?n.reveal:3); return {activeNpc:id, npcs:s.npcs.map(x=>x.id===id?{...x,reveal:Math.max(x.reveal,3)}:x), log:[{icon:'☻',t:'NPC',txt:`${n?n.name:'NPC'} entra em diálogo com o grupo.`,vis:'todos'},...s.log]}; }); }
-  hideNpcDialogue(){ this.setState({activeNpc:null}); }
+  // Plano final, Etapa 2: o NPC em dialogo e salvo na mesa (activeNpcId) e chega aos
+  // jogadores pela projecao do banco ('dialogue'); antes ficava so na tela do Mestre.
+  async showNpcDialogue(id){
+    this.setState(s=>{ const n=s.npcs.find(x=>x.id===id);
+      return {activeNpcId:id, npcs:s.npcs.map(x=>x.id===id?{...x,reveal:Math.max(x.reveal||1,3)}:x),
+        log:[{icon:'☻',t:'NPC',txt:`${n?n.name:'NPC'} entra em diálogo com o grupo.`,vis:'todos'},...s.log]}; });
+    await this._commitContent('Diálogo iniciado');
+  }
+  async hideNpcDialogue(){ this.setState({activeNpcId:null}); await this._commitContent('Diálogo encerrado'); }
 
   // ---- criar relógio ----
   toggleClockForm(){ this.setState(s=>({showClockForm:!s.showClockForm,clockEditId:s.showClockForm?null:s.clockEditId})); }
@@ -4160,6 +4217,61 @@ class Component extends DCLogic {
     const s=this.state; if(!f||!s.memberId||s.photoBusy) return;
     this._openPhotoEditor(f,{kind:'member'});
   }
+  // ---- Plano final, Etapa 2: acervo de imagens (tabela media no banco) ----
+  // O estado da sessao guarda so o id; cada imagem e buscada uma vez e fica em cache.
+  // Mestre le o proprio acervo; jogador so recebe o que o banco libera para ele.
+  _mediaUrl(id){
+    if(!id) return null;
+    const m=(this.state.media||{})[id]; if(m) return m;
+    this._mediaWant=this._mediaWant||new Set(); this._mediaTried=this._mediaTried||{};
+    if(!this._mediaTried[id]||Date.now()-this._mediaTried[id]>15000){ this._mediaWant.add(id); clearTimeout(this._mediaT); this._mediaT=setTimeout(()=>this._fetchMedia(),30); }
+    return null;
+  }
+  async _fetchMedia(){
+    const s=this.state; if(!this.sb||!this._mediaWant||!this._mediaWant.size) return;
+    const ids=[...this._mediaWant].slice(0,30); ids.forEach(i=>{ this._mediaWant.delete(i); this._mediaTried[i]=Date.now(); });
+    let data=null;
+    try{
+      const isMaster=s.auth.loggedIn&&(s.role==='mestre'||!s.memberId);
+      const r=isMaster?await this.sb.rpc('master_media_get',{p_ids:ids}):await this.sb.rpc('player_media',{p_member_id:s.memberId,p_token:s.memberToken||null,p_ids:ids});
+      if(!r.error) data=r.data;
+    }catch(e){}
+    if(data&&typeof data==='object'&&Object.keys(data).length) this.setState(st=>({media:{...st.media,...data}}));
+    if(this._mediaWant.size){ clearTimeout(this._mediaT); this._mediaT=setTimeout(()=>this._fetchMedia(),30); }
+  }
+  _mediaBg(id,fit){ const u=this._mediaUrl(id); return u?`center/${fit==='cover'?'cover':'contain'} no-repeat url("${u}")`:null; }
+  async _uploadMedia(kind,name,dataUrl){
+    const dims=await new Promise(res=>{ const im=new Image(); im.onload=()=>res([im.width,im.height]); im.onerror=()=>res([null,null]); im.src=dataUrl; });
+    const {data,error}=await this.sb.rpc('master_media_upload',{p_kind:kind,p_name:String(name||'').slice(0,120),p_data:dataUrl,p_width:dims[0],p_height:dims[1]});
+    if(error||!data||!data.ok) throw new Error((error&&error.message)||'upload');
+    this.setState(st=>({media:{...st.media,[data.id]:dataUrl}}));
+    return data.id;
+  }
+  // Imagem de NPC: card inteiro (sem corte) ou retrato recortado no editor
+  async onNpcImage(e,mode){
+    const f=e&&e.target&&e.target.files&&e.target.files[0]; if(e&&e.target) e.target.value='';
+    if(!f||!this.state.npcForm) return;
+    if(mode==='cover'){ this._openPhotoEditor(f,{kind:'npc'}); return; }
+    if(!/^image\/(jpeg|png|webp|gif)$/.test(f.type||'')||f.size>15*1024*1024){ this.setContentField('npc','imgErr',this._photoErrMsg(new Error(f.size>15*1024*1024?'grande':'formato'))); return; }
+    let url; try{ const raw=await new Promise((res,rej)=>{ const rd=new FileReader(); rd.onerror=rej; rd.onload=()=>res(rd.result); rd.readAsDataURL(f); }); url=await this._shrinkImage(raw,1024,0.85); }
+    catch(err){ this.setContentField('npc','imgErr',this._photoErrMsg(new Error('formato'))); return; }
+    await this._setFormImage('npc',url,'contain',(this.state.npcForm.name||'NPC'));
+  }
+  async _setFormImage(kind,url,fit,name){
+    this.setState({imgBusy:true}); this.setContentField(kind,'imgErr','');
+    try{ const id=await this._uploadMedia(kind,name,url); this.setState(st=>({[kind+'Form']:st[kind+'Form']?{...st[kind+'Form'],imageId:id,imageFit:fit}:st[kind+'Form']})); return true; }
+    catch(err){ this.setContentField(kind,'imgErr',/media_too_large/.test(err.message)?'Imagem grande demais mesmo depois de reduzida.':'Não foi possível enviar a imagem. A anterior foi mantida — tente de novo.'); return false; }
+    finally{ this.setState({imgBusy:false}); }
+  }
+  removeFormImage(kind){ this.setState(st=>({[kind+'Form']:st[kind+'Form']?{...st[kind+'Form'],imageId:null,imageFit:null}:null})); }
+  async openAcervo(kind){
+    this.setState({acervo:{kind,items:[],state:'loading'}});
+    try{ const {data,error}=await this.sb.rpc('master_media_list',{p_kind:null}); if(error) throw error;
+      this.setState(st=>st.acervo?{acervo:{...st.acervo,items:Array.isArray(data)?data:[],state:'ok'}}:st); }
+    catch(e){ this.setState(st=>st.acervo?{acervo:{...st.acervo,state:'error'}}:st); }
+  }
+  pickAcervo(item){ const a=this.state.acervo; if(!a) return; const fit=a.kind==='npc'?(item.width&&item.height&&item.width===item.height?'cover':'contain'):'cover';
+    this.setState(st=>({acervo:null,[a.kind+'Form']:st[a.kind+'Form']?{...st[a.kind+'Form'],imageId:item.id,imageFit:fit}:st[a.kind+'Form']})); }
   // ---- editor de foto: enquadrar (arrastar), zoom (controle, botoes, roda, pinca), girar ----
   // A moldura e redonda; a imagem sempre cobre o quadro (sem bordas vazias). Resultado:
   // quadrado 320 px em JPEG, salvo so ao confirmar.
@@ -4211,7 +4323,7 @@ class Component extends DCLogic {
   edWheel(ev){ if(ev&&ev.preventDefault) try{ ev.preventDefault(); }catch(x){} this.edZoomBy((ev&&ev.deltaY>0)?-0.1:0.1); }
   _edRender(){
     const e=this.state.photoEd, img=this._edImg; if(!e||!img) return null;
-    const O=320, k=O/e.V, s0=e.V/Math.min(e.w,e.h);
+    const O=e.target&&e.target.kind==='npc'?512:320, k=O/e.V, s0=e.V/Math.min(e.w,e.h);
     const cv=document.createElement('canvas'); cv.width=O; cv.height=O;
     const cx=cv.getContext('2d'); cx.fillStyle='#13121a'; cx.fillRect(0,0,O,O);
     cx.translate(O/2+e.x*k,O/2+e.y*k); cx.rotate(e.rot*Math.PI/180); cx.scale(e.zoom,e.zoom);
@@ -4224,6 +4336,7 @@ class Component extends DCLogic {
     this.setState(st=>({photoEd:{...st.photoEd,busy:true,err:''}}));
     let ok=false;
     if(e.target.kind==='member'){ const s=this.state; ok=await this._setMemberPhoto(s.memberId,s.memberToken,url); }
+    else if(e.target.kind==='npc'){ ok=await this._setFormImage('npc',url,'cover',(this.state.npcForm&&this.state.npcForm.name)||'NPC'); }
     else ok=await this.setCharPhoto(e.target.charId,url);
     if(ok){ this._edImg=null; this.setState({photoEd:null}); }
     else this.setState(st=>({photoEd:st.photoEd?{...st.photoEd,busy:false,err:'Não foi possível salvar a foto. A anterior foi mantida — tente de novo.'}:null}));
@@ -4693,11 +4806,11 @@ class Component extends DCLogic {
     const decorate=(r)=> r? {...r, gColor:gradeColor[r.grade]||'#c6a35e', isCombat:r.mode==='combate', isGeneral:r.mode!=='combate', marginLabel:(r.margin>=0?'+':'')+r.margin, marginPos:Math.max(0,r.margin||0), ...glowTier(r.grade), diceView:r.dice.map(d=>({d,...diceColor(d,r)}))} : null;
 
     const npcLines={n1:'Sangue antigo reconhece sangue antigo. Você não devia estar aqui.',n2:'Tudo tem um preço, querido. A questão é se você pode pagar.',n3:'Esse cheiro... vocês trouxeram problema para as docas.',n4:'A ordem pública é frágil. Não me obriguem a restaurá-la.'};
-    const npcs=s.npcs.map(n=>{ const th=this.THEME[n.theme]||this.THEME.human||{}; const rl={1:'Silhueta desconhecida',2:'Nome oculto',3:'Apelido',4:'Retrato completo'}; return {...n, acc:th.acc, surf:th.surf, glow:th.glow, rLabel:rl[n.reveal]||'—', imgFilter:n.reveal<=2?'blur(5px) brightness(.55)':'none', onReveal:()=>this.revealNpc(n.id), onDialogue:()=>this.showNpcDialogue(n.id), known:n.reveal>=3, line:n.desc||npcLines[n.id]||'…',
+    const npcs=s.npcs.map(n=>{ const th=this.THEME[n.theme]||this.THEME.human||{}; const rl={1:'Silhueta desconhecida',2:'Nome oculto',3:'Apelido',4:'Retrato completo'}; return {...n, acc:th.acc, surf:th.surf, glow:th.glow, rLabel:rl[n.reveal]||'—', imgFilter:n.reveal<=2?'blur(5px) brightness(.55)':'none', onReveal:()=>this.revealNpc(n.id), onDialogue:()=>this.showNpcDialogue(n.id), known:n.reveal>=3, imgBg:this._mediaBg(n.imageId,n.imageFit)||'none', hasImg:!!n.imageId, line:n.desc||npcLines[n.id]||'…',
       hasDesc:!!n.desc, canHide:(n.reveal||1)>1, onHide:()=>this.hideNpc(n.id), onEdit:()=>this.openContentForm('npc',n),
       delAsk:s.contentDel==='npc:'+n.id, noDelAsk:s.contentDel!=='npc:'+n.id, onAskDel:()=>this.askDeleteContent('npc',n.id), onDel:()=>this.deleteContent('npc',n.id), onCancelDel:()=>this.cancelDeleteContent(),
       sharedLabel:(n.reveal||1)>=3?'Visível ao grupo':'Só o Mestre vê' }; });
-    const activeNpcObj=s.activeNpc?npcs.find(n=>n.id===s.activeNpc):null;
+    const activeNpcObj=s.activeNpcId?npcs.find(n=>n.id===s.activeNpcId):null;
     const clueColor={oculta:'#7e7a70',encontrada:'#c6a35e',analisada:'#7fae8f',compartilhada:'#7ea6d4',perdida:'#c0473f',destruida:'#8a1f1f'};
     const clues=s.clues.map(k=>({...k, sColor:clueColor[k.status]||'#7e7a70'}));
 
@@ -4899,7 +5012,10 @@ class Component extends DCLogic {
       {top:'30%',left:'66%',label:'Cofres',color:'#c6a35e',glow:'rgba(198,163,94,.5)',size:'11px'},
       {top:'55%',left:'28%',label:'Beco dos Fundos',color:'#9b9588',glow:'rgba(155,149,136,.4)',size:'10px'}
     ];
-    const npcDlg=activeNpcObj?{name:activeNpcObj.name,faction:activeNpcObj.faction,acc:activeNpcObj.acc,surf:activeNpcObj.surf,line:activeNpcObj.line}:null;
+    const npcDlg=activeNpcObj?{name:activeNpcObj.name,faction:activeNpcObj.faction,acc:activeNpcObj.acc,surf:activeNpcObj.surf,line:activeNpcObj.line,imgBg:activeNpcObj.imgBg}:null;
+    // jogador: NPC em dialogo vindo do banco (nome/texto publicos; imagem so com retrato revelado)
+    const pd=s.dialogue&&s.dialogue.id?s.dialogue:null; const pdTh=pd?(this.THEME[pd.theme]||this.THEME.human||{}):{};
+    const pDialog=pd?{name:pd.name||'—',desc:pd.desc||'',hasDesc:!!pd.desc,faction:pd.faction||'',hasFaction:!!pd.faction,acc:pdTh.acc||'#b9a06a',surf:pdTh.surf||'#1a1820',imgBg:this._mediaBg(pd.imageId,pd.imageFit)||'none',hasImg:!!pd.imageId}:null;
 
     // ---- clock creation form ----
     const cd=s.clockDraft;
@@ -5005,6 +5121,9 @@ class Component extends DCLogic {
       const hurt=wounds.length>0, shaken=conds.length>0;
       return {id:p.id, char:p.char, player:p.player||'Jogador', isSelf, youLabel:isSelf?'Você':'',
         initial:p.char[0], acc, nat, hasNat:!!nat,
+        // Plano final, Etapa 2: retrato do colega (antes so a inicial). Fundo neutro enquanto
+        // a foto nao chega; inicial quando nao ha foto.
+        avBg:photoOf(p.id)?`center/cover url(${photoOf(p.id)})`:'#1a1820', avInitial:photoOf(p.id)?'':p.char[0],
         healthLabel:hurt?'Ferido':(shaken?'Abalado':'Saudável'),
         healthCol:hurt?'#c41e3a':(shaken?'#d2a23a':'#7fae8f'),
         wounds, conds, hasWounds:hurt, hasConds:shaken, bars, hasBars:bars.length>0,
@@ -5303,7 +5422,13 @@ class Component extends DCLogic {
       rollMasterBlocked:!!this._pairBlock(), diffOptions, combatWeapons, woundLevels, sceneList, libList,
       scenesView, hasScenes:scenesView.length>0, noScenes:scenesView.length===0, contentMsg:s.contentMsg, hasContentMsg:!!s.contentMsg,
       npcForm:s.npcForm||{}, npcFormOpen:!!s.npcForm, clueForm:s.clueForm||{}, clueFormOpen:!!s.clueForm, sceneForm:s.sceneForm||{}, sceneFormOpen:!!s.sceneForm,
-      npcFormErr:!!(s.npcForm&&s.npcForm.err), clueFormErr:!!(s.clueForm&&s.clueForm.err), sceneFormErr:!!(s.sceneForm&&s.sceneForm.err),
+      npcFormErr:!!(s.npcForm&&s.npcForm.err),
+      npcImgBg:(s.npcForm&&this._mediaBg(s.npcForm.imageId,s.npcForm.imageFit))||'none', npcHasImg:!!(s.npcForm&&s.npcForm.imageId), npcNoImg:!(s.npcForm&&s.npcForm.imageId),
+      npcImgErr:(s.npcForm&&s.npcForm.imgErr)||'', npcHasImgErr:!!(s.npcForm&&s.npcForm.imgErr), imgBusy:!!s.imgBusy, imgBusyLabel:s.imgBusy?'Enviando…':'',
+      onNpcCard:e=>this.onNpcImage(e,'contain'), onNpcPortrait:e=>this.onNpcImage(e,'cover'), npcAcervo:()=>this.openAcervo('npc'), npcRemoveImg:()=>this.removeFormImage('npc'),
+      acervoOpen:!!s.acervo, acervoLoading:!!(s.acervo&&s.acervo.state==='loading'), acervoError:!!(s.acervo&&s.acervo.state==='error'),
+      acervoEmpty:!!(s.acervo&&s.acervo.state==='ok'&&!s.acervo.items.length), closeAcervo:()=>this.setState({acervo:null}), retryAcervo:()=>s.acervo&&this.openAcervo(s.acervo.kind),
+      acervoItems:(s.acervo&&s.acervo.items||[]).map(it=>({id:it.id,name:it.name||'Imagem',kindLabel:({npc:'NPC',scene:'Cena',clock:'Relógio',other:'Outra'})[it.kind]||'',bg:this._mediaBg(it.id,'cover')||'#1a1820',onPick:()=>this.pickAcervo(it)})), clueFormErr:!!(s.clueForm&&s.clueForm.err), sceneFormErr:!!(s.sceneForm&&s.sceneForm.err),
       contentSaveLabel:s.contentSaving?'Salvando…':'Salvar', contentSaving:!!s.contentSaving,
       newNpc:()=>this.openContentForm('npc'), newClue:()=>this.openContentForm('clue'), newScene:()=>this.openContentForm('scene'),
       saveNpc:()=>this.saveContent('npc'), saveClue:()=>this.saveContent('clue'), saveScene:()=>this.saveContent('scene'),
@@ -5447,7 +5572,7 @@ class Component extends DCLogic {
       scene:s.scene, self:selfV, selfSens, selfAttr, selfSkill, selfWeak,
       pending:s.pending||{label:'Aguarde — o Mestre ainda não pediu um teste.',difficulty:''}, pendingAttr:s.pending?this.attrLabel(s.pending.attrKey):'', pendingSkill:s.pending?this.skillLabel(s.pending.skillKey):'', pendingDice:s.pending?(selfV.attrs[s.pending.attrKey]||1):1,
       rollPlayer:()=>this.rollPlayer(), pRolling:s.pRolling, pRollTemp:s.pRollTemp?s.pRollTemp.map(d=>({d})):null, pRoll:decorate(s.pRoll), hasPRoll:!!s.pRoll, noPRoll:(!s.pRoll&&!s.pRolling),
-      npcsKnown:npcs.filter(n=>n.known), cluesFound:cluesFoundV
+      npcsKnown:npcs.filter(n=>n.known), pDialog:pDialog||{}, hasPDialog:!!pDialog, cluesFound:cluesFoundV
     };
   }
   crumb(){
