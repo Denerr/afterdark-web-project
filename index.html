@@ -282,6 +282,7 @@
 
         <!-- CENA view -->
         <sc-if value="{{ stageIsCena }}">
+          <sc-if value="{{ stageHasSceneImg }}"><div role="img" aria-label="Imagem da cena" style="position:absolute;inset:0;background: {{ stageSceneBg }}"></div><div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,12,.4),rgba(8,8,12,.85))"></div></sc-if>
           <div style="position:absolute;top:16px;left:18px;display:flex;gap:8px">
             <span style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color: {{ sessTheme.acc }};padding:5px 11px;border:1px solid {{ sessTheme.acc }};border-radius:20px;background:rgba(8,8,12,.5)">Cena Ativa</span>
             <span style="font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#cfc7b4;padding:5px 11px;border:1px solid rgba(255,255,255,.12);border-radius:20px;background:rgba(8,8,12,.5)">{{ stageSceneBadge }}</span>
@@ -931,11 +932,21 @@
               <textarea value="{{ sceneForm.desc }}" onInput="{{ onSceneDesc }}" placeholder="O que o grupo percebe ao chegar" rows="4" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
               <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Notas privadas do Mestre</label>
               <textarea value="{{ sceneForm.notes }}" onInput="{{ onSceneNotes }}" placeholder="Só você vê" rows="3" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px;resize:vertical;font-family:inherit"></textarea>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Imagem da cena (visão narrativa, não é o mapa)</label>
+              <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px">
+                <div role="img" aria-label="Prévia da imagem da cena" style="width:120px;height:68px;flex-shrink:0;border-radius:6px;background:#0c0b11;border:1px solid rgba(255,255,255,.12);overflow:hidden"><div style="width:100%;height:100%;background: {{ sceneImgBg }}"></div></div>
+                <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+                  <label style="position:relative;padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Enviar imagem<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange="{{ onSceneImg }}" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"/></label>
+                  <button onClick="{{ sceneAcervo }}" style="padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Escolher do acervo</button>
+                  <sc-if value="{{ sceneHasImg }}"><button onClick="{{ sceneRemoveImg }}" style="align-self:flex-start;padding:4px 0;background:transparent;border:none;color:#a39e90;font-size:11px;cursor:pointer;text-decoration:underline">Remover imagem</button></sc-if>
+                </div>
+              </div>
+              <sc-if value="{{ sceneHasImgErr }}"><div role="alert" style="font-size:12px;color:#e08a8a;margin:-4px 0 10px">{{ sceneImgErr }}</div></sc-if>
               <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Personagens presentes</label>
               <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
                 <sc-for list="{{ scenePresentOpts }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.onToggle }}" aria-pressed="{{ o.on }}" style="padding:6px 11px;min-height:34px;border-radius:16px;font-size:12px;cursor:pointer;background:transparent;border:1px solid rgba(198,166,100,.35);color:#cdc6b6"><sc-if value="{{ o.on }}"><span style="color:#7fae8f">✓ </span></sc-if>{{ o.label }}</button></sc-for>
               </div>
-              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Mapa</label>
+              <label style="font-size:11px;color:#8d887c;display:block;margin-bottom:6px">Mapa associado (opcional; ao ativar a cena, o mapa vai junto)</label>
               <select value="{{ sceneForm.mapId }}" onChange="{{ onSceneMap }}" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:10px;font-size:13px;color:#e9e3d4;outline:none;margin-bottom:10px">
                 <sc-for list="{{ sceneMapOptions }}" as="m" hint-placeholder-count="2"><option value="{{ m.id }}">{{ m.name }}</option></sc-for>
               </select>
@@ -957,7 +968,7 @@
                   <div style="font-size:13px;color:#e9e3d4;overflow-wrap:anywhere;min-width:0">{{ sc.title }}</div>
                   <button onClick="{{ sc.onActivate }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;background: {{ sc.activeBg }};color: {{ sc.activeCol }};border-color:rgba(198,166,100,.45)">{{ sc.activeLabel }}</button>
                 </div>
-                <div style="font-size:11px;color:#8d887c;margin-top:4px">{{ sc.shareLabel }} · {{ sc.mapLine }}</div>
+                <div style="font-size:11px;color:#8d887c;margin-top:4px">{{ sc.shareLabel }} · {{ sc.imgLine }} · {{ sc.mapLine }}</div>
                 <div style="font-size:12px;color:#b9b2a2;font-family:'Cormorant Garamond';font-style:italic;margin-top:3px">Presentes: {{ sc.presentLine }}</div>
                 <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
                   <button onClick="{{ sc.onShare }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">{{ sc.shareBtn }}</button>
@@ -965,6 +976,24 @@
                   <sc-if value="{{ sc.noDelAsk }}"><button onClick="{{ sc.onAskDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:3px;padding:6px 9px;cursor:pointer;color:#c44a5e;min-height:32px">Excluir</button></sc-if>
                   <sc-if value="{{ sc.delAsk }}"><button onClick="{{ sc.onDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:#c41e3a;border:none;border-radius:3px;padding:6px 9px;cursor:pointer;color:#fff;min-height:32px">Confirmar exclusão</button><button onClick="{{ sc.onCancelDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Cancelar</button></sc-if>
                 </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <!-- MAPAS · Plano final, Etapa 4: mapa ativo independente da cena -->
+        <sc-if value="{{ toolMapas }}">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
+            <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e">Mapas</div>
+            <sc-if value="{{ hasActiveMap }}"><button onClick="{{ clearMap }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Ocultar mapa</button></sc-if>
+          </div>
+          <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 12px">O mapa é a planta do lugar; a cena é a visão narrativa. O mapa mostrado aqui vale até você trocar — uma cena com mapa associado leva a ele ao ser ativada.</p>
+          <sc-if value="{{ hasContentMsg }}"><div role="status" style="font-size:12px;color:#7fae8f;margin:0 0 12px">{{ contentMsg }}</div></sc-if>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ mapsView }}" as="m" hint-placeholder-count="3">
+              <div style="display:flex;gap:11px;align-items:center;padding:9px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-left:3px solid {{ m.bg }};border-radius:4px">
+                <div role="img" aria-label="Mapa {{ m.name }}" style="width:72px;height:48px;flex-shrink:0;border-radius:4px;background: {{ m.thumb }}"></div>
+                <div style="flex:1;min-width:0"><div style="font-size:13px;color:#e9e3d4">{{ m.name }}</div><sc-if value="{{ m.usedBy }}"><div style="font-size:11px;color:#8d887c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">Cenas: {{ m.usedBy }}</div></sc-if></div>
+                <button onClick="{{ m.onToggle }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background: {{ m.bg }};color: {{ m.col }};border:1px solid rgba(198,166,100,.45);border-radius:3px;padding:6px 9px;cursor:pointer;min-height:32px">{{ m.label }}</button>
               </div>
             </sc-for>
           </div>
@@ -1317,6 +1346,7 @@
           <sc-if value="{{ centerIsCena }}">
             <div style="border-radius:12px;overflow:hidden;border:1px solid rgba(196,30,58,.22)">
               <div style="height:230px;position:relative;background:radial-gradient(90% 110% at 50% 0%, #2e1117, #16080b)">
+                <sc-if value="{{ pHasSceneImg }}"><div role="img" aria-label="Imagem da cena" style="position:absolute;inset:0;background: {{ pSceneBg }}"></div></sc-if>
                 <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 40% 10%, rgba(196,30,58,.28), transparent 70%)"></div>
                 <div style="position:absolute;top:14px;left:16px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#e07a8a;padding:5px 11px;border:1px solid rgba(196,30,58,.45);border-radius:20px;background:rgba(8,6,8,.5)">Cena Atual</div>
               </div>
@@ -1563,11 +1593,11 @@
           <!-- INVENTÁRIO -->
           <sc-if value="{{ overlayInv }}">
             <div style="background:linear-gradient(180deg,#1a1610,#141009);border:1px solid rgba(198,166,100,.25);border-radius:4px 12px 12px 12px;box-shadow:0 12px 30px rgba(0,0,0,.4);overflow:hidden">
-              <div style="display:flex;gap:4px;padding:10px 12px 0;background:#100c07">
+              <sc-if value="{{ invShowDividers }}"><div style="display:flex;gap:4px;padding:10px 12px 0;background:#100c07">
                 <sc-for list="{{ invDividers }}" as="d" hint-placeholder-count="3">
                   <button onClick="{{ d.onClick }}" style="padding:9px 14px 11px;border:none;border-radius:7px 7px 0 0;font:600 11px 'Archivo';letter-spacing:.06em;text-transform:uppercase;cursor:pointer;background: {{ d.bg }};color: {{ d.col }}">{{ d.label }} <span style="font-family:'Space Mono';opacity:.7">{{ d.count }}</span></button>
                 </sc-for>
-              </div>
+              </div></sc-if>
               <div style="background:repeating-linear-gradient(#ece3cf,#ece3cf 28px,#e4d9c0 29px);padding:18px 16px;min-height:280px">
                 <sc-if value="{{ invPistas }}">
                   <div style="font-family:'Cinzel';font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#7a5a2e;margin-bottom:14px;border-bottom:1px solid rgba(122,90,46,.3);padding-bottom:8px">◷ Caso · Pistas encontradas</div>
@@ -2288,7 +2318,7 @@ class Component extends DCLogic {
   // cache/BroadcastChannel NÃO aplica nem grava nada (antes eram globais e uma mesa ou
   // aba sobrescrevia a outra). Fica apenas para a mesa local de quem joga sem conta,
   // com chave e canal separados por mesa.
-  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library','scenes','activeSceneId','clockEvents','activeNpcId']; }
+  _syncKeys(){ return ['clocks','stressBars','npcs','clues','log','scene','inventory','library','scenes','activeSceneId','clockEvents','activeNpcId','activeMapId']; }
   _snapshot(){ const s=this.state, o={}; this._syncKeys().forEach(k=>{ o[k]=s[k]; }); return o; }
   // Etapa 6: alem do aviso flutuante (some em 4,5 s), o erro com contexto fica junto da
   // acao que falhou ate ela dar certo ou ate o usuario dispensar. ctx: teste, consequencia,
@@ -2331,7 +2361,7 @@ class Component extends DCLogic {
   // ---- estado da sessão de jogo por mesa (Supabase) ----
   _blankTableSession(){
     const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)?JSON.parse(JSON.stringify(window.AfterdarkData.catalog)):{weapons:[],items:[]};
-    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null,clockEvents:[],activeNpcId:null,dialogue:null};
+    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null,clockEvents:[],activeNpcId:null,dialogue:null,activeMapId:null};
   }
   async _loadTableSession(tableId,isOwner){
     const base=this._blankTableSession();
@@ -2388,6 +2418,9 @@ class Component extends DCLogic {
     const remoteObj=(remote&&typeof remote==='object')?remote:{};
     const savedRef=JSON.stringify({state:this._pickSync(remoteObj),notes:this._notesFromRemote(notes,false)});
     next.library=this._mergeLibrary(next.library,this.state.accountLib);
+    // Plano final, Etapa 4: mapa ativo independente da cena. Mesa antiga sem mapa ativo adota
+    // o mapa da cena ativa (nada e apagado; a cena continua apontando para ele).
+    if(next.activeMapId==null){ const sc=(next.scenes||[]).find(x=>x.id===next.activeSceneId); if(sc&&sc.mapId) next.activeMapId=sc.mapId; }
     Object.assign(next,this._notesFromRemote(notes,true));
     this._versions[tableId]=version;
     this.setState({...next,sessionStale:false,saveStatus:'saved',saveError:''},()=>{
@@ -3412,11 +3445,11 @@ class Component extends DCLogic {
     {k:'acoes',       l:'Ações',        tools:['testes']},
     {k:'personagens', l:'Personagens',  tools:['estresse','ferimentos','condicoes']},
     {k:'investigacao',l:'Investigação', tools:['relogios','pistas','npcs']},
-    {k:'conducao',    l:'Condução',     tools:['cenas','roteiro','narrativa']},
+    {k:'conducao',    l:'Condução',     tools:['cenas','mapas','roteiro','narrativa']},
     {k:'acervo',      l:'Acervo',       tools:['biblioteca']},
   ];
   TOOL_LABELS = {testes:'Testes',estresse:'Estresse',ferimentos:'Ferimentos',condicoes:'Condições',
-    relogios:'Relógios',pistas:'Pistas',npcs:'NPCs',cenas:'Cenas',roteiro:'Roteiro',
+    relogios:'Relógios',pistas:'Pistas',npcs:'NPCs',cenas:'Cenas',mapas:'Mapas',roteiro:'Roteiro',
     narrativa:'Narrativa',biblioteca:'Biblioteca'};
   _toolGroupOf(tool){ const g=this.TOOL_GROUPS.find(g=>g.tools.includes(tool)); return g?g.k:'acoes'; }
   // Trocar de grupo mantem a ferramenta se ela ja pertence a ele; senao abre a primeira.
@@ -3618,7 +3651,7 @@ class Component extends DCLogic {
   toggleClueShare(id){ this.setState(s=>({clues:s.clues.map(k=>k.id===id?{...k,status:k.status==='oculta'?'compartilhada':'oculta'}:k)})); }
   openContentForm(kind,item){
     const blank={npc:{id:null,name:'',desc:'',notes:'',faction:'',imageId:null,imageFit:null},clue:{id:null,name:'',txt:'',notes:''},
-      scene:{id:null,title:'',desc:'',notes:'',present:[],mapId:'',shared:true}}[kind];
+      scene:{id:null,title:'',desc:'',notes:'',present:[],mapId:'',shared:true,imageId:null}}[kind];
     const f=item?{...blank,...item,present:Array.isArray(item.present)?item.present.map(x=>({...x})):[]}:blank;
     if(kind==='clue'&&f.txt==='—') f.txt='';
     this.setState({[kind+'Form']:{...f,err:''},contentMsg:'',contentDel:null});
@@ -3662,7 +3695,7 @@ class Component extends DCLogic {
     } else {
       this.setState(st=>{ const ex=st.scenes.find(x=>x.id===id);
         const e={...(ex||{}),id,title:T(f.title).slice(0,120),desc:T(f.desc).slice(0,4000),notes:T(f.notes).slice(0,4000),
-          present:(f.present||[]).slice(0,40),mapId:f.mapId||null,shared:!!f.shared};
+          present:(f.present||[]).slice(0,40),mapId:f.mapId||null,shared:!!f.shared,imageId:f.imageId||null};
         return {scenes:ex?st.scenes.map(x=>x.id===id?e:x):[...st.scenes,e],sceneForm:{...f,id}}; });
     }
     await this._commitContent(f.id?'Alterações salvas':(kind==='npc'?'NPC cadastrado':kind==='clue'?'Pista cadastrada':'Cena cadastrada'),kind+'Form');
@@ -3678,8 +3711,14 @@ class Component extends DCLogic {
     await this._commitContent('Excluído');
   }
   async activateScene(id){
-    this.setState(s=>({activeSceneId:s.activeSceneId===id?null:id}));
+    // cena com mapa associado leva a esse mapa; sem mapa, o mapa escolhido pelo Mestre fica
+    this.setState(s=>{ const on=s.activeSceneId!==id; const sc=s.scenes.find(x=>x.id===id);
+      return {activeSceneId:on?id:null,activeMapId:(on&&sc&&sc.mapId)?sc.mapId:s.activeMapId}; });
     await this._commitContent(this.state.activeSceneId?'Cena ativada':'Cena desativada');
+  }
+  async setActiveMap(id){
+    this.setState(s=>({activeMapId:s.activeMapId===id?null:id}));
+    await this._commitContent(this.state.activeMapId?'Mapa mostrado aos jogadores':'Mapa ocultado');
   }
   async toggleSceneShare(id){
     this.setState(s=>({scenes:s.scenes.map(x=>x.id===id?{...x,shared:!x.shared}:x)}));
@@ -4515,7 +4554,9 @@ class Component extends DCLogic {
   // Desktop: Testes/Grupo/Diário são abas da lateral. Celular: viram foco de tela inteira.
   openPlayerArea(k){
     if(k==='mapa'||k==='cena') return this.setCenterTab(k);
-    if(k==='pistas') return this.setState({playerFocus:'inventario',invDivider:'pistas',playerMenuOpen:false});
+    // Plano final, Etapa 4: Pistas e Inventario e Armas sao paineis separados
+    if(k==='pistas') return this.setState({playerFocus:'pistas',playerMenuOpen:false});
+    if(k==='inventario') return this.setState(s=>({playerFocus:'inventario',invDivider:s.invDivider==='armas'?'armas':'itens',playerMenuOpen:false}));
     if((k==='testes'||k==='grupo'||k==='diario')&&!this.state.playerNarrow) return this.setState({sideTab:k,playerFocus:null,playerMenuOpen:false});
     if(k==='testes'||k==='grupo'||k==='diario') return this.setState({sideTab:k,playerFocus:k,playerMenuOpen:false});
     this.setPlayerFocus(k);
@@ -4930,12 +4971,12 @@ class Component extends DCLogic {
     const presentNames=list=>(list||[]).map(p=>p.kind==='pc'?charOfId(p.id):npcOfId(p.id)).filter(Boolean);
     const scenesView=(s.scenes||[]).map(x=>{ const act=s.activeSceneId===x.id; const mp=x.mapId?this.MAPS.find(m=>m.id===x.mapId):null;
       return {...x, active:act, activeLabel:act?'✓ Ativa':'Ativar', activeBg:act?'#c6a35e':'transparent', activeCol:act?'#0b0b10':'#e0c179',
-        presentLine:presentNames(x.present).join(', ')||'Ninguém marcado', mapLine:mp?mp.name:(x.mapId?'Mapa indisponível':'Sem mapa'),
+        presentLine:presentNames(x.present).join(', ')||'Ninguém marcado', mapLine:mp?('Mapa: '+mp.name):(x.mapId?'Mapa indisponível':'Sem mapa associado'), imgLine:x.imageId?'Com imagem':'Sem imagem',
         shareLabel:x.shared?'Compartilhada':'Só o Mestre', shareBtn:x.shared?'Deixar só para mim':'Compartilhar', onShare:()=>this.toggleSceneShare(x.id),
         onActivate:()=>this.activateScene(x.id), onEdit:()=>this.openContentForm('scene',x),
         delAsk:s.contentDel==='scene:'+x.id, noDelAsk:s.contentDel!=='scene:'+x.id, onAskDel:()=>this.askDeleteContent('scene',x.id), onDel:()=>this.deleteContent('scene',x.id), onCancelDel:()=>this.cancelDeleteContent()}; });
     const actScene=(s.scenes||[]).find(x=>x.id===s.activeSceneId)||null;
-    const actMap=this._mapView(actScene&&actScene.mapId);
+    const actMap=this._mapView(s.activeMapId);
     const sceneList=[{title:'Salão de Leilões',sub:'Cena ativa · Alta Vesper'},{title:'Cofres da Sociedade Rubra',sub:'Investigação · sangue falso'},{title:'Beco dos Fundos',sub:'Fuga possível'},{title:'Camarote Privado',sub:'NPC misterioso'}].map(sc=>({...sc, onClick:()=>this.openScene({title:'Modo Cena',sub:sc.title,acc:sessTheme.acc,surf:sessTheme.surf,glow:sessTheme.glow,text:'A cena muda — '+sc.sub+'. O Mestre conduz o grupo para um novo momento da noite em Saint Vesper.'}) }));
     const libList=[['⚖','Regras rápidas de teste e dificuldade'],['☰','Facções de Saint Vesper'],['◉','Mapa completo da cidade'],['✦','NPCs importantes'],['◷','Tabelas de relógios'],['✎','Anotações da campanha']].map(([icon,txt])=>({icon,txt}));
     const historyPrompts=[{q:'O que seu personagem perdeu?'},{q:'Quem ele teme encontrar em Saint Vesper?'},{q:'Qual segredo ele nunca contou?'},{q:'O que ele viu que não deveria ter visto?'}];
@@ -5126,12 +5167,12 @@ class Component extends DCLogic {
     const showGrupoBox=sideActive==='grupo';
     const centerIsMapa=s.centerTab==='mapa';
     const fichaOpen=focus==='ficha';
-    const overlayNpcs=focus==='npcs', overlayInv=focus==='inventario', overlayOpen=overlayNpcs||overlayInv;
+    const overlayNpcs=focus==='npcs', overlayPistas=focus==='pistas', overlayInv=focus==='inventario'||overlayPistas, overlayOpen=overlayNpcs||overlayInv;
     const mobileFocusBar=pNarrow&&sideKeys.includes(focus);
     // Celular: Mesa/Ficha/Grupo/Testes ficam na barra inferior; o resto vai para "Mais".
     const menuKeys=pNarrow?['cena','diario','npcs','pistas','inventario']:['mapa','cena','ficha','testes','grupo','diario','npcs','inventario'];
     const activeMenu=(k)=>{ if(k==='mapa') return s.centerTab==='mapa'&&!focus; if(k==='cena') return s.centerTab==='cena'&&!focus;
-      if(k==='pistas') return focus==='inventario'&&s.invDivider==='pistas'; if(k==='inventario') return focus==='inventario'&&s.invDivider!=='pistas';
+      if(k==='pistas') return focus==='pistas'; if(k==='inventario') return focus==='inventario';
       if(!pNarrow&&sideKeys.includes(k)) return !focus&&s.sideTab===k; return focus===k; };
     const playerMenu=menuKeys.map(k=>({k,l:tabLabels[k],icon:tabIcons[k],onClick:()=>this.openPlayerArea(k),bg:activeMenu(k)?'rgba(198,163,94,.1)':'transparent',col:activeMenu(k)?'#efe8d8':'#cfc7b4',iconCol:activeMenu(k)?'#e0c179':'#8d887c',badge:(k==='testes'&&s.testNotif),badgeText:'novo'}));
     // Relógios do jogador: o banco (player_get_session) já filtra; este filtro é a
@@ -5176,7 +5217,7 @@ class Component extends DCLogic {
     });
     const playerMapPins=[];
     const pAct=s.activeScene&&s.activeScene.title?s.activeScene:null;
-    const pMap=this._mapView(pAct&&pAct.mapId);
+    const pMap=this._mapView(s.activeMapId);
     const pPresent=pAct?[...(pAct.presentPcs||[]).map(id=>charOfId(id)).filter(Boolean),...(pAct.presentNpcs||[]).map(id=>npcOfId(id)).filter(Boolean)]:[];
     if(pAct&&pAct.presentUnknown>0) pPresent.push(pAct.presentUnknown===1?'uma figura não identificada':`${pAct.presentUnknown} figuras não identificadas`);
     // self avatar + health
@@ -5239,7 +5280,7 @@ class Component extends DCLogic {
     const invOwned=eqView(myEq.filter(e=>e.kind===invKind),s.memberId).map(e=>({...e,removeLabel:e.busy?'…':'✕'}));
     const invAvailable=libOf.map(e=>{ const n=myEq.filter(x=>x.kind===invKind&&x.ref===e.id).length; const busy=Object.keys(s.equipBusy||{}).some(k=>k.startsWith('add:'))&&!!(this._pendIid&&this._pendIid[s.memberId+':'+invKind+':'+e.id]);
       return {...e,icon:invKind==='weapons'?'⚔':'◈',hasBonus:invKind==='weapons'&&e.bonus>0,owned:n>0,ownedLabel:n>0?`você tem ${n}`:'',addLabel:busy?'…':'＋',onAdd:()=>this.equipOp(s.memberId,'add',invKind,e.id)}; });
-    const invDividers=[['pistas','Pistas',cluesFoundV.length],['itens','Itens',myEq.filter(e=>e.kind==='items').length],['armas','Armas',myEq.filter(e=>e.kind==='weapons').length]].map(([k,label,count])=>({k,label,count,onClick:()=>this.setInvDivider(k),bg:s.invDivider===k?'#ece3cf':'#221c12',col:s.invDivider===k?'#3a2e1c':'#a08a64',shadow:s.invDivider===k?'0 -2px 8px rgba(0,0,0,.2)':'none'}));
+    const invDividers=[['itens','Itens',myEq.filter(e=>e.kind==='items').length],['armas','Armas',myEq.filter(e=>e.kind==='weapons').length]].map(([k,label,count])=>({k,label,count,onClick:()=>this.setInvDivider(k),bg:s.invDivider===k?'#ece3cf':'#221c12',col:s.invDivider===k?'#3a2e1c':'#a08a64',shadow:s.invDivider===k?'0 -2px 8px rgba(0,0,0,.2)':'none'}));
 
     return {
       grain:(this.props.showGrain!==false), actionError:s.actionError, hasActionError:!!s.actionError,
@@ -5334,7 +5375,15 @@ class Component extends DCLogic {
       stageSceneTitle:actScene?actScene.title:'Nenhuma cena ativa', stageSceneDesc:actScene?(actScene.desc||'Sem descrição.'):'Cadastre uma cena em Cenas e ative-a para mostrá-la aqui e aos jogadores.',
       stageSceneBadge:actScene?(actScene.shared?'Compartilhada':'Só o Mestre vê'):'—', stageHasScene:!!actScene,
       stagePresent:actScene?(presentNames(actScene.present).join(', ')||'Ninguém marcado'):'', stageMap:actMap, stageMapName:actMap.hasMap?actMap.name:'',
-      stageNoMapText:actScene?(actMap.missing?'O mapa desta cena não está mais disponível.':'Esta cena não tem mapa.'):'Ative uma cena com mapa para vê-lo aqui.',
+      stageNoMapText:actMap.missing?'O mapa ativo não está mais disponível.':'Nenhum mapa ativo. Escolha um em Condução › Mapas (ou ative uma cena com mapa).',
+      stageSceneBg:actScene?(this._mediaBg(actScene.imageId,'cover')||'none'):'none', stageHasSceneImg:!!(actScene&&actScene.imageId),
+      mapsView:this.MAPS.filter(m=>!s.oneshot||!m.oneshot||m.oneshot===s.oneshot).map(m=>{ const on=s.activeMapId===m.id; return {...m,on,label:on?'✓ Ativo':'Mostrar',
+        thumb:`center/cover no-repeat url("${m.src}")`,bg:on?'#c6a35e':'transparent',col:on?'#0b0b10':'#e0c179',
+        usedBy:(s.scenes||[]).filter(x=>x.mapId===m.id).map(x=>x.title).join(', '),onToggle:()=>this.setActiveMap(m.id)}; }),
+      hasActiveMap:!!s.activeMapId, clearMap:()=>s.activeMapId&&this.setActiveMap(s.activeMapId),
+      sceneImgBg:(s.sceneForm&&this._mediaBg(s.sceneForm.imageId,'cover'))||'none', sceneHasImg:!!(s.sceneForm&&s.sceneForm.imageId),
+      sceneImgErr:(s.sceneForm&&s.sceneForm.imgErr)||'', sceneHasImgErr:!!(s.sceneForm&&s.sceneForm.imgErr),
+      onSceneImg:e=>this.onBgImage(e,'scene'), sceneAcervo:()=>this.openAcervo('scene'), sceneRemoveImg:()=>this.removeFormImage('scene'),
       oneshotList, chaptersView, selChapter, sessTheme, sessName, centerBorder:'rgba(198,166,100,.18)',
       // master stage
       stageSurf:sessTheme.surf, stageGlow:sessTheme.glow,
@@ -5390,7 +5439,8 @@ class Component extends DCLogic {
       playerMapPins, pendingFormula,
       pScene:pAct||{}, pHasScene:!!pAct, pNoScene:!pAct, pSceneDesc:pAct?(pAct.desc||''):'', pSceneHasDesc:!!(pAct&&pAct.desc),
       pPresentLine:pPresent.join(', '), pHasPresent:pPresent.length>0, pMap, pMapName:pMap.hasMap?pMap.name:'',
-      pNoMapText:pAct?(pMap.missing?'O mapa desta cena não está disponível.':'Esta cena não tem mapa.'):'O Mestre ainda não mostrou um mapa.',
+      pNoMapText:pMap.missing?'O mapa não está disponível.':'O Mestre ainda não mostrou um mapa.',
+      pSceneBg:pAct?(this._mediaBg(pAct.imageId,'cover')||'none'):'none', pHasSceneImg:!!(pAct&&pAct.imageId),
       playerClocks, hasMyClocks:playerClocks.length>0, sessionStale:s.sessionStale,
       // Ponto 3: status da mesa e conexão (jogador)
       // pausa nao cobre mais a tela: vira um aviso fixo com saidas (menu, mesas, inicio)
@@ -5428,9 +5478,9 @@ class Component extends DCLogic {
       canRollPlayer:ptPending&&!s.pRoll&&!s.pRolling&&!this._tablePaused(), pSendSending:!!(ps&&ps.state==='sending'), pSendSent:!!(ps&&ps.state==='sent'), pSendError:!!(ps&&ps.state==='error'), pSendCancelled:!!(ps&&ps.state==='cancelled'), pSendMsg:ps?ps.msg:'',
       resendPlayerResult:()=>this.resendPlayerResult(),
       mobileFocusBar, focusLabel:tabLabels[focus]||'', backToMap:()=>this.clearFocus(),
-      overlayOpen, overlayNpcs, overlayInv, overlayTitle:overlayNpcs?'NPCs conhecidos':'Inventário',
+      overlayOpen, overlayNpcs, overlayInv, overlayTitle:overlayNpcs?'NPCs conhecidos':(overlayPistas?'Pistas':'Inventário e Armas'), invShowDividers:!overlayPistas,
       // inventory
-      tabInventario:s.playerTab==='inventario', invDividers, invPistas:s.invDivider==='pistas', invStuff:invIsStuff,
+      tabInventario:s.playerTab==='inventario', invDividers, invPistas:overlayPistas, invStuff:!overlayPistas&&invIsStuff,
       invStuffTitle:s.invDivider==='armas'?'⚔ Equipamento · Armas':'◈ Equipamento · Itens',
       invOwned, noOwned:invOwned.length===0, emptyStuffMsg:s.invDivider==='armas'?'Você não carrega armas ainda.':'Você não carrega itens ainda.',
       invAvailable, noAvailable:invAvailable.length===0, noClues:cluesFoundV.length===0,
@@ -5456,7 +5506,7 @@ class Component extends DCLogic {
       toolCondicoes:s.masterTool==='condicoes',
       narrativaPassages, narrativaText:nt.text, narrativaMissionTitle:narrativaPad.title||'Missão atual',
       setNarrativaPadrao:()=>this.setNarrativaMode('padrao'), setNarrativaProprio:()=>this.setNarrativaMode('proprio'), resetNarrativa:()=>this.resetNarrativa(), onNarrativaText:(e)=>this.onNarrativaText(e),
-      toolTestes:s.masterTool==='testes', toolRelogios:s.masterTool==='relogios', toolEstresse:s.masterTool==='estresse', toolFerimentos:s.masterTool==='ferimentos', toolNpcs:s.masterTool==='npcs', toolCenas:s.masterTool==='cenas', toolBiblioteca:s.masterTool==='biblioteca',
+      toolTestes:s.masterTool==='testes', toolRelogios:s.masterTool==='relogios', toolEstresse:s.masterTool==='estresse', toolFerimentos:s.masterTool==='ferimentos', toolNpcs:s.masterTool==='npcs', toolCenas:s.masterTool==='cenas', toolMapas:s.masterTool==='mapas', toolBiblioteca:s.masterTool==='biblioteca',
       tabCena:s.playerTab==='cena', tabFicha:s.playerTab==='ficha', tabTestes:s.playerTab==='testes', tabMapa:s.playerTab==='mapa', tabDiario:s.playerTab==='diario', tabNpcs:s.playerTab==='npcs', tabPistas:s.playerTab==='pistas',
       testDraft:s.testDraft, attrsAll:this.ATTRS, skillsAll:this.SKILLS,
       // So as pericias do atributo escolhido; a opcao vazia aparece quando nada valido esta selecionado.
