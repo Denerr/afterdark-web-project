@@ -301,7 +301,22 @@
         <!-- MAPA view -->
         <sc-if value="{{ stageIsMapa }}">
           <sc-if value="{{ stageMap.hasMap }}">
-            <div role="img" aria-label="Mapa: {{ stageMapName }}" style="position:absolute;inset:0;width:100%;height:100%;background:#0c0a10;background-image: {{ stageMap.bg }};background-size:contain;background-repeat:no-repeat;background-position:center"></div>
+            <div data-mapvp="m" role="application" aria-label="Mapa interativo: {{ stageMapName }}. Setas movem a visão, + e − aproximam, 0 ajusta; no modo Posicionar, Enter posiciona no centro." tabindex="0" onPointerDown="{{ stageMV.onDown }}" onPointerMove="{{ stageMV.onMove }}" onPointerUp="{{ stageMV.onUp }}" onPointerCancel="{{ stageMV.onUp }}" onWheel="{{ stageMV.onWheel }}" onKeyDown="{{ stageMV.onKey }}" style="position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;cursor: {{ stageMV.vpCursor }};background:#0c0a10;outline-offset:-2px">
+              <div data-mapworld="1" style="{{ stageMV.worldStyle }}">
+                <div role="img" aria-label="Mapa: {{ stageMapName }}" style="{{ stageMV.imgStyle }}"></div>
+                <sc-for list="{{ stageMV.segs }}" as="sg" hint-placeholder-count="1"><div style="{{ sg.style }}"></div></sc-for>
+                <sc-for list="{{ stageMV.marks }}" as="mk" hint-placeholder-count="2"><div role="img" aria-label="{{ mk.aria }}" title="{{ mk.title }}" style="{{ mk.style }}"><div style="{{ mk.dotStyle }}">{{ mk.glyph }}</div><div style="{{ mk.labelStyle }}">{{ mk.label }}</div></div></sc-for>
+              </div>
+              <sc-if value="{{ stageMV.isPlace }}"><div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border:1px solid rgba(224,193,121,.7);border-radius:50%;pointer-events:none"></div></sc-if>
+            </div>
+            <div style="position:absolute;right:14px;bottom:14px;z-index:4;display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+              <button onClick="{{ stageMV.zoomOut }}" aria-label="Diminuir zoom" style="width:36px;height:36px;border-radius:6px;background:rgba(12,11,17,.92);border:1px solid rgba(255,255,255,.14);color:#efe8d8;font-size:16px;cursor:pointer">−</button>
+              <button onClick="{{ stageMV.zoomIn }}" aria-label="Aumentar zoom" style="width:36px;height:36px;border-radius:6px;background:rgba(12,11,17,.92);border:1px solid rgba(255,255,255,.14);color:#efe8d8;font-size:16px;cursor:pointer">＋</button>
+              <button onClick="{{ stageMV.fit }}" aria-label="Ajustar à tela" style="width:36px;height:36px;border-radius:6px;background:rgba(12,11,17,.92);border:1px solid rgba(255,255,255,.14);color:#efe8d8;font-size:16px;cursor:pointer;font-size:12px;width:auto;padding:0 10px">Ajustar</button>
+              <span style="font-family:'Space Mono';font-size:11px;color:#cfc7b4;background:rgba(12,11,17,.92);border-radius:6px;padding:3px 6px">{{ stageMV.zoomPct }}</span>
+              <button onClick="{{ stageMV.setNav }}" aria-pressed="{{ stageMV.isNav }}" style="height:36px;padding:0 10px;border-radius:6px;border:1px solid rgba(198,166,100,.45);font:600 10px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer;background: {{ stageMV.navBg }};color: {{ stageMV.navCol }}">Navegar</button>
+              <button onClick="{{ stageMV.setPlace }}" aria-pressed="{{ stageMV.isPlace }}" style="height:36px;padding:0 10px;border-radius:6px;border:1px solid rgba(198,166,100,.45);font:600 10px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer;background: {{ stageMV.placeBg }};color: {{ stageMV.placeCol }}">Posicionar</button>
+            </div>
             <sc-if value="{{ stageMap.loading }}"><div role="status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8d887c;background:rgba(8,8,12,.4)">Carregando mapa…</div></sc-if>
             <sc-if value="{{ stageMap.error }}"><div role="alert" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;font-size:13px;color:#e08a8a;background:rgba(8,8,12,.85)">Não foi possível carregar o mapa.<button onClick="{{ stageMap.onRetry }}" style="padding:8px 14px;min-height:40px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:5px;color:#e0c179;font-size:11px;cursor:pointer">Tentar de novo</button></div></sc-if>
           </sc-if>
@@ -997,6 +1012,39 @@
               </div>
             </sc-for>
           </div>
+          <sc-if value="{{ hasActiveMap }}">
+            <div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)">
+              <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;margin-bottom:8px">Marcações do mapa ativo</div>
+              <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 10px">Escolha o que posicionar e use "Posicionar" no mapa. Arrastar e pinçar só movem a sua visão — o zoom não é compartilhado.</p>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+                <sc-for list="{{ mkKinds }}" as="kb" hint-placeholder-count="4"><button onClick="{{ kb.onClick }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;background: {{ kb.bg }};color: {{ kb.col }}">{{ kb.l }}</button></sc-for>
+              </div>
+              <sc-if value="{{ mkIsNpc }}"><select value="{{ mkTool.npcId }}" onChange="{{ onMkNpc }}" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"><sc-for list="{{ mkNpcOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></sc-if>
+              <sc-if value="{{ mkIsPoint }}">
+                <input value="{{ mkTool.label }}" onInput="{{ onMkLabel }}" placeholder="Nome do ponto (ex.: Porta dos fundos)" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"/>
+                <input value="{{ mkTool.descr }}" onInput="{{ onMkDescr }}" placeholder="Descrição pública (opcional)" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"/>
+                <select value="{{ mkTool.icon }}" onChange="{{ onMkIcon }}" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"><sc-for list="{{ mkIconOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select>
+              </sc-if>
+              <sc-if value="{{ mkIsRoute }}">
+                <input value="{{ mkTool.label }}" onInput="{{ onMkLabel }}" placeholder="Nome da rota (opcional)" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"/>
+                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:12px;color:#cdc6b6">{{ mkRouteCount }} ponto(s) marcados</span><button onClick="{{ mkFinishRoute }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(198,166,100,.45);color:#e0c179">Concluir rota</button><button onClick="{{ mkCancelRoute }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Recomeçar</button></div>
+              </sc-if>
+              <sc-if value="{{ mkIsMove }}"><div style="font-size:12px;color:#cdc6b6;margin-bottom:8px">Escolha "Mover" numa marcação da lista e clique no mapa.</div></sc-if>
+              <sc-if value="{{ mkHasVis }}"><button onClick="{{ mkToggleVis }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;margin-bottom:10px">{{ mkVisLabel }}</button></sc-if>
+              <sc-if value="{{ hasMarkMsg }}"><div role="status" style="font-size:12px;color:#e0c179;margin:0 0 10px">{{ markMsg }}</div></sc-if>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ mkList }}" as="mk" hint-placeholder-count="2">
+                  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 9px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:4px">
+                    <span style="flex:1;min-width:120px;font-size:12px;color:#e9e3d4">{{ mk.label }} <span style="color:#8d887c">· {{ mk.kindLabel }} {{ mk.visLabel }}</span></span>
+                    <sc-if value="{{ mk.canMove }}"><button onClick="{{ mk.onMove }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Mover</button></sc-if>
+                    <sc-if value="{{ mk.canVis }}"><button onClick="{{ mk.onVis }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Público/Privado</button></sc-if>
+                    <button onClick="{{ mk.onDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(196,30,58,.3);color:#c44a5e">Remover</button>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ mkHasList }}"><div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><button onClick="{{ mkClear }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(196,30,58,.3);color:#c44a5e">{{ mkClearLabel }}</button><sc-if value="{{ mkClearAsk }}"><button onClick="{{ mkCancelClear }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Cancelar</button></sc-if></div></sc-if>
+            </div>
+          </sc-if>
         </sc-if>
         <!-- ROTEIRO -->
         <sc-if value="{{ toolRoteiro }}">
@@ -1307,15 +1355,33 @@
             <div style="background:#13121a;border:1px solid rgba(198,166,100,.2);border-radius:12px;padding:14px">
               <div style="position:relative;width:100%;aspect-ratio:3 / 2;max-height:440px;min-height:200px;border-radius:9px;overflow:hidden;background:radial-gradient(80% 80% at 50% 40%, #1a1622, #0c0a10);border:1px solid rgba(198,166,100,.15)">
                 <sc-if value="{{ pMap.hasMap }}">
-                  <div role="img" aria-label="Mapa: {{ pMapName }}" style="position:absolute;inset:0;width:100%;height:100%;background:#0c0a10;background-image: {{ pMap.bg }};background-size:contain;background-repeat:no-repeat;background-position:center"></div>
+                  <div data-mapvp="p" role="application" aria-label="Mapa interativo: {{ pMapName }}. Setas movem a visão, + e − aproximam, 0 ajusta; no modo Posicionar, Enter posiciona no centro." tabindex="0" onPointerDown="{{ pMV.onDown }}" onPointerMove="{{ pMV.onMove }}" onPointerUp="{{ pMV.onUp }}" onPointerCancel="{{ pMV.onUp }}" onWheel="{{ pMV.onWheel }}" onKeyDown="{{ pMV.onKey }}" style="position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;cursor: {{ pMV.vpCursor }};background:#0c0a10;outline-offset:-2px">
+              <div data-mapworld="1" style="{{ pMV.worldStyle }}">
+                <div role="img" aria-label="Mapa: {{ pMapName }}" style="{{ pMV.imgStyle }}"></div>
+                <sc-for list="{{ pMV.segs }}" as="sg" hint-placeholder-count="1"><div style="{{ sg.style }}"></div></sc-for>
+                <sc-for list="{{ pMV.marks }}" as="mk" hint-placeholder-count="2"><div role="img" aria-label="{{ mk.aria }}" title="{{ mk.title }}" style="{{ mk.style }}"><div style="{{ mk.dotStyle }}">{{ mk.glyph }}</div><div style="{{ mk.labelStyle }}">{{ mk.label }}</div></div></sc-for>
+              </div>
+              <sc-if value="{{ pMV.isPlace }}"><div aria-hidden="true" style="position:absolute;left:50%;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border:1px solid rgba(224,193,121,.7);border-radius:50%;pointer-events:none"></div></sc-if>
+            </div>
+            
                   <sc-if value="{{ pMap.loading }}"><div role="status" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8d887c;background:rgba(8,8,12,.4)">Carregando mapa…</div></sc-if>
                   <sc-if value="{{ pMap.error }}"><div role="alert" style="position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;font-size:13px;color:#e08a8a;background:rgba(8,8,12,.85)">Não foi possível carregar o mapa.<button onClick="{{ pMap.onRetry }}" style="padding:8px 14px;min-height:40px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:5px;color:#e0c179;font-size:11px;cursor:pointer">Tentar de novo</button></div></sc-if>
                 </sc-if>
                 <sc-if value="{{ pMap.noMap }}"><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font-family:'Cormorant Garamond';font-style:italic;font-size:16px;color:#8d887c">{{ pNoMapText }}</div></sc-if>
-                <sc-if value="{{ pMap.hasMap }}"><div style="position:absolute;left:0;right:0;bottom:0;padding:14px 18px;background:linear-gradient(180deg,transparent,rgba(8,8,12,.85))"><div style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">{{ pMapName }}</div></div></sc-if>
+                <sc-if value="{{ pMap.hasMap }}"><div style="position:absolute;left:0;right:0;bottom:0;padding:14px 18px;background:linear-gradient(180deg,transparent,rgba(8,8,12,.85));pointer-events:none;z-index:3"><div style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">{{ pMapName }}</div></div></sc-if>
               </div>
             </div>
 
+            <sc-if value="{{ pMap.hasMap }}"><div role="toolbar" aria-label="Controles do mapa" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px">
+              <button onClick="{{ pMV.zoomOut }}" aria-label="Diminuir zoom" style="width:36px;height:36px;border-radius:6px;background:rgba(12,11,17,.92);border:1px solid rgba(255,255,255,.14);color:#efe8d8;font-size:16px;cursor:pointer">−</button>
+              <button onClick="{{ pMV.zoomIn }}" aria-label="Aumentar zoom" style="width:36px;height:36px;border-radius:6px;background:rgba(12,11,17,.92);border:1px solid rgba(255,255,255,.14);color:#efe8d8;font-size:16px;cursor:pointer">＋</button>
+              <button onClick="{{ pMV.fit }}" aria-label="Ajustar à tela" style="width:36px;height:36px;border-radius:6px;background:rgba(12,11,17,.92);border:1px solid rgba(255,255,255,.14);color:#efe8d8;font-size:16px;cursor:pointer;font-size:12px;width:auto;padding:0 10px">Ajustar</button>
+              <span style="font-family:'Space Mono';font-size:11px;color:#cfc7b4;background:rgba(12,11,17,.92);border-radius:6px;padding:3px 6px">{{ pMV.zoomPct }}</span>
+              <button onClick="{{ pMV.setNav }}" aria-pressed="{{ pMV.isNav }}" style="height:36px;padding:0 10px;border-radius:6px;border:1px solid rgba(198,166,100,.45);font:600 10px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer;background: {{ pMV.navBg }};color: {{ pMV.navCol }}">Navegar</button>
+              <button onClick="{{ pMV.setPlace }}" aria-pressed="{{ pMV.isPlace }}" style="height:36px;padding:0 10px;border-radius:6px;border:1px solid rgba(198,166,100,.45);font:600 10px 'Archivo';letter-spacing:.08em;text-transform:uppercase;cursor:pointer;background: {{ pMV.placeBg }};color: {{ pMV.placeCol }}">Posicionar</button>
+            </div></sc-if>
+            <sc-if value="{{ pMV.isPlace }}"><div role="status" style="font-size:12px;color:#cdc6b6;margin:8px 2px 0">{{ pPlaceHint }}</div></sc-if>
+            <sc-if value="{{ hasMarkMsg }}"><div role="status" style="font-size:12px;color:#e0c179;margin:6px 2px 0">{{ markMsg }}</div></sc-if>
             <!-- RELOGIOS DO JOGADOR: imediatamente abaixo do mapa -->
             <!-- Somente leitura: nenhum controle de avancar/reduzir/revelar/excluir. -->
             <!-- A secao inteira desaparece quando nao ha relogio permitido, para nao -->
@@ -2088,7 +2154,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, media:{}, acervo:null, imgBusy:false, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, marks:[], mapCam:{}, mapVp:{}, mapMode:{}, markPending:null, markMsg:'', markBusy:false, markTool:{kind:'point',npcId:'',label:'',descr:'',icon:'local',vis:'public',routePts:[],selectedId:null}, markClearAsk:false, media:{}, acervo:null, imgBusy:false, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -2361,7 +2427,7 @@ class Component extends DCLogic {
   // ---- estado da sessão de jogo por mesa (Supabase) ----
   _blankTableSession(){
     const cat=(window.AfterdarkData&&window.AfterdarkData.catalog)?JSON.parse(JSON.stringify(window.AfterdarkData.catalog)):{weapons:[],items:[]};
-    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null,clockEvents:[],activeNpcId:null,dialogue:null,activeMapId:null};
+    return {clocks:[],stressBars:[],npcs:[],clues:[],log:[],scene:{local:'',clima:'',desc:'',npc:'',pistas:[]},inventory:{items:[],weapons:[]},library:cat,scenes:[],activeSceneId:null,activeScene:null,clockEvents:[],activeNpcId:null,dialogue:null,activeMapId:null,marks:[]};
   }
   async _loadTableSession(tableId,isOwner){
     const base=this._blankTableSession();
@@ -2402,6 +2468,7 @@ class Component extends DCLogic {
     if(!isOwner){
       // o jogador so pega o que o Mestre cadastrou: nunca o catalogo padrao embutido no site
       this._enqueuePlayerEvents(remote&&remote.clockEvents);
+      next.marks=this._mergeMarksList(Array.isArray(remote&&remote.marks)?remote.marks:[]);
       const rl=(remote&&remote.library)||{};
       next.library={weapons:Array.isArray(rl.weapons)?rl.weapons:[],items:Array.isArray(rl.items)?rl.items:[]};
       next.clockBump=this._clockBumps(this.state.clocks,next.clocks);
@@ -2529,6 +2596,7 @@ class Component extends DCLogic {
     this._tsSaveT=this._retryT=this._loadRetryT=null; this._loadedFor=null; this._dirtySince=0;
   }
   componentDidUpdate(){
+    this._measureMaps();
     const scr=this.state.screen;
     if(this._lastScr!==scr){
       const wasPlayer=/^j_(panel|lobby)$/.test(this._lastScr||''), isPlayer=/^j_(panel|lobby)$/.test(scr);
@@ -2844,10 +2912,13 @@ class Component extends DCLogic {
       // antes dela é descartada para não mostrar por um instante o valor antigo.
       const ver=this._membersVer||0;
       try{
-        const [mres,rres]=await Promise.all([
+        const mkVer=this._marksVer||0;
+        const [mres,rres,kres]=await Promise.all([
           this.sb.from('table_members').select(this._memberCols()).eq('table_id',t.id).order('joined_at',{ascending:true}),
-          this.state.auth.loggedIn?this.sb.from('table_requests').select('id,target_member_id,kind,params,status,result,created_at,answered_at,master_ack_at').eq('table_id',t.id).order('created_at',{ascending:false}).limit(30):Promise.resolve({data:null})
+          this.state.auth.loggedIn?this.sb.from('table_requests').select('id,target_member_id,kind,params,status,result,created_at,answered_at,master_ack_at').eq('table_id',t.id).order('created_at',{ascending:false}).limit(30):Promise.resolve({data:null}),
+          this.state.auth.loggedIn?this.sb.rpc('master_marks',{p_table_id:t.id}):Promise.resolve({data:null})
         ]);
+        if(kres&&!kres.error&&Array.isArray(kres.data)&&mkVer===(this._marksVer||0)) this.setState({marks:this._mergeMarksList(kres.data)});
         const cur=this._activeTableRow();
         if(!cur||cur.id!==t.id) return;
         if(!mres.error&&mres.data&&ver===(this._membersVer||0)){ const ps=mres.data.map(m=>this._mapMember(m)); this.setState({players:ps}); this._syncPhotos(ps,null,null); }
@@ -3735,7 +3806,7 @@ class Component extends DCLogic {
     if(st.status==='loading'&&!this._mapReq[src]){
       this._mapReq[src]=true;
       const im=new Image();
-      im.onload=()=>this.setState(s=>({mapLoad:{...s.mapLoad,[m.src]:{n:st.n,status:'ok'}}}));
+      im.onload=()=>this.setState(s=>({mapLoad:{...s.mapLoad,[m.src]:{n:st.n,status:'ok',w:im.naturalWidth,h:im.naturalHeight}}}));
       im.onerror=()=>{ delete this._mapReq[src]; this.setState(s=>({mapLoad:{...s.mapLoad,[m.src]:{n:st.n,status:'error'}}})); };
       im.src=src;
     }
@@ -4286,6 +4357,160 @@ class Component extends DCLogic {
     const f=e&&e.target&&e.target.files&&e.target.files[0]; if(e&&e.target) e.target.value='';
     const s=this.state; if(!f||!s.memberId||s.photoBusy) return;
     this._openPhotoEditor(f,{kind:'member'});
+  }
+  // ---- Plano final, Etapa 5: mapa interativo compartilhado ----
+  // Camera (zoom/arraste) e de cada pessoa; marcacoes sao registros no banco, em
+  // coordenadas 0..1 relativas a imagem (o mesmo ponto em qualquer tela e zoom).
+  _measureMaps(){
+    const els=document.querySelectorAll('[data-mapvp]'); if(!els.length) return;
+    const vp={...(this.state.mapVp||{})}; let ch=false;
+    els.forEach(el=>{ const k=el.getAttribute('data-mapvp'); const w=el.clientWidth, h=el.clientHeight;
+      if(!el._adWheel){ el._adWheel=true; el.addEventListener('wheel',e=>e.preventDefault(),{passive:false}); }
+      if(w>0&&h>0&&(!vp[k]||Math.abs(vp[k].w-w)>1||Math.abs(vp[k].h-h)>1)){ vp[k]={w,h}; ch=true; } });
+    if(ch) this.setState({mapVp:vp});
+  }
+  _mergeMarksList(list){
+    const cur=new Map((this.state.marks||[]).map(m=>[m.id,m]));
+    return (list||[]).map(m=>{ const c=cur.get(m.id); return c&&(c.rev||0)>(m.rev||0)?c:m; });
+  }
+  _mapNat(mapId){ const m=this.MAPS.find(x=>x.id===mapId); const st=m&&(this.state.mapLoad||{})[m.src]; return st&&st.w?{w:st.w,h:st.h}:{w:1536,h:1024}; }
+  _geom(k,mapId){ const vp=(this.state.mapVp||{})[k]||{w:600,h:400}; const n=this._mapNat(mapId); const fit=Math.min(vp.w/n.w,vp.h/n.h);
+    const W=n.w*fit, H=n.h*fit; return {vp,W,H,left:(vp.w-W)/2,top:(vp.h-H)/2}; }
+  _cam(k,mapId){ return (this.state.mapCam||{})[k+':'+mapId]||{z:1,tx:0,ty:0}; }
+  _clampCam(k,mapId,c){ const g=this._geom(k,mapId); const z=Math.max(1,Math.min(6,c.z)); const W=g.W*z, H=g.H*z, m=40;
+    return {z,tx:Math.min(g.vp.w-g.left-m,Math.max(m-g.left-W,c.tx)),ty:Math.min(g.vp.h-g.top-m,Math.max(m-g.top-H,c.ty))}; }
+  _setCam(k,mapId,c){ const key=k+':'+mapId; const v=this._clampCam(k,mapId,c); this.setState(s=>({mapCam:{...s.mapCam,[key]:v}})); }
+  mapZoom(k,mapId,f,cx,cy){ const c=this._cam(k,mapId), g=this._geom(k,mapId); if(cx==null){ cx=g.vp.w/2; cy=g.vp.h/2; }
+    const nz=Math.max(1,Math.min(6,c.z*f)); const px=(cx-g.left-c.tx)/c.z, py=(cy-g.top-c.ty)/c.z;
+    this._setCam(k,mapId,{z:nz,tx:cx-g.left-px*nz,ty:cy-g.top-py*nz}); }
+  mapFit(k,mapId){ this._setCam(k,mapId,{z:1,tx:0,ty:0}); }
+  _mapMode(k){ return (this.state.mapMode||{})[k]||'nav'; }
+  setMapMode(k,v){ this.setState(s=>({mapMode:{...s.mapMode,[k]:v},markMsg:''})); }
+  mapDown(k,mapId,ev){
+    try{ ev.currentTarget.setPointerCapture(ev.pointerId); }catch(e){}
+    const r=ev.currentTarget.getBoundingClientRect();
+    if(!this._mp||this._mp.k!==k) this._mp={k,mapId,ptrs:{},moved:false};
+    const mp=this._mp; mp.ptrs[ev.pointerId]={x:ev.clientX,y:ev.clientY}; mp.vp={left:r.left,top:r.top};
+    mp.world=ev.currentTarget.querySelector('[data-mapworld]');
+    if(Object.keys(mp.ptrs).length>1) mp.moved=true;
+    mp.start={cam:this._cam(k,mapId),ptrs:JSON.parse(JSON.stringify(mp.ptrs))};
+  }
+  mapMove(k,mapId,ev){
+    const mp=this._mp; if(!mp||mp.k!==k||!mp.ptrs[ev.pointerId]) return;
+    mp.ptrs[ev.pointerId]={x:ev.clientX,y:ev.clientY};
+    const ids=Object.keys(mp.ptrs), st=mp.start;
+    if(ids.length===1){ const p0=st.ptrs[ids[0]]; if(!p0) return; const dx=ev.clientX-p0.x, dy=ev.clientY-p0.y;
+      if(!mp.moved&&Math.hypot(dx,dy)<6) return; mp.moved=true;   // limiar: clique x arraste
+      this._setCam(k,mapId,{z:st.cam.z,tx:st.cam.tx+dx,ty:st.cam.ty+dy}); }
+    else { const a=mp.ptrs[ids[0]],b=mp.ptrs[ids[1]],a0=st.ptrs[ids[0]],b0=st.ptrs[ids[1]]; if(!a0||!b0) return;
+      const d0=Math.hypot(a0.x-b0.x,a0.y-b0.y)||1, d=Math.hypot(a.x-b.x,a.y-b.y), g=this._geom(k,mapId), c=st.cam;
+      const cx=(a0.x+b0.x)/2-mp.vp.left, cy=(a0.y+b0.y)/2-mp.vp.top, nz=Math.max(1,Math.min(6,c.z*d/d0));
+      const px=(cx-g.left-c.tx)/c.z, py=(cy-g.top-c.ty)/c.z, mx=(a.x+b.x)/2-mp.vp.left, my=(a.y+b.y)/2-mp.vp.top;
+      this._setCam(k,mapId,{z:nz,tx:mx-g.left-px*nz,ty:my-g.top-py*nz}); }
+  }
+  mapUp(k,mapId,ev){
+    const mp=this._mp; if(!mp||mp.k!==k) return;
+    const single=Object.keys(mp.ptrs).length===1, moved=mp.moved; delete mp.ptrs[ev.pointerId];
+    if(single&&!moved&&ev.type==='pointerup'&&this._mapMode(k)==='place'){
+      const w=mp.world&&mp.world.getBoundingClientRect();
+      if(w&&w.width>0){ const x=(ev.clientX-w.left)/w.width, y=(ev.clientY-w.top)/w.height; if(x>=0&&x<=1&&y>=0&&y<=1) this._mapPlace(k,mapId,x,y); }
+    }
+    if(!Object.keys(mp.ptrs).length) this._mp=null; else mp.start={cam:this._cam(k,mapId),ptrs:JSON.parse(JSON.stringify(mp.ptrs))};
+  }
+  mapWheel(k,mapId,ev){ const r=ev.currentTarget.getBoundingClientRect(); this.mapZoom(k,mapId,ev.deltaY<0?1.15:1/1.15,ev.clientX-r.left,ev.clientY-r.top); }
+  // teclado: setas movem a camera, +/- zoom, 0 ajusta; Enter posiciona no centro da mira
+  mapKey(k,mapId,ev){
+    const key=ev.key, c=this._cam(k,mapId); let used=true;
+    if(key==='ArrowLeft') this._setCam(k,mapId,{...c,tx:c.tx+40}); else if(key==='ArrowRight') this._setCam(k,mapId,{...c,tx:c.tx-40});
+    else if(key==='ArrowUp') this._setCam(k,mapId,{...c,ty:c.ty+40}); else if(key==='ArrowDown') this._setCam(k,mapId,{...c,ty:c.ty-40});
+    else if(key==='+'||key==='=') this.mapZoom(k,mapId,1.25); else if(key==='-') this.mapZoom(k,mapId,1/1.25); else if(key==='0') this.mapFit(k,mapId);
+    else if(key==='Enter'&&this._mapMode(k)==='place'){ const g=this._geom(k,mapId); const x=((g.vp.w/2-g.left-c.tx)/c.z)/g.W, y=((g.vp.h/2-g.top-c.ty)/c.z)/g.H;
+      if(x>=0&&x<=1&&y>=0&&y<=1) this._mapPlace(k,mapId,x,y); }
+    else used=false;
+    if(used&&ev.preventDefault) try{ ev.preventDefault(); }catch(e){}
+  }
+  _mapPlace(k,mapId,x,y){ if(k==='p') this.playerMarkMove(mapId,x,y); else this.masterPlace(mapId,x,y); }
+  async playerMarkMove(mapId,x,y){
+    const s=this.state; if(!this.sb||!s.memberId) return;
+    if(this._tablePaused()){ this.setState({markMsg:'Mesa pausada pelo Mestre: o marcador volta a mover quando ele retomar.'}); return; }
+    this.setState({markPending:{mapId,x,y},markMsg:'Salvando posição…'}); this._marksVer=(this._marksVer||0)+1;
+    let data=null,error=null;
+    try{ ({data,error}=await this.sb.rpc('player_mark_move',{p_member_id:s.memberId,p_token:s.memberToken||null,p_map_id:mapId,p_x:x,p_y:y})); }catch(e){ error=e; }
+    if(error||!data||!data.ok){ const m=(error&&error.message)||''; this.setState({markPending:null,markMsg:/table_paused/.test(m)?'Mesa pausada pelo Mestre.':/map_not_active/.test(m)?'Este mapa não está mais ativo.':'Não foi possível mover seu marcador. Tente de novo.'}); return; }
+    this._upsertMarkLocal(data.mark); this.setState({markPending:null,markMsg:'✓ Posição salva'});
+  }
+  _upsertMarkLocal(mk){ if(!mk||!mk.id) return; this.setState(s=>{ const ex=(s.marks||[]).some(m=>m.id===mk.id); return {marks:ex?s.marks.map(m=>m.id===mk.id&&(m.rev||0)<=(mk.rev||0)?mk:m):[...(s.marks||[]),mk]}; }); }
+  setMarkTool(k,v){ this.setState(s=>({markTool:{...s.markTool,[k]:v,...(k==='kind'?{routePts:[]}:{})},markMsg:''})); }
+  async _markUpsert(mark){
+    const tid=this.state.activeTableId; if(!this.sb||!tid) return false;
+    this.setState({markBusy:true}); this._marksVer=(this._marksVer||0)+1;
+    let data=null,error=null;
+    try{ ({data,error}=await this.sb.rpc('master_mark_upsert',{p_table_id:tid,p_mark:mark})); }catch(e){ error=e; }
+    this.setState({markBusy:false});
+    if(error||!data||!data.ok){ this.setState({markMsg:'Não foi possível salvar a marcação. Nada foi alterado — tente de novo.'}); return false; }
+    this._upsertMarkLocal(data.mark); this.setState({markMsg:'✓ Marcação salva'}); return true;
+  }
+  async masterPlace(mapId,x,y){
+    const t=this.state.markTool;
+    if(t.kind==='route'){ this.setState(s=>({markTool:{...s.markTool,routePts:[...s.markTool.routePts,[x,y]]},markMsg:`Rota: ${s.markTool.routePts.length+1} ponto(s). Conclua quando terminar.`})); return; }
+    if(t.kind==='move'){ const m=(this.state.marks||[]).find(z=>z.id===t.selectedId); if(!m){ this.setState({markMsg:'Escolha na lista a marcação a mover.'}); return; }
+      await this._markUpsert({...m,mapId,x,y}); return; }
+    if(t.kind==='npc'){ const n=this.state.npcs.find(z=>z.id===t.npcId); if(!n){ this.setState({markMsg:'Escolha o NPC antes de posicionar.'}); return; }
+      await this._markUpsert({id:this._uuid(),mapId,kind:'npc',npcId:n.id,label:n.name,x,y,visibility:t.vis}); return; }
+    const label=String(t.label||'').trim(); if(!label){ this.setState({markMsg:'Dê um nome ao ponto antes de posicionar.'}); return; }
+    await this._markUpsert({id:this._uuid(),mapId,kind:'point',label,descr:String(t.descr||'').trim(),icon:t.icon,x,y,visibility:t.vis});
+  }
+  async finishRoute(){
+    const t=this.state.markTool, mapId=this.state.activeMapId;
+    if(!mapId||t.routePts.length<2){ this.setState({markMsg:'A rota precisa de pelo menos 2 pontos.'}); return; }
+    const ok=await this._markUpsert({id:this._uuid(),mapId,kind:'route',label:String(t.label||'').trim()||'Rota',points:t.routePts,visibility:t.vis});
+    if(ok) this.setState(s=>({markTool:{...s.markTool,routePts:[]}}));
+  }
+  async markDelete(id){
+    const tid=this.state.activeTableId; this._marksVer=(this._marksVer||0)+1;
+    let error=null; try{ ({error}=await this.sb.rpc('master_mark_delete',{p_table_id:tid,p_id:id})); }catch(e){ error=e; }
+    if(error){ this.setState({markMsg:'Não foi possível remover. Tente de novo.'}); return; }
+    this.setState(s=>({marks:s.marks.filter(m=>m.id!==id),markMsg:'✓ Marcação removida'}));
+  }
+  async markClear(){
+    const tid=this.state.activeTableId, mapId=this.state.activeMapId; if(!this.state.markClearAsk){ this.setState({markClearAsk:true}); return; }
+    this._marksVer=(this._marksVer||0)+1;
+    let error=null; try{ ({error}=await this.sb.rpc('master_mark_clear',{p_table_id:tid,p_map_id:mapId})); }catch(e){ error=e; }
+    this.setState({markClearAsk:false});
+    if(error){ this.setState({markMsg:'Não foi possível limpar o mapa. Tente de novo.'}); return; }
+    this.setState(s=>({marks:s.marks.filter(m=>m.mapId!==mapId),markMsg:'✓ Mapa limpo (NPCs, fichas e imagens continuam cadastrados)'}));
+  }
+  _mapViewer(k,mapId){
+    const s=this.state, mv=this._mapView(mapId);
+    if(!mv.hasMap) return {...mv,marks:[],segs:[]};
+    const g=this._geom(k,mapId), c=this._cam(k,mapId), inv=1/c.z, isM=k==='m';
+    const glyph={pc:'',npc:'☻',point:'◆'}, icon={porta:'▯',local:'◉',obstaculo:'✕',interesse:'✦'};
+    const list=(s.marks||[]).filter(m=>m.mapId===mapId);
+    const view=(m,extra)=>{ const own=m.kind==='pc'&&m.memberId===s.memberId&&!isM; const priv=m.visibility==='private';
+      const col=m.kind==='pc'?(own?'#e0c179':'#cfc7b4'):m.kind==='npc'?'#c44a5e':'#7ea6d4';
+      const g2=m.kind==='pc'?((m.label||'?')[0]||'?'):m.kind==='point'?(icon[m.icon]||'◆'):glyph[m.kind];
+      return {id:m.id,label:(m.label||'')+(priv?' (privado)':''),aria:`${m.kind==='pc'?'Personagem':m.kind==='npc'?'NPC':'Ponto'}: ${m.label||''}`,glyph:g2,title:m.descr||'',
+        style:`position:absolute;left:${(m.x||0)*100}%;top:${(m.y||0)*100}%;transform:translate(-50%,-13px) scale(${inv});transform-origin:50% 13px;display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:none;z-index:${m.kind==='pc'?3:2};opacity:${extra&&extra.ghost?.6:1}`,
+        dotStyle:`width:26px;height:26px;border-radius:${m.kind==='point'?'4px':'50%'};background:rgba(12,11,17,.92);border:2px ${priv?'dashed':'solid'} ${col};color:${col};display:flex;align-items:center;justify-content:center;font:700 13px 'Cinzel';box-shadow:0 0 10px rgba(0,0,0,.6)`,
+        labelStyle:`font-size:11px;color:#efe8d8;background:rgba(8,8,12,.85);border-radius:6px;padding:1px 6px;white-space:nowrap`}; };
+    const marks=list.filter(m=>m.kind!=='route').map(m=>view(m));
+    if(!isM&&s.markPending&&s.markPending.mapId===mapId){ const me=(s.players||[]).find(p=>p.id===s.memberId);
+      marks.push(view({id:'pending',kind:'pc',memberId:s.memberId,label:((me&&me.char)||'Você')+' · salvando…',x:s.markPending.x,y:s.markPending.y},{ghost:true})); }
+    const segOf=(pts,col,dash,priv)=>{ const out=[]; for(let i=1;i<pts.length;i++){ const [x1,y1]=pts[i-1],[x2,y2]=pts[i];
+      const dx=(x2-x1)*g.W, dy=(y2-y1)*g.H, len=Math.hypot(dx,dy), ang=Math.atan2(dy,dx);
+      out.push({style:`position:absolute;left:${x1*100}%;top:${y1*100}%;width:${len}px;height:${3*inv}px;margin-top:${-1.5*inv}px;transform-origin:0 50%;transform:rotate(${ang}rad);background:${dash?'repeating-linear-gradient(90deg,'+col+' 0 8px,transparent 8px 14px)':col};opacity:${priv?.6:.9};pointer-events:none;z-index:1`}); } return out; };
+    let segs=[]; list.filter(m=>m.kind==='route'&&Array.isArray(m.points)).forEach(m=>{ segs=segs.concat(segOf(m.points,'#d2a23a',false,m.visibility==='private')); });
+    if(isM&&s.markTool.kind==='route'&&s.markTool.routePts.length) segs=segs.concat(segOf(s.markTool.routePts,'#e0c179',true,false));
+    const routeLabels=list.filter(m=>m.kind==='route'&&Array.isArray(m.points)&&m.points.length).map(m=>view({...m,kind:'point',icon:'interesse',x:m.points[0][0],y:m.points[0][1]}));
+    const mode=this._mapMode(k);
+    return {...mv,marks:marks.concat(routeLabels),segs,
+      worldStyle:`position:absolute;left:${g.left}px;top:${g.top}px;width:${g.W}px;height:${g.H}px;transform:translate(${c.tx}px,${c.ty}px) scale(${c.z});transform-origin:0 0`,
+      imgStyle:`position:absolute;inset:0;background-image:${mv.bg};background-size:100% 100%;background-repeat:no-repeat`,
+      vpCursor:mode==='place'?'crosshair':'grab', zoomPct:Math.round(c.z*100)+'%', isPlace:mode==='place', isNav:mode!=='place',
+      navBg:mode!=='place'?'#c6a35e':'transparent', navCol:mode!=='place'?'#0b0b10':'#cfc7b4', placeBg:mode==='place'?'#c6a35e':'transparent', placeCol:mode==='place'?'#0b0b10':'#cfc7b4',
+      onDown:ev=>this.mapDown(k,mapId,ev), onMove:ev=>this.mapMove(k,mapId,ev), onUp:ev=>this.mapUp(k,mapId,ev), onWheel:ev=>this.mapWheel(k,mapId,ev), onKey:ev=>this.mapKey(k,mapId,ev),
+      zoomIn:()=>this.mapZoom(k,mapId,1.25), zoomOut:()=>this.mapZoom(k,mapId,1/1.25), fit:()=>this.mapFit(k,mapId),
+      setNav:()=>this.setMapMode(k,'nav'), setPlace:()=>{ this.setMapMode(k,'place'); if(isM) this.setSceneView('mapa'); }};
   }
   // ---- Plano final, Etapa 2: acervo de imagens (tabela media no banco) ----
   // O estado da sessao guarda so o id; cada imagem e buscada uma vez e fica em cache.
@@ -5375,6 +5600,22 @@ class Component extends DCLogic {
       stageSceneTitle:actScene?actScene.title:'Nenhuma cena ativa', stageSceneDesc:actScene?(actScene.desc||'Sem descrição.'):'Cadastre uma cena em Cenas e ative-a para mostrá-la aqui e aos jogadores.',
       stageSceneBadge:actScene?(actScene.shared?'Compartilhada':'Só o Mestre vê'):'—', stageHasScene:!!actScene,
       stagePresent:actScene?(presentNames(actScene.present).join(', ')||'Ninguém marcado'):'', stageMap:actMap, stageMapName:actMap.hasMap?actMap.name:'',
+      stageMV:this._mapViewer('m',s.activeMapId), pMV:this._mapViewer('p',s.activeMapId), markMsg:s.markMsg, hasMarkMsg:!!s.markMsg,
+      pPlaceHint:this._tablePaused()?'Mesa pausada: o marcador não pode ser movido agora.':'Toque ou clique no mapa para posicionar seu personagem. Arrastar ou pinçar só move a visão.',
+      ...(()=>{ const t=s.markTool, mapMarks=(s.marks||[]).filter(m=>m.mapId===s.activeMapId);
+        const kindBtn=(kk,l)=>({k:kk,l,onClick:()=>this.setMarkTool('kind',kk),bg:t.kind===kk?'#c6a35e':'transparent',col:t.kind===kk?'#0b0b10':'#cfc7b4'});
+        return {mkKinds:[kindBtn('npc','NPC'),kindBtn('point','Ponto'),kindBtn('route','Rota'),kindBtn('move','Mover')],
+          mkIsNpc:t.kind==='npc', mkIsPoint:t.kind==='point', mkIsRoute:t.kind==='route', mkIsMove:t.kind==='move', mkHasVis:t.kind!=='move',
+          mkTool:t, mkNpcOpts:[{id:'',name:'Escolha o NPC'},...s.npcs.map(n=>({id:n.id,name:n.name}))],
+          mkIconOpts:[['local','Local'],['porta','Porta'],['obstaculo','Obstáculo'],['interesse','Ponto de interesse']].map(([v,l])=>({v,l})),
+          mkVisLabel:t.vis==='private'?'Privado (só você vê)':'Público (o grupo vê)', mkToggleVis:()=>this.setMarkTool('vis',t.vis==='private'?'public':'private'),
+          onMkNpc:e=>this.setMarkTool('npcId',e.target.value), onMkLabel:e=>this.setMarkTool('label',e.target.value), onMkDescr:e=>this.setMarkTool('descr',e.target.value), onMkIcon:e=>this.setMarkTool('icon',e.target.value),
+          mkRouteCount:t.routePts.length, mkFinishRoute:()=>this.finishRoute(), mkCancelRoute:()=>this.setMarkTool('routePts',[]),
+          mkList:mapMarks.map(m=>({id:m.id,label:m.label||'—',kindLabel:({pc:'Personagem',npc:'NPC',point:'Ponto',route:'Rota'})[m.kind],visLabel:m.kind==='pc'?'':(m.visibility==='private'?'Privado':'Público'),
+            selected:t.selectedId===m.id, canMove:m.kind!=='route', canVis:m.kind!=='pc',
+            onMove:()=>this.setState(st=>({markTool:{...st.markTool,kind:'move',selectedId:m.id},mapMode:{...st.mapMode,m:'place'},sceneView:'mapa',markMsg:`Clique no mapa para mover "${m.label}".`})),
+            onVis:()=>this._markUpsert({...m,visibility:m.visibility==='private'?'public':'private'}), onDel:()=>this.markDelete(m.id)})),
+          mkHasList:mapMarks.length>0, mkClearLabel:s.markClearAsk?'Confirmar: limpar todas as marcações':'Limpar mapa', mkClear:()=>this.markClear(), mkClearAsk:!!s.markClearAsk, mkCancelClear:()=>this.setState({markClearAsk:false})}; })(),
       stageNoMapText:actMap.missing?'O mapa ativo não está mais disponível.':'Nenhum mapa ativo. Escolha um em Condução › Mapas (ou ative uma cena com mapa).',
       stageSceneBg:actScene?(this._mediaBg(actScene.imageId,'cover')||'none'):'none', stageHasSceneImg:!!(actScene&&actScene.imageId),
       mapsView:this.MAPS.filter(m=>!s.oneshot||!m.oneshot||m.oneshot===s.oneshot).map(m=>{ const on=s.activeMapId===m.id; return {...m,on,label:on?'✓ Ativo':'Mostrar',
