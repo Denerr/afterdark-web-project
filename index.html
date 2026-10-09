@@ -317,10 +317,6 @@
             <div style="font-family:'Cinzel';font-weight:600;font-size:26px;color:#efe8d8;margin-bottom:8px">{{ stageSceneTitle }}</div>
             <p style="font-family:'Cormorant Garamond';font-size:18px;line-height:1.55;color:#cdc6b6;margin:0 0 10px;max-width:620px;white-space:pre-line">{{ stageSceneDesc }}</p>
             <sc-if value="{{ stageHasScene }}"><div style="font-size:12px;color:#8d887c;margin:0 0 14px">Presentes: {{ stagePresent }}</div></sc-if>
-            <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <button onClick="{{ onSceneIntro }}" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#0b0b10;background: {{ sessTheme.acc }};border:none;border-radius:2px;padding:9px 16px;cursor:pointer" style-hover="filter:brightness(1.15)">▸ Modo Cena</button>
-              <button onClick="{{ onSceneNpc }}" style="font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#cfc7b4;background:transparent;border:1px solid rgba(255,255,255,.16);border-radius:2px;padding:9px 16px;cursor:pointer" style-hover="border-color:rgba(255,255,255,.4)">Revelar NPC</button>
-            </div>
           </div>
         </sc-if>
 
@@ -4565,10 +4561,10 @@ class Component extends DCLogic {
     const list=(s.marks||[]).filter(m=>m.mapId===mapId);
     const view=(m,extra)=>{ const own=m.kind==='pc'&&m.memberId===s.memberId&&!isM; const priv=m.visibility==='private';
       const col=m.kind==='pc'?(own?'#e0c179':'#cfc7b4'):m.kind==='npc'?'#c44a5e':'#7ea6d4';
-      const g2=m.kind==='pc'?((m.label||'?')[0]||'?'):m.kind==='point'?(icon[m.icon]||'◆'):glyph[m.kind];
+      const g2=m.kind==='pc'?((m.label||'?')[0]||'?'):m.kind==='point'?'':glyph[m.kind];
       return {id:m.id,label:(m.label||'')+(priv?' (privado)':''),aria:`${m.kind==='pc'?'Personagem':m.kind==='npc'?'NPC':'Ponto'}: ${m.label||''}`,glyph:g2,title:m.descr||'',
         style:`position:absolute;left:${(m.x||0)*100}%;top:${(m.y||0)*100}%;transform:translate(-50%,-13px) scale(${inv});transform-origin:50% 13px;display:flex;flex-direction:column;align-items:center;gap:3px;pointer-events:none;z-index:${m.kind==='pc'?3:2};opacity:${extra&&extra.ghost?.6:1}`,
-        dotStyle:`width:26px;height:26px;border-radius:${m.kind==='point'?'4px':'50%'};background:rgba(12,11,17,.92);border:2px ${priv?'dashed':'solid'} ${col};color:${col};display:flex;align-items:center;justify-content:center;font:700 13px 'Cinzel';box-shadow:0 0 10px rgba(0,0,0,.6)`,
+        dotStyle:`width:26px;height:26px;border-radius:50%;background:${m.kind==='point'?`radial-gradient(circle,${col} 0 5px,rgba(12,11,17,.92) 6px)`:'rgba(12,11,17,.92)'};border:2px ${priv?'dashed':'solid'} ${col};color:${col};display:flex;align-items:center;justify-content:center;font:700 13px 'Cinzel';box-shadow:0 0 10px rgba(0,0,0,.6)`,
         labelStyle:`font-size:11px;color:#efe8d8;background:rgba(8,8,12,.85);border-radius:6px;padding:1px 6px;white-space:nowrap`}; };
     const marks=list.filter(m=>m.kind!=='route').map(m=>view(m));
     if(!isM&&s.markPending&&s.markPending.mapId===mapId){ const me=(s.players||[]).find(p=>p.id===s.memberId);
