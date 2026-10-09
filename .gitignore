@@ -1,3 +1,6 @@
 *.md
 # originais dos mapas (PNG ~4 MB); o site usa as versoes WebP em assets/maps
 Mapas_Oficiais_Afterdark/
+
+# originais das imagens padrão dos relógios (1920 px); o site usa as versões em assets/clocks
+Saint_Vesper_Rel*/
