@@ -365,7 +365,12 @@
       <!-- marcacoes do mapa ativo: sempre logo abaixo do mapa (preparo mais rapido) -->
           <sc-if value="{{ hasActiveMap }}">
         <div role="region" aria-label="Marcações do mapa ativo" style="background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:7px;padding:16px 18px">
-          <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;margin-bottom:8px">Marcações do mapa ativo</div>
+          <button onClick="{{ toggleMarks }}" aria-expanded="{{ marksOpen }}" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:none;padding:0;cursor:pointer;min-height:32px">
+            <span style="flex:1;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e">Marcações do mapa ativo</span>
+            <span style="font-family:'Space Mono';font-size:11px;color:#8d887c">{{ marksCount }}</span>
+            <span style="font-size:11px;color:#c6a35e">{{ marksCaret }}</span>
+          </button>
+          <sc-if value="{{ marksOpen }}"><div style="margin-top:8px">
           <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 10px">Escolha o que posicionar e use "Posicionar" no mapa acima. Arrastar e pinçar só movem a sua visão — o zoom não é compartilhado.</p>
           <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
             <sc-for list="{{ mkKinds }}" as="kb" hint-placeholder-count="4"><button onClick="{{ kb.onClick }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;background: {{ kb.bg }};color: {{ kb.col }}">{{ kb.l }}</button></sc-for>
@@ -394,6 +399,7 @@
             </sc-for>
           </div>
           <sc-if value="{{ mkHasList }}"><div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><button onClick="{{ mkClear }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(196,30,58,.3);color:#c44a5e">{{ mkClearLabel }}</button><sc-if value="{{ mkClearAsk }}"><button onClick="{{ mkCancelClear }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Cancelar</button></sc-if></div></sc-if>
+          </div></sc-if>
         </div>
       </sc-if>
       <!-- clocks: mesa + jogador -->
@@ -2192,7 +2198,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, objectives:[], objDraft:'', objEditId:null, objPulse:{}, marks:[], mapCam:{}, mapVp:{}, mapMode:{}, markPending:null, markMsg:'', markBusy:false, markTool:{kind:'point',npcId:'',label:'',descr:'',icon:'local',vis:'public',routePts:[],selectedId:null}, markClearAsk:false, media:{}, acervo:null, imgBusy:false, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, marksOpen:(()=>{ try{ return localStorage.getItem('afterdark:marksOpen')!=='0'; }catch(e){ return true; } })(), objectives:[], objDraft:'', objEditId:null, objPulse:{}, marks:[], mapCam:{}, mapVp:{}, mapMode:{}, markPending:null, markMsg:'', markBusy:false, markTool:{kind:'point',npcId:'',label:'',descr:'',icon:'local',vis:'public',routePts:[],selectedId:null}, markClearAsk:false, media:{}, acervo:null, imgBusy:false, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -5686,6 +5692,8 @@ class Component extends DCLogic {
         return {mObjectives:mObj, mHasObj:mObj.length>0, pObjectives:pObj, pHasObj:pObj.length>0,
           objDraft:s.objDraft, onObjDraft:e=>this.setObjDraft(e.target.value), saveObjective:()=>this.saveObjective(), objSaveLabel:s.objEditId?'Salvar':'＋ Adicionar',
           objEditing:!!s.objEditId, cancelObjEdit:()=>this.cancelObjEdit()}; })(),
+      marksOpen:!!s.marksOpen, marksCaret:s.marksOpen?'▴ Recolher':'▾ Mostrar', marksCount:String((s.marks||[]).filter(m=>m.mapId===s.activeMapId).length),
+      toggleMarks:()=>this.setState(st=>{ const v=!st.marksOpen; try{ localStorage.setItem('afterdark:marksOpen',v?'1':'0'); }catch(e){} return {marksOpen:v}; }),
       stageMV:this._mapViewer('m',s.activeMapId), pMV:this._mapViewer('p',s.activeMapId), markMsg:s.markMsg, hasMarkMsg:!!s.markMsg,
       pPlaceHint:this._tablePaused()?'Mesa pausada: o marcador não pode ser movido agora.':'Toque ou clique no mapa para posicionar seu personagem. Arrastar ou pinçar só move a visão.',
       ...(()=>{ const t=s.markTool, mapMarks=(s.marks||[]).filter(m=>m.mapId===s.activeMapId);
