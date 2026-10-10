@@ -1455,7 +1455,7 @@
           <!-- SCENE -->
           <sc-if value="{{ centerIsCena }}">
             <div style="border-radius:12px;overflow:hidden;border:1px solid rgba(196,30,58,.22)">
-              <div style="height:230px;position:relative;background:radial-gradient(90% 110% at 50% 0%, #2e1117, #16080b)">
+              <div style="height: {{ pSceneH }};aspect-ratio: {{ pSceneAR }};max-height:70vh;position:relative;background:radial-gradient(90% 110% at 50% 0%, #2e1117, #16080b)">
                 <sc-if value="{{ pHasSceneImg }}"><div role="img" aria-label="Imagem da cena" style="position:absolute;inset:0;background: {{ pSceneBg }}"></div></sc-if>
                 <div style="position:absolute;inset:0;background:radial-gradient(60% 60% at 40% 10%, rgba(196,30,58,.28), transparent 70%)"></div>
                 <div style="position:absolute;top:14px;left:16px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#e07a8a;padding:5px 11px;border:1px solid rgba(196,30,58,.45);border-radius:20px;background:rgba(8,6,8,.5)">Cena Atual</div>
@@ -5775,7 +5775,7 @@ class Component extends DCLogic {
       pScene:pAct||{}, pHasScene:!!pAct, pNoScene:!pAct, pSceneDesc:pAct?(pAct.desc||''):'', pSceneHasDesc:!!(pAct&&pAct.desc),
       pPresentLine:pPresent.join(', '), pHasPresent:pPresent.length>0, pMap, pMapName:pMap.hasMap?pMap.name:'',
       pNoMapText:pMap.missing?'O mapa não está disponível.':'O Mestre ainda não mostrou um mapa.',
-      pSceneBg:pAct?(this._mediaBg(pAct.imageId,'cover')||'none'):'none', pHasSceneImg:!!(pAct&&pAct.imageId),
+      pSceneBg:pAct?(this._mediaBg(pAct.imageId,'contain')||'none'):'none', pHasSceneImg:!!(pAct&&pAct.imageId), pSceneH:(pAct&&pAct.imageId)?'auto':'230px', pSceneAR:(pAct&&pAct.imageId)?'16 / 9':'auto',
       playerClocks, hasMyClocks:playerClocks.length>0, sessionStale:s.sessionStale,
       // Ponto 3: status da mesa e conexão (jogador)
       // pausa nao cobre mais a tela: vira um aviso fixo com saidas (menu, mesas, inicio)
