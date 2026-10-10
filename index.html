@@ -362,6 +362,40 @@
         </sc-if>
       </div>
 
+      <!-- marcacoes do mapa ativo: sempre logo abaixo do mapa (preparo mais rapido) -->
+          <sc-if value="{{ hasActiveMap }}">
+        <div role="region" aria-label="Marcações do mapa ativo" style="background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:7px;padding:16px 18px">
+          <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;margin-bottom:8px">Marcações do mapa ativo</div>
+          <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 10px">Escolha o que posicionar e use "Posicionar" no mapa acima. Arrastar e pinçar só movem a sua visão — o zoom não é compartilhado.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+            <sc-for list="{{ mkKinds }}" as="kb" hint-placeholder-count="4"><button onClick="{{ kb.onClick }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;background: {{ kb.bg }};color: {{ kb.col }}">{{ kb.l }}</button></sc-for>
+          </div>
+          <sc-if value="{{ mkIsNpc }}"><select value="{{ mkTool.npcId }}" onChange="{{ onMkNpc }}" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"><sc-for list="{{ mkNpcOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></sc-if>
+          <sc-if value="{{ mkIsPoint }}">
+            <input value="{{ mkTool.label }}" onInput="{{ onMkLabel }}" placeholder="Nome do ponto (ex.: Porta dos fundos)" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"/>
+            <input value="{{ mkTool.descr }}" onInput="{{ onMkDescr }}" placeholder="Descrição pública (opcional)" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"/>
+            <select value="{{ mkTool.icon }}" onChange="{{ onMkIcon }}" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"><sc-for list="{{ mkIconOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select>
+          </sc-if>
+          <sc-if value="{{ mkIsRoute }}">
+            <input value="{{ mkTool.label }}" onInput="{{ onMkLabel }}" placeholder="Nome da rota (opcional)" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"/>
+            <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:12px;color:#cdc6b6">{{ mkRouteCount }} ponto(s) marcados</span><button onClick="{{ mkFinishRoute }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(198,166,100,.45);color:#e0c179">Concluir rota</button><button onClick="{{ mkCancelRoute }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Recomeçar</button></div>
+          </sc-if>
+          <sc-if value="{{ mkIsMove }}"><div style="font-size:12px;color:#cdc6b6;margin-bottom:8px">Escolha "Mover" numa marcação da lista e clique no mapa.</div></sc-if>
+          <sc-if value="{{ mkHasVis }}"><button onClick="{{ mkToggleVis }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;margin-bottom:10px">{{ mkVisLabel }}</button></sc-if>
+          <sc-if value="{{ hasMarkMsg }}"><div role="status" style="font-size:12px;color:#e0c179;margin:0 0 10px">{{ markMsg }}</div></sc-if>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <sc-for list="{{ mkList }}" as="mk" hint-placeholder-count="2">
+              <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 9px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:4px">
+                <span style="flex:1;min-width:120px;font-size:12px;color:#e9e3d4">{{ mk.label }} <span style="color:#8d887c">· {{ mk.kindLabel }} {{ mk.visLabel }}</span></span>
+                <sc-if value="{{ mk.canMove }}"><button onClick="{{ mk.onMove }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Mover</button></sc-if>
+                <sc-if value="{{ mk.canVis }}"><button onClick="{{ mk.onVis }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Público/Privado</button></sc-if>
+                <button onClick="{{ mk.onDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(196,30,58,.3);color:#c44a5e">Remover</button>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ mkHasList }}"><div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><button onClick="{{ mkClear }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(196,30,58,.3);color:#c44a5e">{{ mkClearLabel }}</button><sc-if value="{{ mkClearAsk }}"><button onClick="{{ mkCancelClear }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Cancelar</button></sc-if></div></sc-if>
+        </div>
+      </sc-if>
       <!-- clocks: mesa + jogador -->
       <div style="background:#13121a;border:1px solid rgba(198,166,100,.16);border-radius:7px;padding:18px 20px">
         <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#7e7a70;margin-bottom:14px">Relógios da mesa</div>
@@ -526,21 +560,6 @@
           <sc-if value="{{ sendTestBlock }}"><div style="font-size:11px;color:#a39e90;text-align:center;margin-top:8px;letter-spacing:.02em">{{ sendTestBlock }}</div></sc-if>
           <sc-if value="{{ hasErrTeste }}"><div role="alert" style="margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:#1c1216;border:1px solid rgba(196,30,58,.4);border-radius:6px"><span style="font-size:14px;color:#e08a8a;flex-shrink:0">⚠</span><span style="flex:1;min-width:160px;font-size:13px;color:#e9e3d4">{{ errTeste }}</span><button onClick="{{ retryTeste }}" style="flex-shrink:0;background:transparent;border:1px solid rgba(198,166,100,.35);color:#cfc7b4;border-radius:4px;font-size:11px;letter-spacing:.04em;padding:7px 11px;cursor:pointer;min-height:36px">Tentar de novo</button><button onClick="{{ dismissErrTeste }}" aria-label="Dispensar aviso" style="flex-shrink:0;background:transparent;border:none;color:#8d887c;font-size:14px;cursor:pointer;min-width:36px;min-height:36px">✕</button></div></sc-if>
           <sc-if value="{{ testSentFlash }}"><div style="font-size:11px;color:#7fae8f;text-align:center;margin-top:8px;letter-spacing:.04em;animation:fadeIn .3s ease">✓ Teste enviado a {{ testSentTo }} — aguardando rolagem.</div></sc-if>
-          <sc-if value="{{ hasSentReqs }}">
-            <div style="margin-top:14px">
-              <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">Testes enviados</div>
-              <div style="display:flex;flex-direction:column;gap:6px">
-                <sc-for list="{{ sentReqsView }}" as="r" hint-placeholder-count="2">
-                  <div style="display:flex;align-items:center;gap:9px;padding:8px 10px;background:#0e0d12;border:1px solid rgba(255,255,255,.06);border-left:3px solid {{ r.statusCol }};border-radius:4px">
-                    <span style="font-size:13px;color:#a39e90">{{ r.kindIcon }}</span>
-                    <div style="flex:1;min-width:0"><div style="font-size:12px;color:#cdc6b6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.who }} · {{ r.label }}</div><div style="font-family:'Space Mono';font-size:10px;color: {{ r.statusCol }}">{{ r.statusLabel }}</div></div>
-                    <sc-if value="{{ r.isPending }}"><button onClick="{{ r.onCancel }}" style="padding:4px 9px;background:transparent;color:#8d887c;border:1px solid rgba(255,255,255,.12);border-radius:3px;font:500 10px 'Archivo';cursor:pointer">Cancelar</button></sc-if>
-                  </div>
-                </sc-for>
-              </div>
-            </div>
-          </sc-if>
-
           <!-- rolling / result -->
           <sc-if value="{{ rolling }}">
             <div style="margin-top:18px;display:flex;gap:10px;justify-content:center">
@@ -601,6 +620,21 @@
               </div>
             </sc-if>
           </sc-if>
+          <sc-if value="{{ hasSentReqs }}">
+            <div style="margin-top:14px">
+              <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#7e7a70;margin-bottom:8px">Testes enviados</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <sc-for list="{{ sentReqsView }}" as="r" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:9px;padding:8px 10px;background:#0e0d12;border:1px solid rgba(255,255,255,.06);border-left:3px solid {{ r.statusCol }};border-radius:4px">
+                    <span style="font-size:13px;color:#a39e90">{{ r.kindIcon }}</span>
+                    <div style="flex:1;min-width:0"><div style="font-size:12px;color:#cdc6b6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.who }} · {{ r.label }}</div><div style="font-family:'Space Mono';font-size:10px;color: {{ r.statusCol }}">{{ r.statusLabel }}</div></div>
+                    <sc-if value="{{ r.isPending }}"><button onClick="{{ r.onCancel }}" style="padding:4px 9px;background:transparent;color:#8d887c;border:1px solid rgba(255,255,255,.12);border-radius:3px;font:500 10px 'Archivo';cursor:pointer">Cancelar</button></sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
         </sc-if>
         <!-- RELOGIOS -->
         <sc-if value="{{ toolRelogios }}">
@@ -1034,39 +1068,6 @@
               </div>
             </sc-for>
           </div>
-          <sc-if value="{{ hasActiveMap }}">
-            <div style="margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)">
-              <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e;margin-bottom:8px">Marcações do mapa ativo</div>
-              <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 10px">Escolha o que posicionar e use "Posicionar" no mapa. Arrastar e pinçar só movem a sua visão — o zoom não é compartilhado.</p>
-              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-                <sc-for list="{{ mkKinds }}" as="kb" hint-placeholder-count="4"><button onClick="{{ kb.onClick }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;background: {{ kb.bg }};color: {{ kb.col }}">{{ kb.l }}</button></sc-for>
-              </div>
-              <sc-if value="{{ mkIsNpc }}"><select value="{{ mkTool.npcId }}" onChange="{{ onMkNpc }}" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"><sc-for list="{{ mkNpcOpts }}" as="o" hint-placeholder-count="2"><option value="{{ o.id }}">{{ o.name }}</option></sc-for></select></sc-if>
-              <sc-if value="{{ mkIsPoint }}">
-                <input value="{{ mkTool.label }}" onInput="{{ onMkLabel }}" placeholder="Nome do ponto (ex.: Porta dos fundos)" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"/>
-                <input value="{{ mkTool.descr }}" onInput="{{ onMkDescr }}" placeholder="Descrição pública (opcional)" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"/>
-                <select value="{{ mkTool.icon }}" onChange="{{ onMkIcon }}" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"><sc-for list="{{ mkIconOpts }}" as="o" hint-placeholder-count="4"><option value="{{ o.v }}">{{ o.l }}</option></sc-for></select>
-              </sc-if>
-              <sc-if value="{{ mkIsRoute }}">
-                <input value="{{ mkTool.label }}" onInput="{{ onMkLabel }}" placeholder="Nome da rota (opcional)" style="width:100%;background:#13121a;border:1px solid rgba(255,255,255,.12);border-radius:4px;padding:9px;font-size:12px;color:#e9e3d4;outline:none;margin-bottom:8px"/>
-                <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:12px;color:#cdc6b6">{{ mkRouteCount }} ponto(s) marcados</span><button onClick="{{ mkFinishRoute }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(198,166,100,.45);color:#e0c179">Concluir rota</button><button onClick="{{ mkCancelRoute }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Recomeçar</button></div>
-              </sc-if>
-              <sc-if value="{{ mkIsMove }}"><div style="font-size:12px;color:#cdc6b6;margin-bottom:8px">Escolha "Mover" numa marcação da lista e clique no mapa.</div></sc-if>
-              <sc-if value="{{ mkHasVis }}"><button onClick="{{ mkToggleVis }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;margin-bottom:10px">{{ mkVisLabel }}</button></sc-if>
-              <sc-if value="{{ hasMarkMsg }}"><div role="status" style="font-size:12px;color:#e0c179;margin:0 0 10px">{{ markMsg }}</div></sc-if>
-              <div style="display:flex;flex-direction:column;gap:6px">
-                <sc-for list="{{ mkList }}" as="mk" hint-placeholder-count="2">
-                  <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:7px 9px;background:#0f0e13;border:1px solid rgba(255,255,255,.07);border-radius:4px">
-                    <span style="flex:1;min-width:120px;font-size:12px;color:#e9e3d4">{{ mk.label }} <span style="color:#8d887c">· {{ mk.kindLabel }} {{ mk.visLabel }}</span></span>
-                    <sc-if value="{{ mk.canMove }}"><button onClick="{{ mk.onMove }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Mover</button></sc-if>
-                    <sc-if value="{{ mk.canVis }}"><button onClick="{{ mk.onVis }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Público/Privado</button></sc-if>
-                    <button onClick="{{ mk.onDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(196,30,58,.3);color:#c44a5e">Remover</button>
-                  </div>
-                </sc-for>
-              </div>
-              <sc-if value="{{ mkHasList }}"><div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap"><button onClick="{{ mkClear }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(196,30,58,.3);color:#c44a5e">{{ mkClearLabel }}</button><sc-if value="{{ mkClearAsk }}"><button onClick="{{ mkCancelClear }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Cancelar</button></sc-if></div></sc-if>
-            </div>
-          </sc-if>
         </sc-if>
         <!-- ROTEIRO -->
         <sc-if value="{{ toolRoteiro }}">
