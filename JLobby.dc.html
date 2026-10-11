@@ -27,8 +27,8 @@
     </div>
     <!-- Etapa 6: sem ficha, o lobby explica o proximo passo e leva ao wizard -->
     <sc-if value="{{ needsSheet }}"><div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:-8px 0 20px;padding:12px 14px;background:#13121a;border:1px solid rgba(198,166,100,.3);border-radius:8px">
-      <span style="flex:1;min-width:180px;font-family:'Cormorant Garamond';font-size:16px;color:#cfc7b4">Você ainda não tem ficha nesta mesa. Crie seu personagem para o Mestre poder aprovar.</span>
-      <button onClick="{{ toWizard }}" style="padding:11px 18px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;min-height:44px">Criar ficha</button>
+      <span style="flex:1;min-width:180px;font-family:'Cormorant Garamond';font-size:16px;color:#cfc7b4">Você ainda não tem ficha nesta mesa. Escolha um personagem seu ou crie um novo para o Mestre poder aprovar.</span>
+      <button onClick="{{ toChar }}" style="padding:11px 18px;background:#c6a35e;color:#0b0b10;border:none;border-radius:4px;font:700 11px 'Archivo';letter-spacing:.1em;text-transform:uppercase;cursor:pointer;min-height:44px">Escolher personagem</button>
     </div></sc-if>
     <!-- all players -->
     <div style="background:rgba(20,18,24,.7);border:1px solid rgba(198,166,100,.15);border-radius:10px;padding:20px">

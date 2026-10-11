@@ -1257,7 +1257,7 @@
 
 <!-- ========================= JOGADOR · LOBBY (aguardando mestre) ========================= -->
 <sc-if value="{{ isJLobby }}" data-screen-label="Jogador Lobby">
-<dc-import name="JLobby" needsSheet="{{ needsSheet }}" toWizard="{{ toWizard }}" errJogador="{{ errJogador }}" hasErrJogador="{{ hasErrJogador }}" dismissErrJogador="{{ dismissErrJogador }}" retryJogador="{{ retryJogador }}" joinTableType="{{ joinTableType }}" joinTableName="{{ joinTableName }}" myCharAccent="{{ myCharAccent }}" myCharInitial="{{ myCharInitial }}" myCharName="{{ myCharName }}" myCharSensLabel="{{ myCharSensLabel }}" lobbyPlayerCount="{{ lobbyPlayerCount }}" noLobbyPlayers="{{ noLobbyPlayers }}" lobbyPlayers="{{ lobbyPlayers }}" mySheetLabel="{{ mySheetLabel }}" mySheetCol="{{ mySheetCol }}" leaveTable="{{ leaveTable }}"/>
+<dc-import name="JLobby" needsSheet="{{ needsSheet }}" toWizard="{{ toWizard }}" toChar="{{ toChar }}" errJogador="{{ errJogador }}" hasErrJogador="{{ hasErrJogador }}" dismissErrJogador="{{ dismissErrJogador }}" retryJogador="{{ retryJogador }}" joinTableType="{{ joinTableType }}" joinTableName="{{ joinTableName }}" myCharAccent="{{ myCharAccent }}" myCharInitial="{{ myCharInitial }}" myCharName="{{ myCharName }}" myCharSensLabel="{{ myCharSensLabel }}" lobbyPlayerCount="{{ lobbyPlayerCount }}" noLobbyPlayers="{{ noLobbyPlayers }}" lobbyPlayers="{{ lobbyPlayers }}" mySheetLabel="{{ mySheetLabel }}" mySheetCol="{{ mySheetCol }}" leaveTable="{{ leaveTable }}"/>
 </sc-if>
 
 <!-- ========================= JOGADOR · WIZARD ========================= -->
@@ -2875,12 +2875,12 @@ class Component extends DCLogic {
         this.setState({screen:'j_panel',nav:[]});
         this._startJogadorSessionPoll(saved.tableId);
       } else if(!mbr.char_name){
-        // Ainda sem ficha (ex.: F5 no meio da criacao): volta ao wizard, que recupera o
-        // rascunho. Antes caia no lobby, que nao tinha como criar a ficha.
+        // Ainda sem ficha: com rascunho (F5 no meio da criacao) volta ao wizard, que o
+        // recupera; sem rascunho, vai a escolha de personagem (usar um pronto ou criar).
         // (sem polling aqui: como no fluxo normal, ele comeca ao concluir a ficha, senao o
         // inicio da sessao arrancaria o jogador do wizard ainda sem ficha)
         this.setState({nav:[]});
-        this.startCharWizard();
+        if(this._hasPlayerDraft()) this.startCharWizard(); else this.goCharChoice();
       } else {
         this.setState({screen:'j_lobby',nav:[]});
         this._startPlayerPolling(saved.tableId);
@@ -4919,6 +4919,7 @@ class Component extends DCLogic {
       if(!(await this._submitSheet(w.name||s.auth.name||'Jogador',charName,charData))) return;
     }
     const tid=this.state.joinTableId;
+    if(this.sb&&this.state.auth.loggedIn) setTimeout(()=>this._loadUserData(),600);
     this._clearWizDraft(); this.setState({wizRestored:false});
     this.setState(st=>({screen:'j_lobby',nav:[...st.nav,'j_wizard'],self:this._selfFromMember({char_name:charName,char_data:charData,wounds:[],conditions:[]},st.self)}));
     this._startPlayerPolling(tid);
@@ -4982,6 +4983,10 @@ class Component extends DCLogic {
     const who=(a.loggedIn&&a.id)?`u:${a.id}`:(s.memberId?`v:${s.memberId}`:null);
     return (who&&s.joinTableId)?`afterdark:wizDraft:${who}:mesa:${s.joinTableId}`:null;
   }
+  // escolha de personagem ao entrar na mesa: a lista da conta e recarregada (pode ter
+  // personagem novo vindo de outra mesa)
+  goCharChoice(){ this.go('j_char'); if(this.sb&&this.state.auth.loggedIn) this._loadUserData(); }
+  _hasPlayerDraft(){ const k=this._playerDraftKey(); try{ const d=k&&JSON.parse(localStorage.getItem(k)||'null'); return !!(d&&d.wiz&&d.v===1); }catch(e){ return false; } }
   _restoreWizDraft(){
     // O rascunho fica preso ao contexto em que o wizard COMECOU: mesmo que mesa ou vinculo
     // mudem com o wizard aberto, o conteudo nunca e gravado na chave de outro contexto.
@@ -6066,7 +6071,7 @@ class Component extends DCLogic {
       joinInputBorder:s.joinError?'rgba(196,30,58,.6)':'rgba(198,166,100,.3)',
       joinBtnBg:s.joinBusy?'#2a2830':'#c6a35e', joinBtnCol:s.joinBusy?'#6f6b61':'#0b0b10',
       joinBtnCursor:s.joinBusy?'not-allowed':'pointer', joinBtnLabel:s.joinBusy?'Verificando...':'Entrar →',
-      toName:()=>this.joinByCode(), toChar:()=>this.go('j_char'), toWizard:()=>this.startCharWizard(), toIntro:()=>this.go('j_intro'), toPanel:()=>this.go('j_panel'),
+      toName:()=>this.joinByCode(), toChar:()=>this.goCharChoice(), toWizard:()=>this.startCharWizard(), toIntro:()=>this.go('j_intro'), toPanel:()=>this.go('j_panel'),
       savedCharsForJoin:s.characters.map(c=>({name:c.name,sensLabel:this.SENS[c.sens]?this.SENS[c.sens].label:'Sensitivo',onSelect:()=>this._selectSavedChar(c)})),
       noSavedChars:false,
       // player lobby
