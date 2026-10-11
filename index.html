@@ -40,6 +40,7 @@
 <script src="src/data/equipment.js"></script>
 <script src="src/data/maps.js"></script>
 <script src="src/data/clock_images.js"></script>
+<script src="src/data/characters.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/animejs@3.2.2/lib/anime.min.js"></script>
 </helmet>
@@ -938,7 +939,10 @@
         <sc-if value="{{ toolNpcs }}">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
             <div style="font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#c6a35e">NPCs</div>
-            <button onClick="{{ newNpc }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(198,166,100,.4);color:#e0c179">＋ Novo NPC</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+              <button onClick="{{ openCharAdd }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">❖ Acervo de personagens</button>
+              <button onClick="{{ newNpc }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;border-color:rgba(198,166,100,.4);color:#e0c179">＋ Novo NPC</button>
+            </div>
           </div>
           <p style="font-size:12px;color:#8d887c;font-family:'Cormorant Garamond';font-style:italic;margin:0 0 12px">Um NPC novo fica só com você. "Revelar" o aproxima do grupo; a partir de "Apelido" ele aparece aos jogadores.</p>
           <sc-if value="{{ hasContentMsg }}"><div role="status" style="font-size:12px;color:#7fae8f;margin:0 0 12px">{{ contentMsg }}</div></sc-if>
@@ -959,7 +963,8 @@
                 <div style="display:flex;flex-direction:column;gap:6px;min-width:0">
                   <label style="position:relative;padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Card inteiro (sem corte)<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange="{{ onNpcCard }}" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"/></label>
                   <label style="position:relative;padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Retrato (enquadrar)<input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange="{{ onNpcPortrait }}" style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none"/></label>
-                  <button onClick="{{ npcAcervo }}" style="padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Escolher do acervo</button>
+                  <button onClick="{{ npcCharPick }}" style="padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(198,166,100,.4);border-radius:4px;color:#e0c179;font-size:11px;cursor:pointer">❖ Card de personagem</button>
+                  <button onClick="{{ npcAcervo }}" style="padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:4px;color:#cfc7b4;font-size:11px;cursor:pointer">Imagem do acervo</button>
                   <sc-if value="{{ npcHasImg }}"><button onClick="{{ npcRemoveImg }}" style="align-self:flex-start;padding:4px 0;background:transparent;border:none;color:#a39e90;font-size:11px;cursor:pointer;text-decoration:underline">Remover imagem</button></sc-if>
                   <span role="status" style="font-size:11px;color:#8d887c">{{ imgBusyLabel }}</span>
                 </div>
@@ -985,6 +990,7 @@
                   <button onClick="{{ n.onReveal }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px;color: {{ n.acc }};border-color: {{ n.acc }}55">Revelar</button>
                   <sc-if value="{{ n.canHide }}"><button onClick="{{ n.onHide }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Ocultar</button></sc-if>
                   <button onClick="{{ n.onDialogue }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">☻ Diálogo</button>
+                  <sc-if value="{{ n.isCard }}"><button onClick="{{ n.onZoom }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Ver card</button></sc-if>
                   <button onClick="{{ n.onEdit }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">✎ Editar</button>
                   <sc-if value="{{ n.noDelAsk }}"><button onClick="{{ n.onAskDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(196,30,58,.3);border-radius:3px;padding:6px 9px;cursor:pointer;color:#c44a5e;min-height:32px">Excluir</button></sc-if>
                   <sc-if value="{{ n.delAsk }}"><button onClick="{{ n.onDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:#c41e3a;border:none;border-radius:3px;padding:6px 9px;cursor:pointer;color:#fff;min-height:32px">Confirmar exclusão</button><button onClick="{{ n.onCancelDel }}" style="font-size:10px;letter-spacing:.06em;text-transform:uppercase;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:3px;padding:6px 9px;cursor:pointer;color:#cfc7b4;min-height:32px">Cancelar</button></sc-if>
@@ -1390,6 +1396,7 @@
                 <div style="font-family:'Cinzel';font-weight:600;font-size:17px;color:#efe8d8;overflow-wrap:anywhere">{{ pDialog.name }}</div>
                 <sc-if value="{{ pDialog.hasFaction }}"><div style="font-size:11px;color:#8d887c">{{ pDialog.faction }}</div></sc-if>
                 <sc-if value="{{ pDialog.hasDesc }}"><p style="font-family:'Cormorant Garamond';font-size:15px;line-height:1.4;color:#cdc6b6;margin:4px 0 0">{{ pDialog.desc }}</p></sc-if>
+                <sc-if value="{{ pDialog.isCard }}"><button onClick="{{ pDialog.onZoom }}" style="margin-top:8px;min-height:36px;padding:6px 12px;background:transparent;border:1px solid {{ pDialog.acc }}66;border-radius:5px;color:#e9e3d4;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">Ver card</button></sc-if>
               </div>
             </div>
           </sc-if>
@@ -1694,7 +1701,7 @@
               <sc-for list="{{ npcsKnown }}" as="n" hint-placeholder-count="3">
                 <div style="display:flex;gap:13px;align-items:center;background:#0f0e13;border:1px solid {{ n.acc }}33;border-radius:10px;padding:14px">
                   <div style="width:48px;height:48px;border-radius:8px;flex-shrink:0;background:radial-gradient(circle at 50% 30%, {{ n.surf }}, #0a0a0e);border:1px solid {{ n.acc }};filter: {{ n.imgFilter }}"><div style="width:100%;height:100%;border-radius:inherit;background: {{ n.imgBg }}"></div></div>
-                  <div style="flex:1"><div style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">{{ n.name }}</div><div style="font-size:12px;color: {{ n.acc }}">{{ n.faction }}</div><p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:5px 0 0;line-height:1.4">{{ n.desc }}</p></div>
+                  <div style="flex:1"><div style="font-family:'Cinzel';font-weight:600;font-size:16px;color:#efe8d8">{{ n.name }}</div><div style="font-size:12px;color: {{ n.acc }}">{{ n.faction }}</div><p style="font-family:'Cormorant Garamond';font-size:15px;color:#a39e90;margin:5px 0 0;line-height:1.4">{{ n.desc }}</p><sc-if value="{{ n.isCard }}"><button onClick="{{ n.onZoom }}" style="margin-top:8px;min-height:36px;padding:6px 12px;background:transparent;border:1px solid {{ n.acc }}66;border-radius:5px;color:#e9e3d4;font-size:11px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer">Ver card</button></sc-if></div>
                 </div>
               </sc-for>
               <sc-if value="{{ noNpcsKnown }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;text-align:center;padding:14px 6px">Nenhum personagem conhecido ainda. Eles aparecem aqui quando o Mestre os apresentar ao grupo.</div></sc-if>
@@ -1815,6 +1822,53 @@
       </sc-for>
     </div>
   </div>
+</div>
+</sc-if>
+
+<!-- ========================= ACERVO DE PERSONAGENS (overlay) ========================= -->
+<sc-if value="{{ charPickOpen }}">
+<div role="dialog" aria-label="{{ charPickTitle }}" style="position:fixed;inset:0;z-index:96;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(6,6,10,.92);backdrop-filter:blur(6px);animation:fadeIn .25s ease">
+  <div style="width:100%;max-width:720px;max-height:88vh;display:flex;flex-direction:column;background:#13121a;border:1px solid rgba(198,166,100,.25);border-radius:12px;overflow:hidden">
+    <div style="padding:18px 20px 12px;border-bottom:1px solid rgba(255,255,255,.07)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">
+        <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#c6a35e">{{ charPickTitle }}</div>
+        <button onClick="{{ closeCharPick }}" style="padding:8px 12px;min-height:38px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#cfc7b4;font-size:12px;cursor:pointer">Fechar</button>
+      </div>
+      <p style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#a39e90;margin:0 0 10px">{{ charPickHint }}</p>
+      <input value="{{ charPick.q }}" onInput="{{ onCharQ }}" placeholder="Buscar por nome" aria-label="Buscar personagem" style="width:100%;background:#0f0e13;border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:10px;font-size:14px;color:#e9e3d4;outline:none"/>
+      <sc-if value="{{ charHasCast }}"><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <sc-if value="{{ charNoCastAsk }}"><button onClick="{{ addCast }}" style="min-height:40px;padding:8px 14px;background:transparent;border:1px solid rgba(198,166,100,.45);border-radius:5px;color:#e0c179;font-size:12px;cursor:pointer">{{ castLabel }}</button></sc-if>
+        <sc-if value="{{ charCastAsk }}"><button onClick="{{ addCast }}" style="min-height:40px;padding:8px 14px;background:#c6a35e;border:none;border-radius:5px;color:#0b0b10;font-weight:700;font-size:12px;cursor:pointer">{{ castConfirmLabel }}</button><button onClick="{{ cancelCast }}" style="min-height:40px;padding:8px 14px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:5px;color:#cfc7b4;font-size:12px;cursor:pointer">Cancelar</button></sc-if>
+      </div></sc-if>
+      <sc-if value="{{ hasCharMsg }}"><div role="status" style="font-size:12px;color:#7fae8f;margin-top:8px">{{ charMsg }}</div></sc-if>
+    </div>
+    <div style="overflow:auto;padding:14px 20px 20px">
+      <sc-if value="{{ charEmpty }}"><div style="font-family:'Cormorant Garamond';font-style:italic;font-size:15px;color:#8a7350;padding:12px 0">Nenhum personagem com esse nome.</div></sc-if>
+      <sc-for list="{{ charGroups }}" as="g" hint-placeholder-count="2">
+        <div role="group" aria-label="{{ g.label }}" style="margin-bottom:18px">
+          <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px"><span style="font-family:'Cinzel';font-weight:600;font-size:14px;color:#efe8d8">{{ g.label }}</span><span style="font-family:'Space Mono';font-size:11px;color:#8d887c">{{ g.count }}</span></div>
+          <div style="font-size:11px;color:#8d887c;margin:-4px 0 8px">{{ g.sub }}</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px">
+            <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+              <button onClick="{{ it.onPick }}" aria-label="{{ it.aria }}" style="display:flex;flex-direction:column;gap:5px;padding:5px;background:#0f0e13;border:1px solid rgba(255,255,255,.08);border-radius:8px;cursor:pointer;text-align:left;min-width:0">
+                <span style="display:block;width:100%;aspect-ratio:9 / 16;border-radius:5px;background: {{ it.bg }}"></span>
+                <span style="font-size:11px;color:#cdc6b6;line-height:1.25;overflow-wrap:anywhere">{{ it.name }}</span>
+                <sc-if value="{{ it.on }}"><span style="font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#7fae8f">{{ it.badge }}</span></sc-if>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ========================= CARD AMPLIADO (overlay) ========================= -->
+<sc-if value="{{ cardZoomOpen }}">
+<div role="dialog" aria-label="{{ cardZoom.name }}" onClick="{{ closeCardZoom }}" style="position:fixed;inset:0;z-index:97;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px;background:rgba(6,6,10,.94);backdrop-filter:blur(6px);animation:fadeIn .25s ease;cursor:zoom-out">
+  <div role="img" aria-label="{{ cardZoom.label }}" style="width: {{ cardZoom.w }};aspect-ratio:9 / 16;background: {{ cardZoom.bg }}"></div>
+  <button onClick="{{ closeCardZoom }}" style="min-height:44px;padding:8px 18px;background:transparent;border:1px solid rgba(255,255,255,.2);border-radius:6px;color:#e9e3d4;font-size:12px;cursor:pointer">✕ Fechar</button>
 </div>
 </sc-if>
 
@@ -2198,7 +2252,7 @@ class Component extends DCLogic {
 
   state = {
     homeVar:null, screen:'landing', nav:[], role:null, mode:null, oneshot:null, chapter:2, gateFrom:'perfil', actionError:'',
-    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, marksOpen:(()=>{ try{ return localStorage.getItem('afterdark:marksOpen')!=='0'; }catch(e){ return true; } })(), objectives:[], objDraft:'', objEditId:null, objPulse:{}, marks:[], mapCam:{}, mapVp:{}, mapMode:{}, markPending:null, markMsg:'', markBusy:false, markTool:{kind:'point',npcId:'',label:'',descr:'',icon:'local',vis:'public',routePts:[],selectedId:null}, markClearAsk:false, media:{}, acervo:null, imgBusy:false, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
+    joinCode:'', joinName:'', joinBusy:false, joinError:'', joinConflict:null, playerTables:[], playerTablesState:'idle', enteringMemberId:null, myEquip:[], equipBusy:{}, evQueue:[], photoEd:null, marksOpen:(()=>{ try{ return localStorage.getItem('afterdark:marksOpen')!=='0'; }catch(e){ return true; } })(), charPick:null, cardZoom:null, objectives:[], objDraft:'', objEditId:null, objPulse:{}, marks:[], mapCam:{}, mapVp:{}, mapMode:{}, markPending:null, markMsg:'', markBusy:false, markTool:{kind:'point',npcId:'',label:'',descr:'',icon:'local',vis:'public',routePts:[],selectedId:null}, markClearAsk:false, media:{}, acervo:null, imgBusy:false, charsState:'idle', resumeFailed:false, clockEditId:null, clockOpBusy:false, penForm:{attr:'corpo',value:1,reason:''}, penBusy:false, clockEvents:[], npcForm:null, clueForm:null, sceneForm:null, contentDel:null, contentSaving:null, contentMsg:'', mapLoad:{}, scenes:[], activeSceneId:null, activeScene:null, photos:{}, photoBusy:false, photoMsg:'', charPhotoBusy:false, joinTableId:null, joinTableName:'', joinTableType:'', memberId:null, memberToken:null,
     auth:{loggedIn:false, name:'', email:'', phone:''}, authBusy:false,
     reg:{name:'',email:'',phone:'',pass:'',pass2:''}, regError:false, regErrorText:'', regSent:false,
     login:{email:'',pass:''}, loginError:false,
@@ -3764,6 +3818,9 @@ class Component extends DCLogic {
   // Tudo vai no estado da sessao, gravado pelo salvamento do Mestre. O formulario so fecha
   // depois que o banco confirma; em falha, fica aberto com o texto digitado.
   get MAPS(){ return (window.AfterdarkData||{}).maps || []; }
+  get CHARS(){ return (window.AfterdarkData||{}).characters || []; }
+  // card oficial do acervo de personagens: o NPC guarda imageId 'card:<id>' (arquivo estatico, sem banco)
+  _card(id){ return typeof id==='string'&&id.indexOf('card:')===0 ? (this.CHARS.find(c=>c.id===id.slice(5))||null) : null; }
   hideNpc(id){ this.setState(s=>({npcs:s.npcs.map(n=>n.id===id?{...n,reveal:1}:n)})); }
   toggleClueShare(id){ this.setState(s=>({clues:s.clues.map(k=>k.id===id?{...k,status:k.status==='oculta'?'compartilhada':'oculta'}:k)})); }
   openContentForm(kind,item){
@@ -4597,6 +4654,7 @@ class Component extends DCLogic {
   // Mestre le o proprio acervo; jogador so recebe o que o banco libera para ele.
   _mediaUrl(id){
     if(!id) return null;
+    if(String(id).indexOf('card:')===0){ const c=this._card(id); return c?c.card:null; }
     const m=(this.state.media||{})[id]; if(m) return m;
     this._mediaWant=this._mediaWant||new Set(); this._mediaTried=this._mediaTried||{};
     if(!this._mediaTried[id]||Date.now()-this._mediaTried[id]>15000){ this._mediaWant.add(id); clearTimeout(this._mediaT); this._mediaT=setTimeout(()=>this._fetchMedia(),30); }
@@ -4614,7 +4672,9 @@ class Component extends DCLogic {
     if(data&&typeof data==='object'&&Object.keys(data).length) this.setState(st=>({media:{...st.media,...data}}));
     if(this._mediaWant.size){ clearTimeout(this._mediaT); this._mediaT=setTimeout(()=>this._fetchMedia(),30); }
   }
-  _mediaBg(id,fit){ const u=this._mediaUrl(id); return u?`center/${fit==='cover'?'cover':'contain'} no-repeat url("${u}")`:null; }
+  _mediaBg(id,fit){
+    const c=this._card(id); if(c) return fit==='full'?`center/contain no-repeat url("${c.card}")`:`50% 13% / 185% auto no-repeat url("${c.thumb}")`;
+    const u=this._mediaUrl(id); return u?`center/${fit==='cover'?'cover':'contain'} no-repeat url("${u}")`:null; }
   async _uploadMedia(kind,name,dataUrl){
     const dims=await new Promise(res=>{ const im=new Image(); im.onload=()=>res([im.width,im.height]); im.onerror=()=>res([null,null]); im.src=dataUrl; });
     const {data,error}=await this.sb.rpc('master_media_upload',{p_kind:kind,p_name:String(name||'').slice(0,120),p_data:dataUrl,p_width:dims[0],p_height:dims[1]});
@@ -4659,6 +4719,42 @@ class Component extends DCLogic {
   }
   pickAcervo(item){ const a=this.state.acervo; if(!a) return; const fit=a.kind==='npc'?(item.width&&item.height&&item.width===item.height?'cover':'contain'):'cover';
     this.setState({acervo:null}); this._formPatch(a.kind,{imageId:item.id,imageFit:fit}); }
+  // ---- acervo de personagens (cards oficiais) ----
+  // mode 'form': escolhe o card do NPC em edicao. mode 'add': cria o NPC na mesa, oculto.
+  openCharPicker(mode){ this.setState({charPick:{mode,q:'',castAsk:false,msg:''}}); }
+  setCharQ(q){ this.setState(st=>st.charPick?{charPick:{...st.charPick,q:String(q||'').slice(0,60)}}:st); }
+  _npcFromCard(c){ return {id:'n'+this._uuid().replace(/-/g,'').slice(0,10),name:c.name,desc:'',notes:'',faction:'',theme:'human',reveal:1,imageId:'card:'+c.id,imageFit:'card'}; }
+  async pickChar(c){
+    const cp=this.state.charPick; if(!cp||!c) return;
+    if(cp.mode==='form'){ const f=this.state.npcForm||{}; this.setState({charPick:null}); this._formPatch('npc',{imageId:'card:'+c.id,imageFit:'card',name:String(f.name||'').trim()?f.name:c.name}); return; }
+    if(this.state.npcs.some(n=>n.imageId==='card:'+c.id)){ this.setState(st=>st.charPick?{charPick:{...st.charPick,msg:c.name+' já está na mesa.'}}:st); return; }
+    this.setState(st=>({npcs:[...st.npcs,this._npcFromCard(c)],charPick:st.charPick?{...st.charPick,msg:'✓ '+c.name+' adicionado (oculto).'}:st.charPick}));
+    await this._commitContent('NPC adicionado do acervo');
+  }
+  async addCast(){
+    const s=this.state, cp=s.charPick; if(!cp||!s.oneshot) return;
+    const have=new Set(s.npcs.map(n=>n.imageId)); const add=this.CHARS.filter(c=>c.oneshot===s.oneshot&&!have.has('card:'+c.id));
+    if(!add.length){ this.setState({charPick:{...cp,castAsk:false,msg:'O elenco inteiro já está na mesa.'}}); return; }
+    if(!cp.castAsk){ this.setState({charPick:{...cp,castAsk:true,msg:''}}); return; }
+    this.setState(st=>({npcs:[...st.npcs,...add.map(c=>this._npcFromCard(c))],charPick:st.charPick?{...st.charPick,castAsk:false,msg:'✓ '+add.length+' NPCs adicionados, todos ocultos.'}:st.charPick}));
+    await this._commitContent('Elenco adicionado');
+  }
+  _charPickView(){
+    const s=this.state, cp=s.charPick; if(!cp) return {charPickOpen:false,charGroups:[],charPick:{}};
+    const G=(window.AfterdarkData||{}).characterGroups||{}, N=v=>String(v||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+    const q=N(cp.q).trim(), have=new Set(s.npcs.map(n=>n.imageId)), add=cp.mode==='add';
+    const order=['sombras','gota','misterios','gerais'].sort((a,b)=>(b===s.oneshot)-(a===s.oneshot));
+    const groups=order.map(g=>{ const items=this.CHARS.filter(c=>c.group===g&&(!q||N(c.name).indexOf(q)>=0)).map(c=>{ const on=add&&have.has('card:'+c.id);
+        return {id:c.id,name:c.name,bg:`center/contain no-repeat url("${c.thumb}")`,on,badge:on?'✓ Na mesa':'',onPick:()=>this.pickChar(c),aria:(on?c.name+' (já na mesa)':c.name)}; });
+      return {key:g,label:g===s.oneshot?'Elenco deste one-shot · '+((G[g]||{}).name||g):((G[g]||{}).name||g),sub:g==='gerais'?'Sem campanha obrigatória':(g===s.oneshot?'Elenco padrão':'Outro one-shot · pode usar nesta mesa'),count:String(items.length),items,has:items.length>0}; }).filter(g=>g.has);
+    const castMissing=s.oneshot?this.CHARS.filter(c=>c.oneshot===s.oneshot&&!have.has('card:'+c.id)).length:0;
+    return {charPickOpen:true,charPick:cp,charGroups:groups,charEmpty:!groups.length,onCharQ:e=>this.setCharQ(e.target.value),closeCharPick:()=>this.setState({charPick:null}),
+      charPickTitle:add?'Acervo de personagens':'Escolher personagem do acervo', charPickHint:add?'Tocar em um personagem o adiciona à mesa, oculto. Você revela quando quiser.':'O card escolhido vira a imagem deste NPC.',
+      charHasCast:add&&!!s.oneshot, charCastAsk:!!cp.castAsk, charNoCastAsk:!cp.castAsk, castLabel:castMissing?`＋ Adicionar elenco inteiro (${castMissing}, ocultos)`:'Elenco inteiro já está na mesa',
+      castConfirmLabel:`Confirmar: adicionar ${castMissing} NPCs ocultos`, addCast:()=>this.addCast(), cancelCast:()=>this.setState(st=>st.charPick?{charPick:{...st.charPick,castAsk:false}}:st),
+      hasCharMsg:!!cp.msg, charMsg:cp.msg||''};
+  }
+  openCardZoom(imageId,name){ const c=this._card(imageId); if(c) this.setState({cardZoom:{src:c.card,name:name||c.name}}); }
   // ---- editor de foto: enquadrar (arrastar), zoom (controle, botoes, roda, pinca), girar ----
   // A moldura e redonda; a imagem sempre cobre o quadro (sem bordas vazias). Resultado:
   // quadrado 320 px em JPEG, salvo so ao confirmar.
@@ -5195,7 +5291,7 @@ class Component extends DCLogic {
     const decorate=(r)=> r? {...r, gColor:gradeColor[r.grade]||'#c6a35e', isCombat:r.mode==='combate', isGeneral:r.mode!=='combate', marginLabel:(r.margin>=0?'+':'')+r.margin, marginPos:Math.max(0,r.margin||0), ...glowTier(r.grade), diceView:r.dice.map(d=>({d,...diceColor(d,r)}))} : null;
 
     const npcLines={n1:'Sangue antigo reconhece sangue antigo. Você não devia estar aqui.',n2:'Tudo tem um preço, querido. A questão é se você pode pagar.',n3:'Esse cheiro... vocês trouxeram problema para as docas.',n4:'A ordem pública é frágil. Não me obriguem a restaurá-la.'};
-    const npcs=s.npcs.map(n=>{ const th=this.THEME[n.theme]||this.THEME.human||{}; const rl={1:'Silhueta desconhecida',2:'Nome oculto',3:'Apelido',4:'Retrato completo'}; return {...n, acc:th.acc, surf:th.surf, glow:th.glow, rLabel:rl[n.reveal]||'—', imgFilter:n.reveal<=2?'blur(5px) brightness(.55)':'none', onReveal:()=>this.revealNpc(n.id), onDialogue:()=>this.showNpcDialogue(n.id), known:n.reveal>=3, imgBg:this._mediaBg(n.imageId,n.imageFit)||'none', hasImg:!!n.imageId, line:n.desc||npcLines[n.id]||'…',
+    const npcs=s.npcs.map(n=>{ const th=this.THEME[n.theme]||this.THEME.human||{}; const rl={1:'Silhueta desconhecida',2:'Nome oculto',3:'Apelido',4:'Retrato completo'}; return {...n, acc:th.acc, surf:th.surf, glow:th.glow, rLabel:rl[n.reveal]||'—', imgFilter:n.reveal<=2?'blur(5px) brightness(.55)':'none', onReveal:()=>this.revealNpc(n.id), onDialogue:()=>this.showNpcDialogue(n.id), known:n.reveal>=3, imgBg:this._mediaBg(n.imageId,n.imageFit)||'none', hasImg:!!n.imageId, isCard:!!this._card(n.imageId), onZoom:()=>this.openCardZoom(n.imageId,n.name), line:n.desc||npcLines[n.id]||'…',
       hasDesc:!!n.desc, canHide:(n.reveal||1)>1, onHide:()=>this.hideNpc(n.id), onEdit:()=>this.openContentForm('npc',n),
       delAsk:s.contentDel==='npc:'+n.id, noDelAsk:s.contentDel!=='npc:'+n.id, onAskDel:()=>this.askDeleteContent('npc',n.id), onDel:()=>this.deleteContent('npc',n.id), onCancelDel:()=>this.cancelDeleteContent(),
       sharedLabel:(n.reveal||1)>=3?'Visível ao grupo':'Só o Mestre vê' }; });
@@ -5404,7 +5500,7 @@ class Component extends DCLogic {
     const npcDlg=activeNpcObj?{name:activeNpcObj.name,faction:activeNpcObj.faction,acc:activeNpcObj.acc,surf:activeNpcObj.surf,line:activeNpcObj.line,imgBg:activeNpcObj.imgBg}:null;
     // jogador: NPC em dialogo vindo do banco (nome/texto publicos; imagem so com retrato revelado)
     const pd=s.dialogue&&s.dialogue.id?s.dialogue:null; const pdTh=pd?(this.THEME[pd.theme]||this.THEME.human||{}):{};
-    const pDialog=pd?{name:pd.name||'—',desc:pd.desc||'',hasDesc:!!pd.desc,faction:pd.faction||'',hasFaction:!!pd.faction,acc:pdTh.acc||'#b9a06a',surf:pdTh.surf||'#1a1820',imgBg:this._mediaBg(pd.imageId,pd.imageFit)||'none',hasImg:!!pd.imageId}:null;
+    const pDialog=pd?{name:pd.name||'—',desc:pd.desc||'',hasDesc:!!pd.desc,faction:pd.faction||'',hasFaction:!!pd.faction,acc:pdTh.acc||'#b9a06a',surf:pdTh.surf||'#1a1820',imgBg:this._mediaBg(pd.imageId,pd.imageFit)||'none',hasImg:!!pd.imageId,isCard:!!this._card(pd.imageId),onZoom:()=>this.openCardZoom(pd.imageId,pd.name)}:null;
 
     // ---- clock creation form ----
     const cd=s.clockDraft;
@@ -5856,7 +5952,8 @@ class Component extends DCLogic {
       npcFormErr:!!(s.npcForm&&s.npcForm.err),
       npcImgBg:(s.npcForm&&this._mediaBg(s.npcForm.imageId,s.npcForm.imageFit))||'none', npcHasImg:!!(s.npcForm&&s.npcForm.imageId), npcNoImg:!(s.npcForm&&s.npcForm.imageId),
       npcImgErr:(s.npcForm&&s.npcForm.imgErr)||'', npcHasImgErr:!!(s.npcForm&&s.npcForm.imgErr), imgBusy:!!s.imgBusy, imgBusyLabel:s.imgBusy?'Enviando…':'',
-      onNpcCard:e=>this.onNpcImage(e,'contain'), onNpcPortrait:e=>this.onNpcImage(e,'cover'), npcAcervo:()=>this.openAcervo('npc'), npcRemoveImg:()=>this.removeFormImage('npc'),
+      onNpcCard:e=>this.onNpcImage(e,'contain'), onNpcPortrait:e=>this.onNpcImage(e,'cover'), npcAcervo:()=>this.openAcervo('npc'), npcCharPick:()=>this.openCharPicker('form'), openCharAdd:()=>this.openCharPicker('add'), hasOneshot:!!s.oneshot,
+      ...this._charPickView(), cardZoomOpen:!!s.cardZoom, cardZoom:s.cardZoom?{...s.cardZoom,label:'Card de '+s.cardZoom.name,bg:`center/contain no-repeat url("${s.cardZoom.src}")`,w:Math.round(Math.min(460,window.innerWidth*0.92,(window.innerHeight-110)*9/16))+'px'}:{}, closeCardZoom:()=>this.setState({cardZoom:null}), npcRemoveImg:()=>this.removeFormImage('npc'),
       acervoOpen:!!s.acervo, acervoLoading:!!(s.acervo&&s.acervo.state==='loading'), acervoError:!!(s.acervo&&s.acervo.state==='error'),
       acervoEmpty:!!(s.acervo&&s.acervo.state==='ok'&&!s.acervo.items.length), closeAcervo:()=>this.setState({acervo:null}), retryAcervo:()=>s.acervo&&this.openAcervo(s.acervo.kind),
       acervoItems:(s.acervo&&s.acervo.items||[]).map(it=>({id:it.id,name:it.name||'Imagem',kindLabel:({npc:'NPC',scene:'Cena',clock:'Relógio',other:'Outra'})[it.kind]||'',bg:this._mediaBg(it.id,'cover')||'#1a1820',onPick:()=>this.pickAcervo(it)})), clueFormErr:!!(s.clueForm&&s.clueForm.err), sceneFormErr:!!(s.sceneForm&&s.sceneForm.err),
